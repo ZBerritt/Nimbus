@@ -31,7 +31,7 @@ namespace SaveDataSync
             return saveGameLocations[name];
         }
 
-        public string GetSaveZipData(string name)
+        public byte[] GetSaveZipData(string name)
         {
             string location = GetSavePath(name);
             FileAttributes attr = File.GetAttributes(location);
@@ -81,7 +81,35 @@ namespace SaveDataSync
 
                     // Read from temporary file
                     Console.Write(tmpFile.FilePath);
-                    return File.ReadAllText(tmpFile.FilePath);
+                    return File.ReadAllBytes(tmpFile.FilePath);
+                }
+            }
+        }
+
+        public void WriteData(string name, byte[] data)
+        {
+            string location = GetSavePath(name);
+            using (var tmpFile = new FileUtils.TemporaryFile())
+            {
+                File.WriteAllBytes(tmpFile.FilePath, data); // Write the data to a file to use the zip util functions
+                using (ZipFile zipFile = new ZipFile(tmpFile.FilePath))
+                {
+                    foreach (ZipEntry entry in zipFile)
+                    {
+                        if (entry.IsFile)
+                        {
+                            Stream stream = zipFile.GetInputStream(entry);
+                            using (StreamReader reader = new StreamReader(stream))
+                            {
+                                string fileName = entry.Name.Replace("/", "\\"); // OCD lol
+                                string pathName = Path.Combine(location, fileName);
+                                using (StreamWriter writer = File.CreateText(pathName))
+                                {
+                                    writer.Write(reader.ReadToEnd());
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
