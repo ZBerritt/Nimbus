@@ -7,11 +7,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SaveDataSync")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("A recreation of SaveFileSync, an application for transferring save files between computers.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("HP")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("SaveDataSync")]
-[assembly: AssemblyCopyright("Copyright © HP 2021")]
+[assembly: AssemblyCopyright("Copyright © 2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
