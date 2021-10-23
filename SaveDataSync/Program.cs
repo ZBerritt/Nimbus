@@ -14,13 +14,6 @@ namespace SaveDataSync
         [STAThread]
         static void Main()
         {
-            string json = @"{
-            'saves': [
-                { 'name': 'pee', 'location': 'poo' },
-                { 'name': '123', 'location': '456' }
-        ]
-    }";
-            LocalSaveList list = LocalSaveList.FromJson(json);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
