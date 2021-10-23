@@ -6,6 +6,10 @@ namespace SaveDataSync
 {
     internal class DataManagement
     {
+        public static LocalSaveList GetLocalSaveList()
+        {
+            return GetLocalSaveList(Locations.DataDirectory());
+        }
         public static LocalSaveList GetLocalSaveList(string location)
         {
             if (!Directory.Exists(location) || !File.Exists(Path.Combine(location, "local_saves.json")))
@@ -18,6 +22,11 @@ namespace SaveDataSync
                     return localSaveList;
                 }
             }
+        }
+
+        public static void SaveLocalData(LocalSaveList localSaveList)
+        {
+            SaveLocalData(Locations.DataDirectory(), localSaveList);
         }
 
         public static void SaveLocalData(string location, LocalSaveList localSaveList)

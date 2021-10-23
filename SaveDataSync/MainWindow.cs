@@ -10,11 +10,18 @@ using System.Windows.Forms;
 
 namespace SaveDataSync
 {
-    public partial class Form1 : Form
+    public partial class MainWindow : Form
     {
-        public Form1()
+
+        private SaveDataSyncEngine engine;
+        public MainWindow()
         {
             InitializeComponent();
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            engine = SaveDataSyncEngine.CreateInstance();
         }
 
         private void Form1_Load(object sender, EventArgs e)
