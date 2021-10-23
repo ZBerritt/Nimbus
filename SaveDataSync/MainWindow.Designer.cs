@@ -1,6 +1,6 @@
 ﻿namespace SaveDataSync
 {
-    partial class Form1
+    partial class MainWindow
     {
         /// <summary>
         /// Required designer variable.
@@ -52,7 +52,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 9.090909F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 90.90909F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(297, 198);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(365, 426);
             this.tableLayoutPanel1.TabIndex = 0;
             this.tableLayoutPanel1.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel1_Paint);
             // 
@@ -69,7 +69,7 @@
             // LocationLabel
             // 
             this.LocationLabel.AutoSize = true;
-            this.LocationLabel.Location = new System.Drawing.Point(106, 0);
+            this.LocationLabel.Location = new System.Drawing.Point(130, 0);
             this.LocationLabel.Name = "LocationLabel";
             this.LocationLabel.Size = new System.Drawing.Size(48, 13);
             this.LocationLabel.TabIndex = 1;
@@ -78,7 +78,7 @@
             // SizeLabel
             // 
             this.SizeLabel.AutoSize = true;
-            this.SizeLabel.Location = new System.Drawing.Point(209, 0);
+            this.SizeLabel.Location = new System.Drawing.Point(257, 0);
             this.SizeLabel.Name = "SizeLabel";
             this.SizeLabel.Size = new System.Drawing.Size(27, 13);
             this.SizeLabel.TabIndex = 2;
@@ -87,19 +87,19 @@
             // StatusLabel
             // 
             this.StatusLabel.AutoSize = true;
-            this.StatusLabel.Location = new System.Drawing.Point(253, 0);
+            this.StatusLabel.Location = new System.Drawing.Point(311, 0);
             this.StatusLabel.Name = "StatusLabel";
             this.StatusLabel.Size = new System.Drawing.Size(37, 13);
             this.StatusLabel.TabIndex = 3;
             this.StatusLabel.Text = "Status";
             // 
-            // Form1
+            // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Name = "Form1";
+            this.Name = "MainWindow";
             this.Text = "SaveDataSync";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
