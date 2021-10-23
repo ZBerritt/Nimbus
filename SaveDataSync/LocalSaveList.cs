@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using ICSharpCode.SharpZipLib.Zip;
+using System.IO;
 
 namespace SaveDataSync
 {
@@ -11,8 +14,8 @@ namespace SaveDataSync
 
         public void AddSave(string name, string location)
         {
-            if (saveGameLocations.ContainsKey(name)) throw new Exception("Save game with name " + name + " already exists!");
-            if (saveGameLocations.ContainsKey(location)) throw new Exception("Save game with location " + location + " already exists");
+            if (saveGameLocations.ContainsKey(name)) throw new Exception("Save game with name " + name + " already exists.");
+            if (saveGameLocations.ContainsKey(location)) throw new Exception("Save game with location " + location + " already exists.");
             saveGameLocations[name] = location;
         }
 
@@ -22,7 +25,68 @@ namespace SaveDataSync
             saveGameLocations.Remove(name);
         }
 
-        public JObject ToJson()
+        public string GetSavePath(string name)
+        {
+            if (!saveGameLocations.ContainsKey(name)) throw new Exception("Save file with the name " + name + " does not exist.");
+            return saveGameLocations[name];
+        }
+
+        public string GetSaveZipData(string name)
+        {
+            string location = GetSavePath(name);
+            FileAttributes attr = File.GetAttributes(location);
+            bool isDirectory = attr.HasFlag(FileAttributes.Directory);
+            using (var tmpFile = new FileUtils.TemporaryFile())
+            {
+                using (ZipOutputStream OutputStream = new ZipOutputStream(File.Open(tmpFile.FilePath, FileMode.Open)))
+                {
+                    byte[] buffer = new byte[4096];
+                    
+                    if (isDirectory)
+                    {
+                        string[] files = FileUtils.GetFileList(location);
+                        foreach (string file in files)
+                        {
+                            string entryName = file.Substring(location.Length + 1, file.Length - location.Length - 1);
+                            ZipEntry entry = new ZipEntry(entryName);
+                            OutputStream.PutNextEntry(entry);
+                            using (FileStream fs = File.OpenRead(file))
+                            {
+                                int sourceBytes;
+
+                                do
+                                {
+                                    sourceBytes = fs.Read(buffer, 0, buffer.Length);
+                                    OutputStream.Write(buffer, 0, sourceBytes);
+                                } while (sourceBytes > 0);
+                            }
+                        }
+                    } else
+                    {
+                        ZipEntry entry = new ZipEntry(Path.GetFileName(location));
+                        OutputStream.PutNextEntry(entry);
+                        using (FileStream fs = File.OpenRead(location))
+                        {
+                            int sourceBytes;
+
+                            do
+                            {
+                                sourceBytes = fs.Read(buffer, 0, buffer.Length);
+                                OutputStream.Write(buffer, 0, sourceBytes);
+                            } while (sourceBytes > 0);
+                        }
+                    }
+                    OutputStream.Finish();
+                    OutputStream.Close();
+
+                    // Read from temporary file
+                    Console.Write(tmpFile.FilePath);
+                    return File.ReadAllText(tmpFile.FilePath);
+                }
+            }
+        }
+            
+        public string ToJson()
         {
             JObject json = new JObject();
             JArray saves = new JArray();
@@ -34,7 +98,7 @@ namespace SaveDataSync
                 saves.Add(saveObject);
             }
             json.Add("saves", saves);
-            return json;
+            return json.ToString();
         }
 
         public static LocalSaveList FromJson(string json)
@@ -51,5 +115,6 @@ namespace SaveDataSync
 
             return list;
         }
+
     }
 }
