@@ -19,24 +19,34 @@ namespace SaveDataSync
             InitializeComponent();
         }
 
-        protected override void OnLoad(EventArgs e)
+        // Loading Events
+        private void OnLoad(object sender, EventArgs e)
         {
             engine = SaveDataSyncEngine.CreateInstance();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        private void saveTable_Paint(object sender, PaintEventArgs e)
         {
             
         }
 
-        private void label1_Click(object sender, EventArgs e)
+        // Click Events
+        private void newSaveFile_Click(object sender, EventArgs e)
         {
+            Console.WriteLine("Create Save File");
+            engine.CreateSaveFile();
+        }
 
+        private void export_Click(object sender, EventArgs e)
+        {
+            Console.WriteLine("Export");
+            engine.ExportSaveData();
+        }
+
+        private void import_Click(object sender, EventArgs e)
+        {
+            Console.WriteLine("Import");
+            engine.ImportSaveData();
         }
     }
 }
