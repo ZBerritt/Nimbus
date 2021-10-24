@@ -6,6 +6,7 @@ namespace SaveDataSync
     {
 
         private LocalSaveList localSaveList;
+        private Server server;
 
         public static SaveDataSyncEngine CreateInstance()
         {
@@ -20,6 +21,32 @@ namespace SaveDataSync
         public LocalSaveList GetLocalSaveList()
         {
             return localSaveList;
+        }
+
+        public Server GetServer()
+        {
+            return server;
+        }
+
+        public void SetServer(Server server)
+        {
+            this.server = server;
+        }
+        
+        // Button actions
+        public void CreateSaveFile()
+        {
+            
+        }
+
+        public void ExportSaveData()
+        {
+
+        }
+
+        public void ImportSaveData()
+        {
+
         }
     }
 }
