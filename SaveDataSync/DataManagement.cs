@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.IO;
+﻿using System.IO;
 
 namespace SaveDataSync
 {
@@ -24,12 +22,12 @@ namespace SaveDataSync
             }
         }
 
-        public static void SaveLocalData(LocalSaveList localSaveList)
+        public static void SaveLocalSaveList(LocalSaveList localSaveList)
         {
-            SaveLocalData(Locations.DataDirectory(), localSaveList);
+            SaveLocalSaveList(Locations.DataDirectory(), localSaveList);
         }
 
-        public static void SaveLocalData(string location, LocalSaveList localSaveList)
+        public static void SaveLocalSaveList(string location, LocalSaveList localSaveList)
         {
             // Check to see if the location exists, otherwise create it
             if (!Directory.Exists(location)) Directory.CreateDirectory(location);
@@ -41,6 +39,12 @@ namespace SaveDataSync
                     localSaveStreamWriter.Write(localSaveList.ToJson());
                 }
             }
+        }
+
+        public static void SaveServerData(string location, Server server)
+        {
+
+
         }
     }
 }

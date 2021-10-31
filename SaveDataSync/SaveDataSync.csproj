@@ -57,6 +57,9 @@
     <SignManifests>false</SignManifests>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Dropbox.Api, Version=6.18.0.0, Culture=neutral, PublicKeyToken=310f0e82fbb45d01, processorArchitecture=MSIL">
+      <HintPath>..\packages\Dropbox.Api.6.18.0\lib\netstandard2.0\Dropbox.Api.dll</HintPath>
+    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=1.3.3.11, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpZipLib.1.3.3\lib\net45\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
@@ -78,6 +81,12 @@
   <ItemGroup>
     <Compile Include="DataManagement.cs" />
     <Compile Include="FileUtils.cs" />
+    <Compile Include="SaveFileWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SaveFileWindow.Designer.cs">
+      <DependentUpon>SaveFileWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="Locations.cs" />
     <Compile Include="MainWindow.cs">
       <SubType>Form</SubType>
@@ -89,6 +98,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LocalSaveList.cs" />
     <Compile Include="SaveDataSyncEngine.cs" />
+    <Compile Include="Servers\DropboxServer.cs" />
     <Compile Include="Servers\Server.cs" />
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
@@ -102,6 +112,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="SaveFileWindow.resx">
+      <DependentUpon>SaveFileWindow.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

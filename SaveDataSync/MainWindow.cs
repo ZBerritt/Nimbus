@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SaveDataSync
@@ -27,7 +20,7 @@ namespace SaveDataSync
 
         private void saveTable_Paint(object sender, PaintEventArgs e)
         {
-            
+
         }
 
         // Click Events
@@ -47,6 +40,11 @@ namespace SaveDataSync
         {
             Console.WriteLine("Import");
             engine.ImportSaveData();
+        }
+
+        private void settings_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

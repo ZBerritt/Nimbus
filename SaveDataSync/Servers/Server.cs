@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SaveDataSync
+﻿namespace SaveDataSync
 {
     internal abstract class Server
     {
+
+        public Server()
+        {
+
+        }
         public abstract string[] SaveNames();
 
         public abstract byte[] GetSaveData(string name);
