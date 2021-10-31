@@ -38,6 +38,7 @@
             this.newSaveFileButton = new System.Windows.Forms.Button();
             this.mainProgressBar = new System.Windows.Forms.ProgressBar();
             this.label1 = new System.Windows.Forms.Label();
+            this.settingsButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -99,7 +100,7 @@
             // 
             // importButton
             // 
-            this.importButton.Location = new System.Drawing.Point(591, 382);
+            this.importButton.Location = new System.Drawing.Point(592, 360);
             this.importButton.Name = "importButton";
             this.importButton.Size = new System.Drawing.Size(148, 23);
             this.importButton.TabIndex = 1;
@@ -109,7 +110,7 @@
             // 
             // exportButton
             // 
-            this.exportButton.Location = new System.Drawing.Point(441, 382);
+            this.exportButton.Location = new System.Drawing.Point(442, 360);
             this.exportButton.Name = "exportButton";
             this.exportButton.Size = new System.Drawing.Size(148, 23);
             this.exportButton.TabIndex = 4;
@@ -119,7 +120,7 @@
             // 
             // newSaveFileButton
             // 
-            this.newSaveFileButton.Location = new System.Drawing.Point(441, 341);
+            this.newSaveFileButton.Location = new System.Drawing.Point(442, 319);
             this.newSaveFileButton.Name = "newSaveFileButton";
             this.newSaveFileButton.Size = new System.Drawing.Size(298, 35);
             this.newSaveFileButton.TabIndex = 5;
@@ -146,11 +147,22 @@
             this.label1.Text = "Server Status";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // settingsButton
+            // 
+            this.settingsButton.Location = new System.Drawing.Point(442, 386);
+            this.settingsButton.Name = "settingsButton";
+            this.settingsButton.Size = new System.Drawing.Size(298, 23);
+            this.settingsButton.TabIndex = 8;
+            this.settingsButton.Text = "Settings";
+            this.settingsButton.UseVisualStyleBackColor = true;
+            this.settingsButton.Click += new System.EventHandler(this.settings_Click);
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.settingsButton);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.mainProgressBar);
             this.Controls.Add(this.newSaveFileButton);
@@ -179,6 +191,7 @@
         private System.Windows.Forms.ProgressBar mainProgressBar;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button newSaveFileButton;
+        private System.Windows.Forms.Button settingsButton;
     }
 }
 

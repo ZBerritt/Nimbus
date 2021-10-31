@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SaveDataSync
+﻿namespace SaveDataSync
 {
     internal class SaveDataSyncEngine
     {
@@ -32,11 +30,11 @@ namespace SaveDataSync
         {
             this.server = server;
         }
-        
+
         // Button actions
         public void CreateSaveFile()
         {
-            
+
         }
 
         public void ExportSaveData()
@@ -47,6 +45,11 @@ namespace SaveDataSync
         public void ImportSaveData()
         {
 
+        }
+
+        public void Save()
+        {
+            DataManagement.SaveLocalSaveList(localSaveList);
         }
     }
 }

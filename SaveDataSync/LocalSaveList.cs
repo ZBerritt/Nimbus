@@ -1,9 +1,8 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
+﻿using ICSharpCode.SharpZipLib.Zip;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using ICSharpCode.SharpZipLib.Zip;
+using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace SaveDataSync
@@ -41,7 +40,7 @@ namespace SaveDataSync
                 using (ZipOutputStream OutputStream = new ZipOutputStream(File.Open(tmpFile.FilePath, FileMode.Open)))
                 {
                     byte[] buffer = new byte[4096];
-                    
+
                     if (isDirectory)
                     {
                         string[] files = FileUtils.GetFileList(location);
@@ -61,7 +60,8 @@ namespace SaveDataSync
                                 } while (sourceBytes > 0);
                             }
                         }
-                    } else
+                    }
+                    else
                     {
                         ZipEntry entry = new ZipEntry(Path.GetFileName(location));
                         OutputStream.PutNextEntry(entry);
@@ -113,7 +113,7 @@ namespace SaveDataSync
                 }
             }
         }
-            
+
         public string ToJson()
         {
             JObject json = new JObject();
@@ -133,7 +133,7 @@ namespace SaveDataSync
         {
             JObject deserializedJson = JsonConvert.DeserializeObject<JObject>(json);
             LocalSaveList list = new LocalSaveList();
-            JArray saves = (JArray) deserializedJson.GetValue("saves");
+            JArray saves = (JArray)deserializedJson.GetValue("saves");
             foreach (JObject save in saves)
             {
                 string name = save.GetValue("name").ToString();
