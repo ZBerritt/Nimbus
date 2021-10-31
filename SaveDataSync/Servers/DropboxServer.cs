@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace SaveDataSync.Servers
 {
@@ -17,7 +18,14 @@ namespace SaveDataSync.Servers
         private string refreshKey; // A key used to refresh the bearer key when expires
         private DateTime expires; // When the bearer key expires
 
-        public DropboxServer(string apiKey, string verifier)
+        public DropboxServer(string bearerKey, string refreshKey, DateTime expires)
+        {
+            this.bearerKey = bearerKey;
+            this.refreshKey = refreshKey;
+            this.expires = expires;
+        }
+
+        public async static Task<DropboxServer> Build(string apiKey, string verifier)
         {
             HttpClient client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Post, "https://api.dropboxapi.com/oauth2/token");
@@ -33,13 +41,14 @@ namespace SaveDataSync.Servers
             request.Content = new StringContent(postDataBuilder.ToString(),
                     Encoding.UTF8, "application/x-www-form-urlencoded");
 
-            var response = client.SendAsync(request).Result;
-            var responseString = response.Content.ReadAsStringAsync().Result;
+            var response = await client.SendAsync(request);
+            var responseString = await response.Content.ReadAsStringAsync();
             Console.WriteLine(response);
             JObject responseObject = JObject.Parse(responseString);
             Console.WriteLine(responseObject.GetValue("expires_in"));
             Console.WriteLine(responseObject.GetValue("refresh_token"));
             Console.WriteLine(responseObject.GetValue("access_token"));
+            return new DropboxServer("", "", DateTime.Now);
         }
         public override byte[] GetSaveData(string name)
         {

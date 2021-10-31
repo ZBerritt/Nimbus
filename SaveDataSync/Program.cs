@@ -14,7 +14,7 @@ namespace SaveDataSync
         static void Main()
         {
             // little test
-            /* string verifier = DropboxServer.GenerateVerifier();
+            string verifier = DropboxServer.GenerateVerifier();
             Console.WriteLine(verifier);
             string target = "https://www.dropbox.com/oauth2/authorize" +
                         "?response_type=code&token_access_type=offline" +
@@ -22,8 +22,11 @@ namespace SaveDataSync
                         "&client_id=" + DropboxServer.APP_ID +
                         "&code_challenge=" + DropboxServer.GenerateCodeChallenge(verifier) +
                         "&code_challenge_method=S256";
-            Process.Start(target); */
-            Server server = new DropboxServer("", "");
+            Process.Start(target);  
+            Console.WriteLine("Type API Key: ");
+            var key = Console.ReadLine();
+            Console.WriteLine(key);
+            Server server = DropboxServer.Build(key, verifier).Result;
             Console.WriteLine(server.ServerOnline());
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
