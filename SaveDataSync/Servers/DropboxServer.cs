@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json.Linq;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace SaveDataSync.Servers
@@ -12,6 +12,7 @@ namespace SaveDataSync.Servers
     internal class DropboxServer : Server
     {
         public static string APP_ID = "i136jjbqxg4aaci";
+        private static readonly HttpClient client = new HttpClient();
 
 
         private string bearerKey; // The acual key used to make requests
@@ -27,28 +28,26 @@ namespace SaveDataSync.Servers
 
         public async static Task<DropboxServer> Build(string apiKey, string verifier)
         {
-            HttpClient client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Post, "https://api.dropboxapi.com/oauth2/token");
-            request.Headers.Add("Accept", "application/json");
+            var values = new Dictionary<string, string>
+            {
+                { "client_id", APP_ID },
+                { "redirect_uri", "http://localhost:1235/callback" },
+                { "grant_type", "authorization_code"},
+                { "code", apiKey },
+                { "code_verifier", verifier },
+            };
+            var content = new FormUrlEncodedContent(values);
 
-            // Build url encoded data
-            StringBuilder postDataBuilder = new StringBuilder();
-            postDataBuilder.Append("client_id=").Append(APP_ID);
-            postDataBuilder.Append("&redirect_uri=http://localhost:1235");
-            postDataBuilder.Append("&grant_type=authorization_code");
-            postDataBuilder.Append("&code=").Append(apiKey);
-            postDataBuilder.Append("&code_verifier=").Append(verifier);
-            request.Content = new StringContent(postDataBuilder.ToString(),
-                    Encoding.UTF8, "application/x-www-form-urlencoded");
-
-            var response = await client.SendAsync(request);
+            var response = await client.PostAsync("https://api.dropboxapi.com/oauth2/token", content);
             var responseString = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(response);
             JObject responseObject = JObject.Parse(responseString);
+            long expiresIn = long.Parse(responseObject.GetValue("expires_in").ToString());
+            string refresh = responseObject.GetValue("refresh_token").ToString();
+            string access = responseObject.GetValue("access_token").ToString();
             Console.WriteLine(responseObject.GetValue("expires_in"));
             Console.WriteLine(responseObject.GetValue("refresh_token"));
             Console.WriteLine(responseObject.GetValue("access_token"));
-            return new DropboxServer("", "", DateTime.Now);
+            return new DropboxServer(access, refresh, DateTime.Now.Add(TimeSpan.FromSeconds(expiresIn)));
         }
         public override byte[] GetSaveData(string name)
         {
@@ -64,25 +63,13 @@ namespace SaveDataSync.Servers
 
         public override bool ServerOnline()
         {
-            try
-            {
-                HttpClient client = new HttpClient();
-                var request = new HttpRequestMessage(HttpMethod.Post, "https://api.dropboxapi.com/2/check/user");
-                request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
-                request.Headers.Add("Accept", "application/json");
-                request.Content = new StringContent("{\"query\": \"verify\"}", Encoding.UTF8, "application/json");
-                client.SendAsync(request).ContinueWith(res =>
-                {
-                    return res.Result.StatusCode == System.Net.HttpStatusCode.OK;
-                });
-            }
-            catch (HttpRequestException e)
-            {
-                Console.Write(e.Message);
-                return false;
-            }
-
-            return false;
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://api.dropboxapi.com/2/check/user");
+            request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
+            request.Content = new StringContent("{\"query\": \"verify\"}", Encoding.UTF8, "application/json");
+            var response = client.SendAsync(request).Result;
+            Console.WriteLine(response.StatusCode);
+            Console.WriteLine(System.Net.HttpStatusCode.OK);
+            return response.StatusCode == System.Net.HttpStatusCode.OK;
         }
 
         public override void UploadSaveData(string name, byte[] data)
@@ -120,7 +107,7 @@ namespace SaveDataSync.Servers
         {
             const string chars = "abcdefghijklmnopqrstuvwxyz123456789";
             var random = new Random();
-            var verifier = new char[128];
+            var verifier = new char[64];
             for (int i = 0; i < verifier.Length; i++)
             {
                 verifier[i] = chars[random.Next(chars.Length)];
