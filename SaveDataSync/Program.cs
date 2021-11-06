@@ -1,7 +1,6 @@
-﻿using System;
-using System.Diagnostics;
+﻿using SaveDataSync.Servers;
+using System;
 using System.Windows.Forms;
-using SaveDataSync.Servers;
 
 namespace SaveDataSync
 {
@@ -15,18 +14,15 @@ namespace SaveDataSync
         {
             // little test
             string verifier = DropboxServer.GenerateVerifier();
-            Console.WriteLine(verifier);
             string target = "https://www.dropbox.com/oauth2/authorize" +
                         "?response_type=code&token_access_type=offline" +
-                        "&redirect_uri=http://localhost:1235" +
+                        "&redirect_uri=http://localhost:1235/callback" +
                         "&client_id=" + DropboxServer.APP_ID +
                         "&code_challenge=" + DropboxServer.GenerateCodeChallenge(verifier) +
                         "&code_challenge_method=S256";
-            Process.Start(target);  
-            Console.WriteLine("Type API Key: ");
-            var key = Console.ReadLine();
-            Console.WriteLine(key);
-            Server server = DropboxServer.Build(key, verifier).Result;
+            OAuthToken oauth = new OAuthToken(target);
+            string token = oauth.GetCode();
+            Server server = DropboxServer.Build(token, verifier).Result;
             Console.WriteLine(server.ServerOnline());
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
