@@ -26,7 +26,7 @@ namespace SaveDataSync.Servers
             this.expires = expires;
         }
 
-        public async static Task<DropboxServer> Build(string apiKey, string verifier)
+        public static DropboxServer Build(string apiKey, string verifier)
         {
             var values = new Dictionary<string, string>
             {
@@ -38,15 +38,12 @@ namespace SaveDataSync.Servers
             };
             var content = new FormUrlEncodedContent(values);
 
-            var response = await client.PostAsync("https://api.dropboxapi.com/oauth2/token", content);
-            var responseString = await response.Content.ReadAsStringAsync();
+            var response = client.PostAsync("https://api.dropboxapi.com/oauth2/token", content).Result;
+            var responseString = response.Content.ReadAsStringAsync().Result;
             JObject responseObject = JObject.Parse(responseString);
             long expiresIn = long.Parse(responseObject.GetValue("expires_in").ToString());
             string refresh = responseObject.GetValue("refresh_token").ToString();
             string access = responseObject.GetValue("access_token").ToString();
-            Console.WriteLine(responseObject.GetValue("expires_in"));
-            Console.WriteLine(responseObject.GetValue("refresh_token"));
-            Console.WriteLine(responseObject.GetValue("access_token"));
             return new DropboxServer(access, refresh, DateTime.Now.Add(TimeSpan.FromSeconds(expiresIn)));
         }
         public override byte[] GetSaveData(string name)
@@ -67,8 +64,6 @@ namespace SaveDataSync.Servers
             request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
             request.Content = new StringContent("{\"query\": \"verify\"}", Encoding.UTF8, "application/json");
             var response = client.SendAsync(request).Result;
-            Console.WriteLine(response.StatusCode);
-            Console.WriteLine(System.Net.HttpStatusCode.OK);
             return response.StatusCode == System.Net.HttpStatusCode.OK;
         }
 
@@ -82,25 +77,26 @@ namespace SaveDataSync.Servers
             if (expires.CompareTo(DateTime.Now) > 0) return bearerKey;
 
             // Key expired, generate a new one
-            HttpClient client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Post, "https://api.dropboxapi.com/oauth2/token");
-            request.Headers.Add("Accept", "application/json");
-
-            // Build url encoded data
-            StringBuilder postDataBuilder = new StringBuilder();
-            postDataBuilder.Append("client_id=").Append(APP_ID);
-            postDataBuilder.Append("&grant_type=refresh_token");
-            postDataBuilder.Append("&refresh_token=").Append(refreshKey);
-            request.Content = new StringContent(postDataBuilder.ToString(),
-                    Encoding.UTF8, "application/x-www-form-urlencoded");
-
-            var response = client.SendAsync(request).Result;
+            var values = new Dictionary<string, string>
+            {
+                { "client_id", APP_ID },
+                { "grant_type", "refresh_token"},
+                { "refresh_token", refreshKey }
+            };
+            var content = new FormUrlEncodedContent(values);
+            var response = client.PostAsync("https://api.dropboxapi.com/oauth2/token", content).Result;
             var responseString = response.Content.ReadAsStringAsync().Result;
-            Console.WriteLine(response);
             JObject responseObject = JObject.Parse(responseString);
-            Console.WriteLine(responseObject.GetValue("expires_in"));
-            Console.WriteLine(responseObject.GetValue("access_token"));
-            return "";
+            long expiresIn = long.Parse(responseObject.GetValue("expires_in").ToString());
+            string access = responseObject.GetValue("access_token").ToString();
+            RenewBearerKey(access, expiresIn);
+            return bearerKey;
+        }
+
+        private void RenewBearerKey(string key, long expiresIn)
+        {
+            bearerKey = key;
+            expires = DateTime.Now.Add(TimeSpan.FromSeconds(expiresIn));
         }
 
         public static string GenerateVerifier()
