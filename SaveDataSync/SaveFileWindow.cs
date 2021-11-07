@@ -31,10 +31,20 @@ namespace SaveDataSync
 
         private void BrowseButton_Click(object sender, EventArgs e)
         {
-            if (folderBrowser.ShowDialog() == DialogResult.OK)
+            if (singleFileCheckBox.Checked)
             {
-                locationTextBox.Text = folderBrowser.SelectedPath;
+                if (openFile.ShowDialog() == DialogResult.OK)
+                {
+                    locationTextBox.Text = openFile.FileName;
+                }  
+            } else
+            {
+                if (folderBrowser.ShowDialog() == DialogResult.OK)
+                {
+                    locationTextBox.Text = folderBrowser.SelectedPath;
+                }
             }
+           
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
@@ -57,5 +67,6 @@ namespace SaveDataSync
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
     }
 }

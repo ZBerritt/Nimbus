@@ -95,12 +95,6 @@ namespace SaveDataSync
             Console.WriteLine("Settings");
         }
 
-        private void SaveFileList_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            var selectedItem = saveFileList.FocusedItem;
-            Console.WriteLine("Selection Change: {0}", selectedItem.Text);
-        }
-
         private void SaveFileList_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)

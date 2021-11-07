@@ -37,6 +37,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.locationTextBox = new System.Windows.Forms.TextBox();
             this.browseButton = new System.Windows.Forms.Button();
+            this.singleFileCheckBox = new System.Windows.Forms.CheckBox();
+            this.openFile = new System.Windows.Forms.OpenFileDialog();
             this.SuspendLayout();
             // 
             // folderBrowser
@@ -114,11 +116,26 @@
             this.browseButton.UseVisualStyleBackColor = true;
             this.browseButton.Click += new System.EventHandler(this.BrowseButton_Click);
             // 
+            // singleFileCheckBox
+            // 
+            this.singleFileCheckBox.AutoSize = true;
+            this.singleFileCheckBox.Location = new System.Drawing.Point(179, 13);
+            this.singleFileCheckBox.Name = "singleFileCheckBox";
+            this.singleFileCheckBox.Size = new System.Drawing.Size(80, 17);
+            this.singleFileCheckBox.TabIndex = 8;
+            this.singleFileCheckBox.Text = "Single File?";
+            this.singleFileCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // openFile
+            // 
+            this.openFile.FileName = "openFile";
+            // 
             // SaveFileWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(315, 130);
+            this.Controls.Add(this.singleFileCheckBox);
             this.Controls.Add(this.browseButton);
             this.Controls.Add(this.locationTextBox);
             this.Controls.Add(this.label2);
@@ -147,5 +164,7 @@
         private System.Windows.Forms.Button browseButton;
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Button saveButton;
+        private System.Windows.Forms.CheckBox singleFileCheckBox;
+        private System.Windows.Forms.OpenFileDialog openFile;
     }
 }
