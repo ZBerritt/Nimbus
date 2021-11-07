@@ -49,7 +49,7 @@
             this.importButton.TabIndex = 1;
             this.importButton.Text = "Import";
             this.importButton.UseVisualStyleBackColor = true;
-            this.importButton.Click += new System.EventHandler(this.import_Click);
+            this.importButton.Click += new System.EventHandler(this.Import_Click);
             // 
             // exportButton
             // 
@@ -59,7 +59,7 @@
             this.exportButton.TabIndex = 4;
             this.exportButton.Text = "Export";
             this.exportButton.UseVisualStyleBackColor = true;
-            this.exportButton.Click += new System.EventHandler(this.export_Click);
+            this.exportButton.Click += new System.EventHandler(this.Export_Click);
             // 
             // newSaveFileButton
             // 
@@ -69,7 +69,7 @@
             this.newSaveFileButton.TabIndex = 5;
             this.newSaveFileButton.Text = "New Save File";
             this.newSaveFileButton.UseVisualStyleBackColor = true;
-            this.newSaveFileButton.Click += new System.EventHandler(this.newSaveFile_Click);
+            this.newSaveFileButton.Click += new System.EventHandler(this.NewSaveFile_Click);
             // 
             // mainProgressBar
             // 
@@ -98,10 +98,11 @@
             this.settingsButton.TabIndex = 8;
             this.settingsButton.Text = "Settings";
             this.settingsButton.UseVisualStyleBackColor = true;
-            this.settingsButton.Click += new System.EventHandler(this.settings_Click);
+            this.settingsButton.Click += new System.EventHandler(this.Settings_Click);
             // 
             // saveFileList
             // 
+            this.saveFileList.Alignment = System.Windows.Forms.ListViewAlignment.SnapToGrid;
             this.saveFileList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.name,
             this.location,
@@ -111,14 +112,18 @@
             this.saveFileList.GridLines = true;
             this.saveFileList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.saveFileList.HideSelection = false;
+            this.saveFileList.LabelEdit = true;
             this.saveFileList.LabelWrap = false;
             this.saveFileList.Location = new System.Drawing.Point(12, 12);
+            this.saveFileList.MultiSelect = false;
             this.saveFileList.Name = "saveFileList";
             this.saveFileList.Size = new System.Drawing.Size(368, 426);
+            this.saveFileList.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.saveFileList.TabIndex = 9;
             this.saveFileList.UseCompatibleStateImageBehavior = false;
             this.saveFileList.View = System.Windows.Forms.View.Details;
-            this.saveFileList.SelectedIndexChanged += new System.EventHandler(this.saveFileList_SelectedIndexChanged);
+            this.saveFileList.SelectedIndexChanged += new System.EventHandler(this.SaveFileList_SelectedIndexChanged);
+            this.saveFileList.MouseClick += new System.Windows.Forms.MouseEventHandler(this.SaveFileList_MouseClick);
             // 
             // name
             // 
@@ -128,7 +133,7 @@
             // location
             // 
             this.location.Text = "Location";
-            this.location.Width = 150;
+            this.location.Width = 160;
             // 
             // size
             // 
@@ -138,7 +143,7 @@
             // 
             this.status.Text = "Status";
             this.status.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.status.Width = 70;
+            this.status.Width = 30;
             // 
             // MainWindow
             // 
@@ -152,6 +157,8 @@
             this.Controls.Add(this.newSaveFileButton);
             this.Controls.Add(this.exportButton);
             this.Controls.Add(this.importButton);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.MaximizeBox = false;
             this.Name = "MainWindow";
             this.Text = "SaveDataSync";
             this.Load += new System.EventHandler(this.OnLoad);
