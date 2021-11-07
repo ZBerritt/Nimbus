@@ -22,7 +22,7 @@ namespace SaveDataSync
                         "&code_challenge_method=S256";
             OAuthToken oauth = new OAuthToken(target);
             string token = oauth.GetCode();
-            Server server = DropboxServer.Build(token, verifier).Result;
+            Server server = DropboxServer.Build(token, verifier);
             Console.WriteLine(server.ServerOnline());
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
