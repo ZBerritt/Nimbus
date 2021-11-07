@@ -28,75 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.NameLabel = new System.Windows.Forms.Label();
-            this.StatusLabel = new System.Windows.Forms.Label();
-            this.SizeLabel = new System.Windows.Forms.Label();
-            this.LocationLabel = new System.Windows.Forms.Label();
             this.importButton = new System.Windows.Forms.Button();
             this.exportButton = new System.Windows.Forms.Button();
             this.newSaveFileButton = new System.Windows.Forms.Button();
             this.mainProgressBar = new System.Windows.Forms.ProgressBar();
             this.label1 = new System.Windows.Forms.Label();
             this.settingsButton = new System.Windows.Forms.Button();
-            this.tableLayoutPanel1.SuspendLayout();
+            this.saveFileList = new System.Windows.Forms.ListView();
+            this.name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.location = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.size = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.status = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
-            // 
-            // tableLayoutPanel1
-            // 
-            this.tableLayoutPanel1.ColumnCount = 4;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 35F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 35F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 15F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 15F));
-            this.tableLayoutPanel1.Controls.Add(this.NameLabel, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.StatusLabel, 3, 0);
-            this.tableLayoutPanel1.Controls.Add(this.SizeLabel, 2, 0);
-            this.tableLayoutPanel1.Controls.Add(this.LocationLabel, 1, 0);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 2;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 9.090909F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 90.90909F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(368, 426);
-            this.tableLayoutPanel1.TabIndex = 0;
-            this.tableLayoutPanel1.Paint += new System.Windows.Forms.PaintEventHandler(this.saveTable_Paint);
-            // 
-            // NameLabel
-            // 
-            this.NameLabel.AutoSize = true;
-            this.NameLabel.Location = new System.Drawing.Point(3, 0);
-            this.NameLabel.Name = "NameLabel";
-            this.NameLabel.Size = new System.Drawing.Size(35, 13);
-            this.NameLabel.TabIndex = 0;
-            this.NameLabel.Text = "Name";
-            // 
-            // StatusLabel
-            // 
-            this.StatusLabel.AutoSize = true;
-            this.StatusLabel.Location = new System.Drawing.Point(314, 0);
-            this.StatusLabel.Name = "StatusLabel";
-            this.StatusLabel.Size = new System.Drawing.Size(37, 13);
-            this.StatusLabel.TabIndex = 3;
-            this.StatusLabel.Text = "Status";
-            // 
-            // SizeLabel
-            // 
-            this.SizeLabel.AutoSize = true;
-            this.SizeLabel.Location = new System.Drawing.Point(259, 0);
-            this.SizeLabel.Name = "SizeLabel";
-            this.SizeLabel.Size = new System.Drawing.Size(27, 13);
-            this.SizeLabel.TabIndex = 2;
-            this.SizeLabel.Text = "Size";
-            // 
-            // LocationLabel
-            // 
-            this.LocationLabel.AutoSize = true;
-            this.LocationLabel.Location = new System.Drawing.Point(131, 0);
-            this.LocationLabel.Name = "LocationLabel";
-            this.LocationLabel.Size = new System.Drawing.Size(48, 13);
-            this.LocationLabel.TabIndex = 1;
-            this.LocationLabel.Text = "Location";
             // 
             // importButton
             // 
@@ -157,41 +100,78 @@
             this.settingsButton.UseVisualStyleBackColor = true;
             this.settingsButton.Click += new System.EventHandler(this.settings_Click);
             // 
+            // saveFileList
+            // 
+            this.saveFileList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.name,
+            this.location,
+            this.size,
+            this.status});
+            this.saveFileList.FullRowSelect = true;
+            this.saveFileList.GridLines = true;
+            this.saveFileList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.saveFileList.HideSelection = false;
+            this.saveFileList.LabelWrap = false;
+            this.saveFileList.Location = new System.Drawing.Point(12, 12);
+            this.saveFileList.Name = "saveFileList";
+            this.saveFileList.Size = new System.Drawing.Size(368, 426);
+            this.saveFileList.TabIndex = 9;
+            this.saveFileList.UseCompatibleStateImageBehavior = false;
+            this.saveFileList.View = System.Windows.Forms.View.Details;
+            this.saveFileList.SelectedIndexChanged += new System.EventHandler(this.saveFileList_SelectedIndexChanged);
+            // 
+            // name
+            // 
+            this.name.Text = "Name";
+            this.name.Width = 70;
+            // 
+            // location
+            // 
+            this.location.Text = "Location";
+            this.location.Width = 150;
+            // 
+            // size
+            // 
+            this.size.Text = "Size";
+            // 
+            // status
+            // 
+            this.status.Text = "Status";
+            this.status.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.status.Width = 70;
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.saveFileList);
             this.Controls.Add(this.settingsButton);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.mainProgressBar);
             this.Controls.Add(this.newSaveFileButton);
             this.Controls.Add(this.exportButton);
             this.Controls.Add(this.importButton);
-            this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "MainWindow";
             this.Text = "SaveDataSync";
             this.Load += new System.EventHandler(this.OnLoad);
-            this.tableLayoutPanel1.ResumeLayout(false);
-            this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.Label NameLabel;
-        private System.Windows.Forms.Label LocationLabel;
-        private System.Windows.Forms.Label SizeLabel;
-        private System.Windows.Forms.Label StatusLabel;
         private System.Windows.Forms.Button importButton;
         private System.Windows.Forms.Button exportButton;
         private System.Windows.Forms.ProgressBar mainProgressBar;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button newSaveFileButton;
         private System.Windows.Forms.Button settingsButton;
+        private System.Windows.Forms.ListView saveFileList;
+        private System.Windows.Forms.ColumnHeader name;
+        private System.Windows.Forms.ColumnHeader location;
+        private System.Windows.Forms.ColumnHeader size;
+        private System.Windows.Forms.ColumnHeader status;
     }
 }
 
