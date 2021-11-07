@@ -122,7 +122,6 @@
             this.saveFileList.TabIndex = 9;
             this.saveFileList.UseCompatibleStateImageBehavior = false;
             this.saveFileList.View = System.Windows.Forms.View.Details;
-            this.saveFileList.SelectedIndexChanged += new System.EventHandler(this.SaveFileList_SelectedIndexChanged);
             this.saveFileList.MouseClick += new System.Windows.Forms.MouseEventHandler(this.SaveFileList_MouseClick);
             // 
             // name
