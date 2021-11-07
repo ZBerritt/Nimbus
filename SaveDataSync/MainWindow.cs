@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Drawing;
 using System.Windows.Forms;
-using System.Diagnostics;
 
 
 
@@ -26,12 +26,6 @@ namespace SaveDataSync
         {
             // Grabs the engine which allows communication with the backend 
             engine = SaveDataSyncEngine.CreateInstance();
-
-            // BEGIN TEST
-            // engine.GetLocalSaveList().AddSave("test3", "C:\\Users\\nitro\\Desktop\\test3.txt");
-            // engine.GetLocalSaveList().AddSave("test1", "C:\\Users\\nitro\\Desktop\\test");
-            // engine.GetLocalSaveList().AddSave("test2", "C:\\Users\\nitro\\Desktop\\test2");
-            // END TEST
 
             // Auto sizes the last column of the save list
             saveFileList.Columns[saveFileList.Columns.Count - 1].Width = -2;
@@ -139,13 +133,14 @@ namespace SaveDataSync
             var removeSave = menu.Items.Add("Remove Save");
             removeSave.Click += (object sender5, EventArgs e5) =>
             {
-                var confirm = MessageBox.Show("Are you sure you want to remove this save file?", 
-                    "Confirm", 
-                    MessageBoxButtons.YesNo, 
+                var confirm = MessageBox.Show("Are you sure you want to remove this save file?",
+                    "Confirm",
+                    MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question);
                 if (confirm == DialogResult.Yes)
                 {
                     engine.GetLocalSaveList().RemoveSave(name);
+                    engine.Save();
                     ReloadSaveList();
 
                 }

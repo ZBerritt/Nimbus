@@ -1,19 +1,24 @@
-﻿namespace SaveDataSync
+﻿using System;
+
+namespace SaveDataSync
 {
     internal class SaveDataSyncEngine
     {
-
+        private static SaveDataSyncEngine instance;
         private LocalSaveList localSaveList;
         private Server server;
 
         public static SaveDataSyncEngine CreateInstance()
         {
-            return new SaveDataSyncEngine();
+            if (instance != null) throw new Exception("Engine instance already exists!");
+            instance = new SaveDataSyncEngine();
+            return instance;
         }
 
-        public SaveDataSyncEngine()
+        private SaveDataSyncEngine()
         {
             localSaveList = DataManagement.GetLocalSaveList();
+            server = DataManagement.GetServerData();
         }
 
         public LocalSaveList GetLocalSaveList()
@@ -50,6 +55,7 @@
         public void Save()
         {
             DataManagement.SaveLocalSaveList(localSaveList);
+            DataManagement.SaveServerData(server);
         }
     }
 }

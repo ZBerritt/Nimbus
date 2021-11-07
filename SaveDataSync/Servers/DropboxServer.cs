@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace SaveDataSync.Servers
 {
@@ -45,6 +44,19 @@ namespace SaveDataSync.Servers
             string refresh = responseObject.GetValue("refresh_token").ToString();
             string access = responseObject.GetValue("access_token").ToString();
             return new DropboxServer(access, refresh, DateTime.Now.Add(TimeSpan.FromSeconds(expiresIn)));
+        }
+
+        public static DropboxServer BuildFromJson(JObject json)
+        {
+            string bearer = (string)json.GetValue("bearerKey");
+            string refresh = (string)json.GetValue("refreshKey");
+            DateTime expires = (DateTime)json.GetValue("expires");
+            return new DropboxServer(bearer, refresh, expires);
+
+        }
+        public override string Name()
+        {
+            return "dropbox";
         }
         public override byte[] GetSaveData(string name)
         {
@@ -121,6 +133,15 @@ namespace SaveDataSync.Servers
             code = Regex.Replace(code, "\\/", "_");
             code = Regex.Replace(code, "=+$", "");
             return code;
+        }
+
+        public override JObject ToJson()
+        {
+            JObject json = new JObject();
+            json.Add("bearerKey", bearerKey);
+            json.Add("refreshKey", refreshKey);
+            json.Add("expires", expires);
+            return json;
         }
     }
 }
