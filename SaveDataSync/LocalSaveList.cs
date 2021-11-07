@@ -11,6 +11,11 @@ namespace SaveDataSync
     {
         private Dictionary<string, string> saveGameLocations = new Dictionary<string, string>();
 
+
+        public Dictionary<string, string> GetSaves()
+        {
+            return saveGameLocations;
+        }
         public void AddSave(string name, string location)
         {
             if (saveGameLocations.ContainsKey(name)) throw new Exception("Save game with name " + name + " already exists.");
