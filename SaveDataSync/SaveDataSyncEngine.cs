@@ -37,9 +37,10 @@ namespace SaveDataSync
         }
 
         // Button actions
-        public void CreateSaveFile()
+        public void CreateSaveFile(string name, string location)
         {
-
+            localSaveList.AddSave(name, location);
+            Save();
         }
 
         public void ExportSaveData()
