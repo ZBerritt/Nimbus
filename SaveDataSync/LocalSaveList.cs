@@ -19,7 +19,12 @@ namespace SaveDataSync
         public void AddSave(string name, string location)
         {
             if (saveGameLocations.ContainsKey(name)) throw new Exception("Save game with name " + name + " already exists.");
-            if (saveGameLocations.ContainsKey(location)) throw new Exception("Save game with location " + location + " already exists.");
+            var locations = saveGameLocations.Values;
+            foreach (var loc in locations)
+            {
+                if (Path.GetFullPath(loc).Equals(Path.GetFullPath(location)))
+                    throw new Exception("Save game with location " + location + " already exists.");
+            }
             saveGameLocations[name] = location;
         }
 

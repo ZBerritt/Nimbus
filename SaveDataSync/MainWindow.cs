@@ -69,8 +69,13 @@ namespace SaveDataSync
         // Click Events
         private void NewSaveFile_Click(object sender, EventArgs e)
         {
-            Console.WriteLine("Create Save File");
-            engine.CreateSaveFile();
+            SaveFileWindow sfw = new SaveFileWindow(engine)
+            {
+                Owner = this,
+                ShowInTaskbar = false
+            };
+            sfw.ShowDialog();
+            ReloadSaveList();
         }
 
         private void Export_Click(object sender, EventArgs e)
