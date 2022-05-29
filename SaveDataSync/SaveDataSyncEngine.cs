@@ -7,6 +7,7 @@ namespace SaveDataSync
         private static SaveDataSyncEngine instance;
         private LocalSaveList localSaveList;
         private Server server;
+        private Settings settings;
 
         public static SaveDataSyncEngine CreateInstance()
         {
@@ -19,11 +20,22 @@ namespace SaveDataSync
         {
             localSaveList = DataManagement.GetLocalSaveList();
             server = DataManagement.GetServerData();
+            settings = DataManagement.GetSettings();
         }
 
         public LocalSaveList GetLocalSaveList()
         {
             return localSaveList;
+        }
+        
+        public Settings GetSettings()
+        {
+            return settings;
+        }
+
+        public void SetSettings(Settings settings)
+        {
+            this.settings = settings;
         }
 
         public Server GetServer()
@@ -57,6 +69,7 @@ namespace SaveDataSync
         {
             DataManagement.SaveLocalSaveList(localSaveList);
             DataManagement.SaveServerData(server);
+            DataManagement.SaveSettings(settings);
         }
     }
 }

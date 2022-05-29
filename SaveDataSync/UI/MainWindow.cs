@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SaveDataSync.UI;
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -110,6 +111,17 @@ namespace SaveDataSync
             ReloadUI();
         }
 
+        private void Settings_Click(object sender, EventArgs e)
+        {
+            SettingsWindow sw = new SettingsWindow(engine)
+            {
+                Owner = this,
+                ShowInTaskbar = true
+            };
+            sw.ShowDialog();
+            ReloadUI();
+        }
+
         private void Export_Click(object sender, EventArgs e)
         {
             Console.WriteLine("Export");
@@ -120,11 +132,6 @@ namespace SaveDataSync
         {
             Console.WriteLine("Import");
             engine.ImportSaveData();
-        }
-
-        private void Settings_Click(object sender, EventArgs e)
-        {
-            Console.WriteLine("Settings");
         }
 
         private void SaveFileList_MouseClick(object sender, MouseEventArgs e)
