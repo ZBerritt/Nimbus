@@ -9,6 +9,7 @@ namespace SaveDataSync
 {
     internal class DataManagement
     {
+        /* Server Management */
         public static LocalSaveList GetLocalSaveList()
         {
             return GetLocalSaveList(Locations.DataDirectory());
@@ -53,6 +54,7 @@ namespace SaveDataSync
         }
         public static void SaveServerData(string location, Server server)
         {
+            if (server == null) return;
             var json = new JObject();
             var serverDataJson = server.ToJson();
             var serverName = server.Name();
@@ -93,13 +95,59 @@ namespace SaveDataSync
                     // The only hardcoded instance where abstract server data cannot work. Methods to be implemented manually
                     switch (serverName)
                     {
-                        case "dropbox":
+                        case "Dropbox":
                             return DropboxServer.BuildFromJson(serverData);
                         default:
                             return null;
                     }
                 }
             }
+        }
+
+        /* Settings Management */
+        public static void SaveSettings(Settings settings)
+        {
+            SaveSettings(Locations.DataDirectory(), settings);
+        }
+
+        public static void SaveSettings(string location, Settings settings)
+        {
+            var json = settings.ToJSON();
+            using (FileStream localSaveStream = File.Open(Path.Combine(location, "settings.json"), FileMode.OpenOrCreate))
+            {
+                using (StreamWriter writer = new StreamWriter(localSaveStream))
+                {
+                    writer.Write(json.ToString());
+                }
+
+            }
+        }
+        public static Settings GetSettings()
+        {
+            return GetSettings(Locations.DataDirectory());
+        }
+
+        public static Settings GetSettings(string location)
+        {
+            if (!Directory.Exists(location) || !File.Exists(Path.Combine(location, "settings.json")))
+            {
+                var settings = new Settings();
+                SaveSettings(location, settings);
+                return settings;
+            }
+
+            using (FileStream localSettingsStream = File.Open(Path.Combine(location, "settings.json"), FileMode.Open))
+            {
+               using (StreamReader sr = new StreamReader(localSettingsStream))
+                {
+                    var content = sr.ReadToEnd();
+                    JObject settingsData = JObject.Parse(content);
+                    var settings = new Settings(settingsData);
+                    return settings;
+                }
+            }
+
+
         }
     }
 }
