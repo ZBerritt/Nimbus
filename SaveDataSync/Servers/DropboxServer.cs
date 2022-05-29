@@ -56,7 +56,12 @@ namespace SaveDataSync.Servers
         }
         public override string Name()
         {
-            return "dropbox";
+            return "Dropbox";
+        }
+
+        public override string Host()
+        {
+            return "dropbox.com";
         }
         public override byte[] GetSaveData(string name)
         {

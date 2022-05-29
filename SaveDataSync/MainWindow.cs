@@ -31,12 +31,13 @@ namespace SaveDataSync
             saveFileList.Columns[saveFileList.Columns.Count - 1].Width = -2;
 
             // Loads the save list with the imported data from the engine
-            ReloadSaveList();
+            ReloadUI();
         }
 
-        public void ReloadSaveList()
+        //Used to reload all UI data
+        public void ReloadUI()
         {
-
+            /* Reload the save file list */
             saveFileList.Items.Clear();
             var saves = engine.GetLocalSaveList().GetSaves();
             foreach (var save in saves)
@@ -45,18 +46,24 @@ namespace SaveDataSync
                 saveItem.SubItems.Add(save.Value);
 
                 // Get file size
-                FileAttributes attr = File.GetAttributes(save.Value);
-                long saveSize = attr.HasFlag(FileAttributes.Directory)
-                    ? new DirectoryInfo(save.Value).EnumerateFiles("*.*", SearchOption.AllDirectories).Sum(fi => fi.Length)
-                    : new FileInfo(save.Value).Length; // The size of the file/folder in bytes
-                string[] sizes = { "Bytes", "kB", "MB", "GB", "TB" };
-                int order = 0;
-                while (saveSize >= 1024 && order < sizes.Length - 1)
+                try
                 {
-                    order++;
-                    saveSize = saveSize / 1024;
+                    FileAttributes attr = File.GetAttributes(save.Value);
+                    long saveSize = attr.HasFlag(FileAttributes.Directory)
+                        ? new DirectoryInfo(save.Value).EnumerateFiles("*.*", SearchOption.AllDirectories).Sum(fi => fi.Length)
+                        : new FileInfo(save.Value).Length; // The size of the file/folder in bytes
+                    string[] sizes = { "Bytes", "kB", "MB", "GB", "TB" };
+                    int order = 0;
+                    while (saveSize >= 1024 && order < sizes.Length - 1)
+                    {
+                        order++;
+                        saveSize = saveSize / 1024;
+                    }
+                    saveItem.SubItems.Add(string.Format("{0:0.##} {1}", saveSize, sizes[order]));
+                } catch (Exception)
+                {
+                    saveItem.SubItems.Add("N/A");
                 }
-                saveItem.SubItems.Add(string.Format("{0:0.##} {1}", saveSize, sizes[order]));
 
                 // Get file sync status
                 saveItem.SubItems.Add("Not implemented");
@@ -64,6 +71,31 @@ namespace SaveDataSync
                 // Add to the table
                 saveFileList.Items.Add(saveItem);
             }
+
+            /* Check server status */
+            var server = engine.GetServer();
+            string serverType = "None";
+            string status = "N/A";
+            string serverHost = "N/A";
+            if (server != null)
+            {
+                serverType = server.Name();
+                serverHost = server.Host();
+                try
+                {   
+                    var serverOnline = server.ServerOnline();
+                    status = serverOnline ? "Online" : "Offline";
+                }
+                catch (Exception)
+                {
+                    status = "Error";
+                }
+            }
+
+            // Set the text of the server information
+            type.Text = serverType;
+            host.Text = serverHost;
+            serverStatus.Text = status;
         }
 
         // Click Events
@@ -75,7 +107,7 @@ namespace SaveDataSync
                 ShowInTaskbar = false
             };
             sfw.ShowDialog();
-            ReloadSaveList();
+            ReloadUI();
         }
 
         private void Export_Click(object sender, EventArgs e)
@@ -140,11 +172,16 @@ namespace SaveDataSync
                 {
                     engine.GetLocalSaveList().RemoveSave(name);
                     engine.Save();
-                    ReloadSaveList();
+                    ReloadUI();
 
                 }
             };
             return menu;
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
