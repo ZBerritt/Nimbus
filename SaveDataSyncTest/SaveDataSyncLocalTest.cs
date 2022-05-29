@@ -10,5 +10,16 @@ namespace SaveDataSyncTest
         {
 
         }
+
+    }
+
+    [TestClass]
+    public class SaveDataSyncServerTest
+    {
+        [TestMethod]
+        public void TestDropboxServer()
+        {
+
+        }
     }
 }
