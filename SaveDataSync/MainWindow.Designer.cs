@@ -39,6 +39,12 @@
             this.location = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.size = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.status = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.typeTitle = new System.Windows.Forms.Label();
+            this.hostTitle = new System.Windows.Forms.Label();
+            this.statusTitle = new System.Windows.Forms.Label();
+            this.type = new System.Windows.Forms.Label();
+            this.serverStatus = new System.Windows.Forms.Label();
+            this.host = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // importButton
@@ -47,7 +53,7 @@
             this.importButton.Name = "importButton";
             this.importButton.Size = new System.Drawing.Size(148, 23);
             this.importButton.TabIndex = 1;
-            this.importButton.Text = "Import";
+            this.importButton.Text = "Import All";
             this.importButton.UseVisualStyleBackColor = true;
             this.importButton.Click += new System.EventHandler(this.Import_Click);
             // 
@@ -57,7 +63,7 @@
             this.exportButton.Name = "exportButton";
             this.exportButton.Size = new System.Drawing.Size(148, 23);
             this.exportButton.TabIndex = 4;
-            this.exportButton.Text = "Export";
+            this.exportButton.Text = "Export All";
             this.exportButton.UseVisualStyleBackColor = true;
             this.exportButton.Click += new System.EventHandler(this.Export_Click);
             // 
@@ -81,11 +87,11 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.ForeColor = System.Drawing.Color.Black;
-            this.label1.Location = new System.Drawing.Point(517, 12);
+            this.label1.Location = new System.Drawing.Point(498, 9);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(156, 29);
+            this.label1.Size = new System.Drawing.Size(179, 31);
             this.label1.TabIndex = 7;
             this.label1.Text = "Server Status";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -144,11 +150,78 @@
             this.status.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.status.Width = 30;
             // 
+            // typeTitle
+            // 
+            this.typeTitle.AutoSize = true;
+            this.typeTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.typeTitle.Location = new System.Drawing.Point(454, 51);
+            this.typeTitle.Name = "typeTitle";
+            this.typeTitle.Size = new System.Drawing.Size(60, 25);
+            this.typeTitle.TabIndex = 10;
+            this.typeTitle.Text = "Type";
+            // 
+            // hostTitle
+            // 
+            this.hostTitle.AutoSize = true;
+            this.hostTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.hostTitle.Location = new System.Drawing.Point(454, 99);
+            this.hostTitle.Name = "hostTitle";
+            this.hostTitle.Size = new System.Drawing.Size(56, 25);
+            this.hostTitle.TabIndex = 11;
+            this.hostTitle.Text = "Host";
+            // 
+            // statusTitle
+            // 
+            this.statusTitle.AutoSize = true;
+            this.statusTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.statusTitle.Location = new System.Drawing.Point(454, 146);
+            this.statusTitle.Name = "statusTitle";
+            this.statusTitle.Size = new System.Drawing.Size(73, 25);
+            this.statusTitle.TabIndex = 12;
+            this.statusTitle.Text = "Status";
+            // 
+            // type
+            // 
+            this.type.AutoSize = true;
+            this.type.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.type.Location = new System.Drawing.Point(660, 52);
+            this.type.Name = "type";
+            this.type.Size = new System.Drawing.Size(57, 24);
+            this.type.TabIndex = 13;
+            this.type.Text = "None";
+            // 
+            // serverStatus
+            // 
+            this.serverStatus.AutoSize = true;
+            this.serverStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.serverStatus.Location = new System.Drawing.Point(659, 146);
+            this.serverStatus.Name = "serverStatus";
+            this.serverStatus.Size = new System.Drawing.Size(19, 25);
+            this.serverStatus.TabIndex = 15;
+            this.serverStatus.Text = "-";
+            // 
+            // host
+            // 
+            this.host.AutoSize = true;
+            this.host.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.host.Location = new System.Drawing.Point(659, 99);
+            this.host.Name = "host";
+            this.host.Size = new System.Drawing.Size(19, 25);
+            this.host.TabIndex = 16;
+            this.host.Text = "-";
+            this.host.Click += new System.EventHandler(this.label2_Click);
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.host);
+            this.Controls.Add(this.serverStatus);
+            this.Controls.Add(this.type);
+            this.Controls.Add(this.statusTitle);
+            this.Controls.Add(this.hostTitle);
+            this.Controls.Add(this.typeTitle);
             this.Controls.Add(this.saveFileList);
             this.Controls.Add(this.settingsButton);
             this.Controls.Add(this.label1);
@@ -178,6 +251,12 @@
         private System.Windows.Forms.ColumnHeader location;
         private System.Windows.Forms.ColumnHeader size;
         private System.Windows.Forms.ColumnHeader status;
+        private System.Windows.Forms.Label typeTitle;
+        private System.Windows.Forms.Label hostTitle;
+        private System.Windows.Forms.Label statusTitle;
+        private System.Windows.Forms.Label type;
+        private System.Windows.Forms.Label serverStatus;
+        private System.Windows.Forms.Label host;
     }
 }
 
