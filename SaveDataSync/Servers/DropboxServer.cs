@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Net.Http.Headers;
 
 namespace SaveDataSync.Servers
 {
@@ -66,13 +67,46 @@ namespace SaveDataSync.Servers
         public override byte[] GetSaveData(string name)
         {
             string urlPath = "/" + name + ".zip"; // Stored on dropbox under this name
-            throw new NotImplementedException();
+            try
+            {
+                JObject reqBody = new JObject();
+                reqBody.Add("path", urlPath);
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://content.dropboxapi.com/2/files/download");
+                request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
+                request.Headers.Add("Dropbox-API-Arg", reqBody.ToString());
+
+
+                var response = client.SendAsync(request).Result;
+                var content = response.Content.ReadAsByteArrayAsync().Result;
+                return content;
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
+            }
 
         }
 
         public override string[] SaveNames()
         {
-            throw new NotImplementedException();
+            JObject reqBody = new JObject();
+            reqBody.Add("path", "");
+            reqBody.Add("include_non_downloadable_files", false);
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://api.dropboxapi.com/2/files/list_folder");
+            request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
+            request.Content = new StringContent(reqBody.ToString());
+            
+            var response = client.SendAsync(request).Result;
+            JObject responseObject = new JObject(response.Content.ToString());
+            JArray entries = (JArray)responseObject.GetValue("entries");
+            List<string> names = new List<string>();
+            foreach (JObject entry in entries)
+            {
+                var name = (string)entry.GetValue("name");
+                names.Add(name);
+            }
+
+            return names.ToArray();
         }
 
         public override bool ServerOnline()
@@ -86,7 +120,21 @@ namespace SaveDataSync.Servers
 
         public override void UploadSaveData(string name, byte[] data)
         {
-            throw new NotImplementedException();
+            string urlPath = "/" + name + ".zip"; // Stored on dropbox under this name
+            JObject reqBody = new JObject();
+            reqBody.Add("path", urlPath);
+            reqBody.Add("mode", "overwrite");
+            reqBody.Add("autorename", false);
+            reqBody.Add("mute", false);
+            reqBody.Add("strict_conflict", false);
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://content.dropboxapi.com/2/files/upload");
+            request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
+            request.Headers.Add("Dropbox-API-Arg", reqBody.ToString());
+            request.Content = new ByteArrayContent(data);
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+
+            client.SendAsync(request);
         }
 
         private string GetBearerKey()
