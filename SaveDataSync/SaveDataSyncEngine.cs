@@ -88,7 +88,7 @@ namespace SaveDataSync
                     }
                     else
                     {
-                        var response = MessageBox.Show("Save file/folder does not exist for " + save + ". Would you like to continue  exporting other files?",
+                        var response = MessageBox.Show("Save file/folder does not exist for " + save + ". Would you like to continue exporting other files?",
                                 "Warning",
                                 MessageBoxButtons.YesNo,
                                 MessageBoxIcon.Warning);

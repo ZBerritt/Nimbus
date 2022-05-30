@@ -70,7 +70,7 @@ namespace SaveDataSync
 
             private void Create(string path)
             {
-                FolderPath = path; 
+                FolderPath = path;
                 Directory.CreateDirectory(FolderPath);
             }
 
@@ -95,6 +95,20 @@ namespace SaveDataSync
             }
 
             return files.ToArray();
+        }
+
+        // Human readable file sizes (10 B, 30 MB, etc)
+        public static string ReadableFileSize(long size)
+        {
+            string[] sizes = { "B", "kB", "MB", "GB", "TB" };
+            int order = 0;
+            while (size >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                size /= 1024;
+            }
+
+            return string.Format("{0:0.##} {1}", size, sizes[order]);
         }
     }
 }

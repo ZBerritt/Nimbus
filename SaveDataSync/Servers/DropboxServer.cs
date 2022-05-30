@@ -20,7 +20,7 @@ namespace SaveDataSync.Servers
         private string bearerKey; // The acual key used to make requests
         private string refreshKey; // A key used to refresh the bearer key when expires
         private DateTime expires; // When the bearer key expires
-        private string apiKey; // Does nothing
+        private readonly string apiKey; // Does nothing honestly
 
         public DropboxServer(string bearerKey, string refreshKey, DateTime expires, string apiKey)
         {
@@ -119,18 +119,17 @@ namespace SaveDataSync.Servers
             string urlPath = "/" + name + ".zip"; // Stored on dropbox under this name
             try
             {
-                JObject reqBody = new JObject();
-                reqBody.Add("path", urlPath);
+                JObject reqBody = new JObject
+                {
+                    { "path", urlPath }
+                };
                 string body = reqBody.ToString().Replace("\n", "\n "); // Add a whitespace after line breaks because it doesn't do that for us
                 var request = new HttpRequestMessage(HttpMethod.Post, "https://content.dropboxapi.com/2/files/download");
                 request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
                 request.Headers.Add("Dropbox-API-Arg", body);
 
                 var response = client.SendAsync(request).Result;
-                if (response.StatusCode == HttpStatusCode.Conflict)
-                {
-                    return null;
-                }
+                if (response.StatusCode == HttpStatusCode.Conflict) return null; // Return nothing if the server errors
                 var content = response.Content.ReadAsByteArrayAsync().Result;
                 return content;
             }
@@ -189,12 +188,14 @@ namespace SaveDataSync.Servers
         public override void UploadSaveData(string name, byte[] data)
         {
             string urlPath = "/" + name + ".zip"; // Stored on dropbox under this name
-            JObject reqBody = new JObject();
-            reqBody.Add("path", urlPath);
-            reqBody.Add("mode", "overwrite");
-            reqBody.Add("autorename", false);
-            reqBody.Add("mute", false);
-            reqBody.Add("strict_conflict", false);
+            JObject reqBody = new JObject
+            {
+                { "path", urlPath },
+                { "mode", "overwrite" },
+                { "autorename", false },
+                { "mute", false },
+                { "strict_conflict", false }
+            };
 
             var request = new HttpRequestMessage(HttpMethod.Post, "https://content.dropboxapi.com/2/files/upload");
             request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
