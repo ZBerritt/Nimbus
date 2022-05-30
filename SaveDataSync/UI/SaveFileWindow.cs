@@ -6,27 +6,32 @@ namespace SaveDataSync
 {
     internal partial class SaveFileWindow : Form
     {
-
         private SaveDataSyncEngine engine;
+
         public SaveFileWindow(SaveDataSyncEngine engine)
         {
             this.engine = engine;
             InitializeComponent();
         }
 
+        public static string ImportWindow(SaveFileWindow window, string name)
+        {
+            window.nameTextBox.Text = name;
+            window.nameTextBox.ReadOnly = true;
+            window.ShowDialog();
+            return window.locationTextBox.Text; // Preform all validation checks outside of the function
+        }
+
         private void folderBrowserDialog1_HelpRequest(object sender, EventArgs e)
         {
-
         }
 
         private void SaveFileWindow_Load(object sender, EventArgs e)
         {
-
         }
 
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-
         }
 
         private void BrowseButton_Click(object sender, EventArgs e)
@@ -45,7 +50,6 @@ namespace SaveDataSync
                     locationTextBox.Text = folderBrowser.SelectedPath;
                 }
             }
-
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
@@ -69,6 +73,5 @@ namespace SaveDataSync
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
     }
 }
