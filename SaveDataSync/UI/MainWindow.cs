@@ -208,12 +208,15 @@ namespace SaveDataSync
                         List<string> savesToExport = GetSelectedSaves(true);
                         using (var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToExport.Count))
                         {
-                            engine.ExportSaves(savesToExport.ToArray(), progressBar);
+                            var success = engine.ExportSaves(savesToExport.ToArray(), progressBar);
+                            if (success.Length != 0)
+                            {
+                                MessageBox.Show("Successfully Exported:\n- " + string.Join("\n- ", success),
+                                "Success!",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information);
+                            }
                         }
-                        MessageBox.Show("Successfully Exported:\n- " + string.Join("\n- ", savesToExport),
-                            "Success!",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information);
                     }
                     catch (Exception ex)
                     {
@@ -234,12 +237,15 @@ namespace SaveDataSync
                     List<string> savesToImport = GetSelectedSaves(false);
                     using (var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToImport.Count))
                     {
-                        engine.ImportSaves(savesToImport.ToArray(), progressBar);
+                        var success = engine.ImportSaves(savesToImport.ToArray(), progressBar);
+                        if (success.Length != 0)
+                        {
+                            MessageBox.Show("Successfully Imported:\n- " + string.Join("\n- ", success),
+                                "Success!",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information);
+                        }
                     }
-                    MessageBox.Show("Successfully Imported:\n- " + string.Join("\n- ", savesToImport),
-                        "Success!",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {

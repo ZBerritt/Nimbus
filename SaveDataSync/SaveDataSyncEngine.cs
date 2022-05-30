@@ -62,9 +62,10 @@ namespace SaveDataSync
             Save();
         }
 
-        // TODO: Return the successful exports (and imports :p)
-        public void ExportSaves(string[] saves, ProgressBarControl progress)
+        // Returns all files successfully exported
+        public string[] ExportSaves(string[] saves, ProgressBarControl progress)
         {
+            var success = new List<string>();
             foreach (string save in saves)
             {
                 progress.Increment("Exporting '" + save + "'");
@@ -83,7 +84,7 @@ namespace SaveDataSync
                             "Warning",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Warning);
-                        return;
+                        return success.ToArray();
                     }
                     else
                     {
@@ -91,7 +92,7 @@ namespace SaveDataSync
                                 "Warning",
                                 MessageBoxButtons.YesNo,
                                 MessageBoxIcon.Warning);
-                        if (response == DialogResult.No) return; // Abort on pressing no
+                        if (response == DialogResult.No) return success.ToArray(); // Abort on pressing no
                         continue;
                     }
                 }
@@ -105,7 +106,7 @@ namespace SaveDataSync
                             "Warning",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Warning);
-                        return;
+                        return success.ToArray();
                     }
                     else
                     {
@@ -113,16 +114,20 @@ namespace SaveDataSync
                             "Warning",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Warning);
-                        if (response == DialogResult.No) return; // Abort on pressing no
+                        if (response == DialogResult.No) return success.ToArray(); // Abort on pressing no
                         continue;
                     }
                 }
                 server.UploadSaveData(save, zipData);
+                success.Add(save);
             }
+
+            return success.ToArray();
         }
 
-        public void ImportSaves(string[] saves, ProgressBarControl progress)
+        public string[] ImportSaves(string[] saves, ProgressBarControl progress)
         {
+            var success = new List<string>();
             foreach (string save in saves)
             {
                 progress.Increment("Importing '" + save + "'");
@@ -135,7 +140,6 @@ namespace SaveDataSync
                     };
                     string location = SaveFileWindow.ImportWindow(prompt, save);
                     if (location == "") throw new Exception("Import aborted by user!");
-                    Console.WriteLine(location);
                 }
 
                 var saveLocation = localSaveList.GetSavePath(save);
@@ -145,7 +149,6 @@ namespace SaveDataSync
                 {
                     var tempFile = tmpFile.FilePath;
                     var tempDir = tmpDir.FolderPath;
-                    Directory.CreateDirectory(tempDir);
                     File.WriteAllBytes(tempFile, remoteZipData);
                     FastZip fastZip = new FastZip();
                     fastZip.ExtractZip(tempFile, tempDir, null);
@@ -158,12 +161,12 @@ namespace SaveDataSync
                         // Handle as a dir
                         foreach (string dir in Directory.GetDirectories(saveContent, "*", SearchOption.AllDirectories))
                         {
-                            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir.Replace(saveContent, saveLocation));
+                            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir.Replace(saveContent, saveLocation)); // Add all dirs
                         }
 
                         foreach (string file in Directory.GetFiles(saveContent, "*", SearchOption.AllDirectories))
                         {
-                            File.Copy(file, file.Replace(saveContent, saveLocation), true);
+                            File.Copy(file, file.Replace(saveContent, saveLocation), true); // Add all files
                         }
                     }
                     else
@@ -171,8 +174,12 @@ namespace SaveDataSync
                         // Handle as a file
                         File.Copy(saveContent, saveLocation, true);
                     }
+
+                    success.Add(save);
                 }
             }
+
+            return success.ToArray();
         }
 
         public void Save()
