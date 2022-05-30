@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SaveDataSync.UI;
+using System;
 
 namespace SaveDataSync
 {
@@ -57,12 +58,15 @@ namespace SaveDataSync
             Save();
         }
 
-        public void ExportSaves(string[] saves)
+        public void ExportSaves(string[] saves, ProgressBarControl progress)
         {
-            Console.WriteLine("Exporting {0}", string.Join(", ", saves));
+            foreach (string save in saves)
+            {
+                progress.Increment("Exporting '" + save + "'");
+            }
         }
 
-        public void ImportSaves(string[] saves)
+        public void ImportSaves(string[] saves, ProgressBarControl progress)
         {
             Console.WriteLine("Importing {0}", string.Join(", ", saves));
         }

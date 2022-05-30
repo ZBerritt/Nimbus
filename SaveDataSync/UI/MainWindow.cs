@@ -206,11 +206,18 @@ namespace SaveDataSync
                     try
                     {
                         List<string> savesToExport = GetSelectedSaves(true);
-                        engine.ExportSaves(savesToExport.ToArray());
+                        using (var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToExport.Count))
+                        {
+                            engine.ExportSaves(savesToExport.ToArray(), progressBar);
+                        }
+                        MessageBox.Show("Successfully Exported:\n- " + string.Join("\n- ", savesToExport),
+                            "Success!",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        MessageBox.Show("Cannot export remote files (you know better than that :P)", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("An erorr has occured: " + ex.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 };
             }
@@ -218,8 +225,22 @@ namespace SaveDataSync
             var quickImport = menu.Items.Add("Quick Import");
             quickImport.Click += (object sender4, EventArgs e4) =>
             {
-                List<string> savesToImport = GetSelectedSaves(false);
-                engine.ImportSaves(savesToImport.ToArray());
+                try
+                {
+                    List<string> savesToImport = GetSelectedSaves(false);
+                    using (var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToImport.Count))
+                    {
+                        engine.ImportSaves(savesToImport.ToArray(), progressBar);
+                    }
+                    MessageBox.Show("Successfully Imported:\n- " + string.Join("\n- ", savesToImport),
+                        "Success!",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("An erorr has occured: " + ex.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             };
 
             if (!hasRemote)
@@ -258,7 +279,7 @@ namespace SaveDataSync
             List<string> saves = new List<string>();
             foreach (ListViewItem item in selected)
             {
-                if (noRemote && item.SubItems[1].Text == "Remote") throw new Exception();
+                if (noRemote && item.SubItems[1].Text == "Remote") throw new Exception("Remote save detected");
                 saves.Add(item.SubItems[0].Text); // The first sub item will always be the name
             }
 
