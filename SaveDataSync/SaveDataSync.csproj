@@ -105,6 +105,7 @@
     <Compile Include="FileUtils.cs" />
     <Compile Include="OAuthToken.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="UI\SaveListSorter.cs" />
     <Compile Include="UI\ServerSettings.cs">
       <SubType>Form</SubType>
     </Compile>
