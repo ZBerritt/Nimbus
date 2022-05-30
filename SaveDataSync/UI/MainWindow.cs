@@ -1,5 +1,6 @@
 ﻿using SaveDataSync.UI;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -156,7 +157,6 @@ namespace SaveDataSync
             {
                 var selectedItem = saveFileList.FocusedItem;
                 if (selectedItem == null) return;
-                Console.WriteLine("Open context menu.");
                 SaveFileContextMenu(selectedItem.Text).Show(saveFileList, new Point(e.X, e.Y));
 
             }
@@ -175,13 +175,17 @@ namespace SaveDataSync
             var quickExport = menu.Items.Add("Quick Export");
             quickExport.Click += (object sender3, EventArgs e3) =>
             {
-                throw new NotImplementedException();
+                var savesToExport = GetSelectedSaves();
+
+                savesToExport.ForEach(i => Console.WriteLine("Export: {0}", i));
             };
 
             var quickImport = menu.Items.Add("Quick Import");
-            quickExport.Click += (object sender4, EventArgs e4) =>
+            quickImport.Click += (object sender4, EventArgs e4) =>
             {
-                throw new NotImplementedException();
+                var savesToImport = GetSelectedSaves();
+
+                savesToImport.ForEach(i => Console.WriteLine("Import: {0}", i));
             };
 
             var removeSave = menu.Items.Add("Remove Save");
@@ -209,6 +213,19 @@ namespace SaveDataSync
                 var url = "http://" + host.Text;
                 Process.Start(url);
             } catch (Exception) { }
+        }
+
+
+        private List<string> GetSelectedSaves()
+        {
+            var selected = saveFileList.SelectedItems;
+            List<string> saves = new List<string>();
+            foreach (ListViewItem item in selected)
+            {
+                saves.Add(item.SubItems[0].Text); // The first sub item will always be the name
+            }
+
+            return saves;
         }
     }
 }
