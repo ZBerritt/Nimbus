@@ -49,24 +49,18 @@ namespace SaveDataSync
                 saveItem.SubItems.Add(save.Value);
 
                 // Get file size
-                try
+                if (!File.Exists(save.Value) && !Directory.Exists(save.Value))
+                {
+                    saveItem.SubItems.Add("N/A");
+                }
+                else
                 {
                     FileAttributes attr = File.GetAttributes(save.Value);
                     long saveSize = attr.HasFlag(FileAttributes.Directory)
                         ? new DirectoryInfo(save.Value).EnumerateFiles("*.*", SearchOption.AllDirectories).Sum(fi => fi.Length)
                         : new FileInfo(save.Value).Length; // The size of the file/folder in bytes
-                    string[] sizes = { "Bytes", "kB", "MB", "GB", "TB" };
-                    int order = 0;
-                    while (saveSize >= 1024 && order < sizes.Length - 1)
-                    {
-                        order++;
-                        saveSize = saveSize / 1024;
-                    }
-                    saveItem.SubItems.Add(string.Format("{0:0.##} {1}", saveSize, sizes[order]));
-                }
-                catch (Exception)
-                {
-                    saveItem.SubItems.Add("N/A");
+                    string readableSize = FileUtils.ReadableFileSize(saveSize);
+                    saveItem.SubItems.Add(readableSize);
                 }
 
                 // Get file sync status

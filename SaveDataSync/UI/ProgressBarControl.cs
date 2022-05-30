@@ -25,7 +25,17 @@ namespace SaveDataSync.UI
             return new ProgressBarControl(progressBar, label, steps);
         }
 
+        ~ProgressBarControl()
+        {
+            Clear();
+        }
+
         public void Dispose()
+        {
+            Clear();
+        }
+
+        public void Clear()
         {
             progressBar.Value = 0;
             label.Text = "";
