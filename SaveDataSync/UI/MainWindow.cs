@@ -77,6 +77,7 @@ namespace SaveDataSync
             var server = engine.GetServer();
             string serverType = "None";
             string status = "N/A";
+            Color statusColor = Color.Black;
             string serverHost = "N/A";
             if (server != null)
             {
@@ -86,10 +87,12 @@ namespace SaveDataSync
                 {   
                     var serverOnline = server.ServerOnline();
                     status = serverOnline ? "Online" : "Offline";
+                    statusColor = serverOnline ? Color.Green : Color.Gold;
                 }
                 catch (Exception)
                 {
                     status = "Error";
+                    statusColor = Color.Red;
                 }
             }
 
@@ -97,6 +100,7 @@ namespace SaveDataSync
             type.Text = serverType;
             host.Text = serverHost;
             serverStatus.Text = status;
+            serverStatus.ForeColor = statusColor;
         }
 
         // Click Events
@@ -119,6 +123,18 @@ namespace SaveDataSync
                 ShowInTaskbar = true
             };
             sw.ShowDialog();
+            ReloadUI();
+        }
+
+
+        private void serverSettingsBtn_Click(object sender, EventArgs e)
+        {
+            ServerSettings ss = new ServerSettings(engine)
+            {
+                Owner = this,
+                ShowInTaskbar = true
+            };
+            ss.ShowDialog();
             ReloadUI();
         }
 
@@ -188,7 +204,11 @@ namespace SaveDataSync
 
         private void label2_Click(object sender, EventArgs e)
         {
-
+            try
+            {
+                var url = "http://" + host.Text;
+                Process.Start(url);
+            } catch (Exception) { }
         }
     }
 }
