@@ -36,6 +36,7 @@ namespace SaveDataSync
         public void SetSettings(Settings settings)
         {
             this.settings = settings;
+            Save();
         }
 
         public Server GetServer()
@@ -46,6 +47,7 @@ namespace SaveDataSync
         public void SetServer(Server server)
         {
             this.server = server;
+            Save();
         }
 
         // Button actions

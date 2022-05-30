@@ -6,6 +6,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Net.Http.Headers;
+using System.Net.Sockets;
+using System.Net;
+using System.IO;
 
 namespace SaveDataSync.Servers
 {
@@ -18,12 +21,14 @@ namespace SaveDataSync.Servers
         private string bearerKey; // The acual key used to make requests
         private string refreshKey; // A key used to refresh the bearer key when expires
         private DateTime expires; // When the bearer key expires
+        private string apiKey; // Does nothing
 
-        public DropboxServer(string bearerKey, string refreshKey, DateTime expires)
+        public DropboxServer(string bearerKey, string refreshKey, DateTime expires, string apiKey)
         {
             this.bearerKey = bearerKey;
             this.refreshKey = refreshKey;
             this.expires = expires;
+            this.apiKey = apiKey;
         }
 
         public static DropboxServer Build(string apiKey, string verifier)
@@ -31,7 +36,7 @@ namespace SaveDataSync.Servers
             var values = new Dictionary<string, string>
             {
                 { "client_id", APP_ID },
-                { "redirect_uri", "http://localhost:1235/callback" },
+                { "redirect_uri", "http://localhost:1235" },
                 { "grant_type", "authorization_code"},
                 { "code", apiKey },
                 { "code_verifier", verifier },
@@ -41,10 +46,52 @@ namespace SaveDataSync.Servers
             var response = client.PostAsync("https://api.dropboxapi.com/oauth2/token", content).Result;
             var responseString = response.Content.ReadAsStringAsync().Result;
             JObject responseObject = JObject.Parse(responseString);
-            long expiresIn = long.Parse(responseObject.GetValue("expires_in").ToString());
-            string refresh = responseObject.GetValue("refresh_token").ToString();
-            string access = responseObject.GetValue("access_token").ToString();
-            return new DropboxServer(access, refresh, DateTime.Now.Add(TimeSpan.FromSeconds(expiresIn)));
+            Console.WriteLine(responseObject.ToString());
+            try
+            {
+                long expiresIn = long.Parse(responseObject.GetValue("expires_in").ToString());
+                string refresh = responseObject.GetValue("refresh_token").ToString();
+                string access = responseObject.GetValue("access_token").ToString();
+                return new DropboxServer(access, refresh, DateTime.Now.Add(TimeSpan.FromSeconds(expiresIn)), apiKey);
+            } catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        internal static string GetApiKey()
+        {
+            string key = null;
+            int port = 1235;
+            TcpListener listener = new TcpListener(IPAddress.Parse("127.0.0.01"), port);
+            listener.Start();
+
+            using (TcpClient client = listener.AcceptTcpClient())
+            using (NetworkStream stream = client.GetStream())
+            using (StreamWriter writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true })
+            using (StreamReader reader = new StreamReader(stream, Encoding.ASCII))
+            {
+                while (key == null)
+                {
+                    try
+                    {
+                        string inputLine = reader.ReadLine(); // First line contains the request
+                        if (inputLine.Contains("code=")) {
+                            string substring = inputLine.Substring(inputLine.IndexOf("code=") + "code=".Length);
+                            key = substring.Substring(0, substring.IndexOf(" "));
+                            var response = Encoding.ASCII.GetBytes("Key obtained! You may now close this tab!");
+                            client.Client.Send(response);
+                        }
+                    } 
+                    catch (Exception)
+                    {
+                        var response = Encoding.ASCII.GetBytes("Some error has occured, please try again...");
+                        return null;
+                    }
+            }
+
+             return key;
+            }
         }
 
         public static DropboxServer BuildFromJson(JObject json)
@@ -52,7 +99,8 @@ namespace SaveDataSync.Servers
             string bearer = (string)json.GetValue("bearerKey");
             string refresh = (string)json.GetValue("refreshKey");
             DateTime expires = (DateTime)json.GetValue("expires");
-            return new DropboxServer(bearer, refresh, expires);
+            string apiKey = (string)json.GetValue("apiKey");
+            return new DropboxServer(bearer, refresh, expires, apiKey);
 
         }
         public override string Name()
@@ -111,11 +159,17 @@ namespace SaveDataSync.Servers
 
         public override bool ServerOnline()
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "https://api.dropboxapi.com/2/check/user");
-            request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
-            request.Content = new StringContent("{\"query\": \"verify\"}", Encoding.UTF8, "application/json");
-            var response = client.SendAsync(request).Result;
-            return response.StatusCode == System.Net.HttpStatusCode.OK;
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://api.dropboxapi.com/2/check/user");
+                request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
+                request.Content = new StringContent("{\"query\": \"verify\"}", Encoding.UTF8, "application/json");
+                var response = client.SendAsync(request).Result;
+                return response.StatusCode == System.Net.HttpStatusCode.OK;
+            } catch (AggregateException)
+            {
+                return false;
+            }
         }
 
         public override void UploadSaveData(string name, byte[] data)
@@ -190,11 +244,19 @@ namespace SaveDataSync.Servers
 
         public override JObject ToJson()
         {
-            JObject json = new JObject();
-            json.Add("bearerKey", bearerKey);
-            json.Add("refreshKey", refreshKey);
-            json.Add("expires", expires);
+            JObject json = new JObject
+            {
+                { "bearerKey", bearerKey },
+                { "refreshKey", refreshKey },
+                { "expires", expires },
+                { "apiKey", apiKey }
+            };
             return json;
+        }
+
+        public string GetServerApiKey()
+        {
+            return apiKey;
         }
     }
 }

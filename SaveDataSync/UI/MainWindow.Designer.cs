@@ -45,6 +45,7 @@
             this.type = new System.Windows.Forms.Label();
             this.serverStatus = new System.Windows.Forms.Label();
             this.host = new System.Windows.Forms.Label();
+            this.serverSettingsBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // importButton
@@ -154,7 +155,7 @@
             // 
             this.typeTitle.AutoSize = true;
             this.typeTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.typeTitle.Location = new System.Drawing.Point(454, 51);
+            this.typeTitle.Location = new System.Drawing.Point(467, 51);
             this.typeTitle.Name = "typeTitle";
             this.typeTitle.Size = new System.Drawing.Size(60, 25);
             this.typeTitle.TabIndex = 10;
@@ -164,7 +165,7 @@
             // 
             this.hostTitle.AutoSize = true;
             this.hostTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.hostTitle.Location = new System.Drawing.Point(454, 99);
+            this.hostTitle.Location = new System.Drawing.Point(467, 99);
             this.hostTitle.Name = "hostTitle";
             this.hostTitle.Size = new System.Drawing.Size(56, 25);
             this.hostTitle.TabIndex = 11;
@@ -174,7 +175,7 @@
             // 
             this.statusTitle.AutoSize = true;
             this.statusTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.statusTitle.Location = new System.Drawing.Point(454, 146);
+            this.statusTitle.Location = new System.Drawing.Point(467, 146);
             this.statusTitle.Name = "statusTitle";
             this.statusTitle.Size = new System.Drawing.Size(73, 25);
             this.statusTitle.TabIndex = 12;
@@ -184,7 +185,7 @@
             // 
             this.type.AutoSize = true;
             this.type.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.type.Location = new System.Drawing.Point(660, 52);
+            this.type.Location = new System.Drawing.Point(637, 52);
             this.type.Name = "type";
             this.type.Size = new System.Drawing.Size(57, 24);
             this.type.TabIndex = 13;
@@ -194,7 +195,7 @@
             // 
             this.serverStatus.AutoSize = true;
             this.serverStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.serverStatus.Location = new System.Drawing.Point(659, 146);
+            this.serverStatus.Location = new System.Drawing.Point(636, 146);
             this.serverStatus.Name = "serverStatus";
             this.serverStatus.Size = new System.Drawing.Size(19, 25);
             this.serverStatus.TabIndex = 15;
@@ -204,18 +205,29 @@
             // 
             this.host.AutoSize = true;
             this.host.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.host.Location = new System.Drawing.Point(659, 99);
+            this.host.Location = new System.Drawing.Point(636, 99);
             this.host.Name = "host";
             this.host.Size = new System.Drawing.Size(19, 25);
             this.host.TabIndex = 16;
             this.host.Text = "-";
             this.host.Click += new System.EventHandler(this.label2_Click);
             // 
+            // serverSettingsBtn
+            // 
+            this.serverSettingsBtn.Location = new System.Drawing.Point(468, 174);
+            this.serverSettingsBtn.Name = "serverSettingsBtn";
+            this.serverSettingsBtn.Size = new System.Drawing.Size(238, 23);
+            this.serverSettingsBtn.TabIndex = 17;
+            this.serverSettingsBtn.Text = "Manage Server";
+            this.serverSettingsBtn.UseVisualStyleBackColor = true;
+            this.serverSettingsBtn.Click += new System.EventHandler(this.serverSettingsBtn_Click);
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.serverSettingsBtn);
             this.Controls.Add(this.host);
             this.Controls.Add(this.serverStatus);
             this.Controls.Add(this.type);
@@ -257,6 +269,7 @@
         private System.Windows.Forms.Label type;
         private System.Windows.Forms.Label serverStatus;
         private System.Windows.Forms.Label host;
+        private System.Windows.Forms.Button serverSettingsBtn;
     }
 }
 
