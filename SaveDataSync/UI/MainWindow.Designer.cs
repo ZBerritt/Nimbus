@@ -46,11 +46,12 @@
             this.serverStatus = new System.Windows.Forms.Label();
             this.host = new System.Windows.Forms.Label();
             this.serverSettingsBtn = new System.Windows.Forms.Button();
+            this.progressLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // importButton
             // 
-            this.importButton.Location = new System.Drawing.Point(671, 414);
+            this.importButton.Location = new System.Drawing.Point(671, 397);
             this.importButton.Name = "importButton";
             this.importButton.Size = new System.Drawing.Size(148, 23);
             this.importButton.TabIndex = 1;
@@ -60,7 +61,7 @@
             // 
             // exportButton
             // 
-            this.exportButton.Location = new System.Drawing.Point(521, 414);
+            this.exportButton.Location = new System.Drawing.Point(521, 397);
             this.exportButton.Name = "exportButton";
             this.exportButton.Size = new System.Drawing.Size(148, 23);
             this.exportButton.TabIndex = 4;
@@ -70,7 +71,7 @@
             // 
             // newSaveFileButton
             // 
-            this.newSaveFileButton.Location = new System.Drawing.Point(521, 373);
+            this.newSaveFileButton.Location = new System.Drawing.Point(521, 356);
             this.newSaveFileButton.Name = "newSaveFileButton";
             this.newSaveFileButton.Size = new System.Drawing.Size(298, 35);
             this.newSaveFileButton.TabIndex = 5;
@@ -80,7 +81,7 @@
             // 
             // mainProgressBar
             // 
-            this.mainProgressBar.Location = new System.Drawing.Point(465, 469);
+            this.mainProgressBar.Location = new System.Drawing.Point(465, 452);
             this.mainProgressBar.Name = "mainProgressBar";
             this.mainProgressBar.Size = new System.Drawing.Size(402, 23);
             this.mainProgressBar.TabIndex = 6;
@@ -99,7 +100,7 @@
             // 
             // settingsButton
             // 
-            this.settingsButton.Location = new System.Drawing.Point(521, 440);
+            this.settingsButton.Location = new System.Drawing.Point(521, 423);
             this.settingsButton.Name = "settingsButton";
             this.settingsButton.Size = new System.Drawing.Size(298, 23);
             this.settingsButton.TabIndex = 8;
@@ -220,11 +221,22 @@
             this.serverSettingsBtn.UseVisualStyleBackColor = true;
             this.serverSettingsBtn.Click += new System.EventHandler(this.serverSettingsBtn_Click);
             // 
+            // progressLabel
+            // 
+            this.progressLabel.AutoSize = true;
+            this.progressLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.progressLabel.Location = new System.Drawing.Point(669, 479);
+            this.progressLabel.Name = "progressLabel";
+            this.progressLabel.Size = new System.Drawing.Size(0, 16);
+            this.progressLabel.TabIndex = 18;
+            this.progressLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(872, 504);
+            this.Controls.Add(this.progressLabel);
             this.Controls.Add(this.serverSettingsBtn);
             this.Controls.Add(this.host);
             this.Controls.Add(this.serverStatus);
@@ -268,6 +280,7 @@
         private System.Windows.Forms.Label serverStatus;
         private System.Windows.Forms.Label host;
         private System.Windows.Forms.Button serverSettingsBtn;
+        private System.Windows.Forms.Label progressLabel;
     }
 }
 

@@ -10,6 +10,7 @@ namespace SaveDataSync.UI
 {
     internal class SaveListSorter : IComparer
     {
+        // Sort remote saves below local saves
         public int Compare(object x, object y)
         {
             ListViewItem item1 = (ListViewItem)x;
