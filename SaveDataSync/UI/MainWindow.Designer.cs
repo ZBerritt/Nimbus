@@ -54,7 +54,7 @@
             this.importButton.Name = "importButton";
             this.importButton.Size = new System.Drawing.Size(148, 23);
             this.importButton.TabIndex = 1;
-            this.importButton.Text = "Import All";
+            this.importButton.Text = "Import";
             this.importButton.UseVisualStyleBackColor = true;
             this.importButton.Click += new System.EventHandler(this.Import_Click);
             // 
@@ -64,7 +64,7 @@
             this.exportButton.Name = "exportButton";
             this.exportButton.Size = new System.Drawing.Size(148, 23);
             this.exportButton.TabIndex = 4;
-            this.exportButton.Text = "Export All";
+            this.exportButton.Text = "Export";
             this.exportButton.UseVisualStyleBackColor = true;
             this.exportButton.Click += new System.EventHandler(this.Export_Click);
             // 
@@ -124,7 +124,6 @@
             this.saveFileList.Location = new System.Drawing.Point(12, 12);
             this.saveFileList.Name = "saveFileList";
             this.saveFileList.Size = new System.Drawing.Size(447, 480);
-            this.saveFileList.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.saveFileList.TabIndex = 9;
             this.saveFileList.UseCompatibleStateImageBehavior = false;
             this.saveFileList.View = System.Windows.Forms.View.Details;
