@@ -50,7 +50,7 @@
             // 
             // importButton
             // 
-            this.importButton.Location = new System.Drawing.Point(592, 360);
+            this.importButton.Location = new System.Drawing.Point(671, 414);
             this.importButton.Name = "importButton";
             this.importButton.Size = new System.Drawing.Size(148, 23);
             this.importButton.TabIndex = 1;
@@ -60,7 +60,7 @@
             // 
             // exportButton
             // 
-            this.exportButton.Location = new System.Drawing.Point(442, 360);
+            this.exportButton.Location = new System.Drawing.Point(521, 414);
             this.exportButton.Name = "exportButton";
             this.exportButton.Size = new System.Drawing.Size(148, 23);
             this.exportButton.TabIndex = 4;
@@ -70,7 +70,7 @@
             // 
             // newSaveFileButton
             // 
-            this.newSaveFileButton.Location = new System.Drawing.Point(442, 319);
+            this.newSaveFileButton.Location = new System.Drawing.Point(521, 373);
             this.newSaveFileButton.Name = "newSaveFileButton";
             this.newSaveFileButton.Size = new System.Drawing.Size(298, 35);
             this.newSaveFileButton.TabIndex = 5;
@@ -80,7 +80,7 @@
             // 
             // mainProgressBar
             // 
-            this.mainProgressBar.Location = new System.Drawing.Point(386, 415);
+            this.mainProgressBar.Location = new System.Drawing.Point(465, 469);
             this.mainProgressBar.Name = "mainProgressBar";
             this.mainProgressBar.Size = new System.Drawing.Size(402, 23);
             this.mainProgressBar.TabIndex = 6;
@@ -90,7 +90,7 @@
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.ForeColor = System.Drawing.Color.Black;
-            this.label1.Location = new System.Drawing.Point(498, 9);
+            this.label1.Location = new System.Drawing.Point(577, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(179, 31);
             this.label1.TabIndex = 7;
@@ -99,7 +99,7 @@
             // 
             // settingsButton
             // 
-            this.settingsButton.Location = new System.Drawing.Point(442, 386);
+            this.settingsButton.Location = new System.Drawing.Point(521, 440);
             this.settingsButton.Name = "settingsButton";
             this.settingsButton.Size = new System.Drawing.Size(298, 23);
             this.settingsButton.TabIndex = 8;
@@ -123,7 +123,7 @@
             this.saveFileList.LabelWrap = false;
             this.saveFileList.Location = new System.Drawing.Point(12, 12);
             this.saveFileList.Name = "saveFileList";
-            this.saveFileList.Size = new System.Drawing.Size(368, 426);
+            this.saveFileList.Size = new System.Drawing.Size(447, 480);
             this.saveFileList.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.saveFileList.TabIndex = 9;
             this.saveFileList.UseCompatibleStateImageBehavior = false;
@@ -133,7 +133,7 @@
             // name
             // 
             this.name.Text = "Name";
-            this.name.Width = 70;
+            this.name.Width = 120;
             // 
             // location
             // 
@@ -154,7 +154,7 @@
             // 
             this.typeTitle.AutoSize = true;
             this.typeTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.typeTitle.Location = new System.Drawing.Point(467, 51);
+            this.typeTitle.Location = new System.Drawing.Point(546, 51);
             this.typeTitle.Name = "typeTitle";
             this.typeTitle.Size = new System.Drawing.Size(60, 25);
             this.typeTitle.TabIndex = 10;
@@ -164,7 +164,7 @@
             // 
             this.hostTitle.AutoSize = true;
             this.hostTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.hostTitle.Location = new System.Drawing.Point(467, 99);
+            this.hostTitle.Location = new System.Drawing.Point(546, 99);
             this.hostTitle.Name = "hostTitle";
             this.hostTitle.Size = new System.Drawing.Size(56, 25);
             this.hostTitle.TabIndex = 11;
@@ -174,7 +174,7 @@
             // 
             this.statusTitle.AutoSize = true;
             this.statusTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.statusTitle.Location = new System.Drawing.Point(467, 146);
+            this.statusTitle.Location = new System.Drawing.Point(546, 146);
             this.statusTitle.Name = "statusTitle";
             this.statusTitle.Size = new System.Drawing.Size(73, 25);
             this.statusTitle.TabIndex = 12;
@@ -184,7 +184,7 @@
             // 
             this.type.AutoSize = true;
             this.type.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.type.Location = new System.Drawing.Point(637, 52);
+            this.type.Location = new System.Drawing.Point(716, 52);
             this.type.Name = "type";
             this.type.Size = new System.Drawing.Size(57, 24);
             this.type.TabIndex = 13;
@@ -194,7 +194,7 @@
             // 
             this.serverStatus.AutoSize = true;
             this.serverStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.serverStatus.Location = new System.Drawing.Point(636, 146);
+            this.serverStatus.Location = new System.Drawing.Point(715, 146);
             this.serverStatus.Name = "serverStatus";
             this.serverStatus.Size = new System.Drawing.Size(19, 25);
             this.serverStatus.TabIndex = 15;
@@ -204,7 +204,7 @@
             // 
             this.host.AutoSize = true;
             this.host.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.host.Location = new System.Drawing.Point(636, 99);
+            this.host.Location = new System.Drawing.Point(715, 99);
             this.host.Name = "host";
             this.host.Size = new System.Drawing.Size(19, 25);
             this.host.TabIndex = 16;
@@ -213,7 +213,7 @@
             // 
             // serverSettingsBtn
             // 
-            this.serverSettingsBtn.Location = new System.Drawing.Point(468, 174);
+            this.serverSettingsBtn.Location = new System.Drawing.Point(547, 174);
             this.serverSettingsBtn.Name = "serverSettingsBtn";
             this.serverSettingsBtn.Size = new System.Drawing.Size(238, 23);
             this.serverSettingsBtn.TabIndex = 17;
@@ -225,7 +225,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(872, 504);
             this.Controls.Add(this.serverSettingsBtn);
             this.Controls.Add(this.host);
             this.Controls.Add(this.serverStatus);
