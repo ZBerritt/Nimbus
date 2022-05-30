@@ -88,7 +88,7 @@ namespace SaveDataSync
                     }
                     else
                     {
-                        var response = MessageBox.Show("Save file/folder does not exist for " + save + ". Would you like to continue anyways?",
+                        var response = MessageBox.Show("Save file/folder does not exist for " + save + ". Would you like to continue  exporting other files?",
                                 "Warning",
                                 MessageBoxButtons.YesNo,
                                 MessageBoxIcon.Warning);
@@ -110,7 +110,7 @@ namespace SaveDataSync
                     }
                     else
                     {
-                        var response = MessageBox.Show("Save folder is empty for " + save + ". Would you like to continue anyways?",
+                        var response = MessageBox.Show("Save folder is empty for " + save + ". Would you like to continue exporting other files?",
                             "Warning",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Warning);
@@ -144,6 +144,26 @@ namespace SaveDataSync
 
                 var saveLocation = localSaveList.GetSavePath(save);
                 var remoteZipData = server.GetSaveData(save);
+                if (remoteZipData == null || remoteZipData.Length == 0)
+                {
+                    if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
+                    {
+                        MessageBox.Show("No remote save data found for " + save + ".",
+                            "Warning",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+                        return success.ToArray();
+                    }
+                    else
+                    {
+                        var response = MessageBox.Show("No remote save data found for " + save + ". Would you like to continue importing other files?",
+                            "Warning",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Warning);
+                        if (response == DialogResult.No) return success.ToArray(); // Abort on pressing no
+                        continue;
+                    }
+                }
                 using (var tmpFile = new FileUtils.TemporaryFile())
                 using (var tmpDir = new FileUtils.TemporaryFolder())
                 {
