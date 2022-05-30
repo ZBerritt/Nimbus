@@ -122,7 +122,6 @@
             this.saveFileList.LabelEdit = true;
             this.saveFileList.LabelWrap = false;
             this.saveFileList.Location = new System.Drawing.Point(12, 12);
-            this.saveFileList.MultiSelect = false;
             this.saveFileList.Name = "saveFileList";
             this.saveFileList.Size = new System.Drawing.Size(368, 426);
             this.saveFileList.Sorting = System.Windows.Forms.SortOrder.Ascending;
