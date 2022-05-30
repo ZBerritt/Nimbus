@@ -44,6 +44,44 @@ namespace SaveDataSync
             }
         }
 
+        public sealed class TemporaryFolder : IDisposable
+        {
+            public TemporaryFolder() :
+              this(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()))
+            { }
+
+            public TemporaryFolder(string directory)
+            {
+                Create(Path.Combine(directory, Path.GetRandomFileName()));
+            }
+
+            ~TemporaryFolder()
+            {
+                Delete();
+            }
+
+            public void Dispose()
+            {
+                Delete();
+                GC.SuppressFinalize(this);
+            }
+
+            public string FolderPath { get; private set; }
+
+            private void Create(string path)
+            {
+                FolderPath = path; 
+                Directory.CreateDirectory(FolderPath);
+            }
+
+            private void Delete()
+            {
+                if (FolderPath == null) return;
+                Directory.Delete(FolderPath, true);
+                FolderPath = null;
+            }
+        }
+
         public static string[] GetFileList(string directory)
         {
             List<string> files = new List<string>();
