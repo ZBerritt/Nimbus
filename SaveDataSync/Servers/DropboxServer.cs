@@ -1,14 +1,14 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Net.Http.Headers;
-using System.Net.Sockets;
-using System.Net;
-using System.IO;
 
 namespace SaveDataSync.Servers
 {
@@ -53,7 +53,8 @@ namespace SaveDataSync.Servers
                 string refresh = responseObject.GetValue("refresh_token").ToString();
                 string access = responseObject.GetValue("access_token").ToString();
                 return new DropboxServer(access, refresh, DateTime.Now.Add(TimeSpan.FromSeconds(expiresIn)), apiKey);
-            } catch (Exception)
+            }
+            catch (Exception)
             {
                 return null;
             }
@@ -76,21 +77,22 @@ namespace SaveDataSync.Servers
                     try
                     {
                         string inputLine = reader.ReadLine(); // First line contains the request
-                        if (inputLine.Contains("code=")) {
+                        if (inputLine.Contains("code="))
+                        {
                             string substring = inputLine.Substring(inputLine.IndexOf("code=") + "code=".Length);
                             key = substring.Substring(0, substring.IndexOf(" "));
                             var response = Encoding.ASCII.GetBytes("Key obtained! You may now close this tab!");
                             client.Client.Send(response);
                         }
-                    } 
+                    }
                     catch (Exception)
                     {
                         var response = Encoding.ASCII.GetBytes("Some error has occured, please try again...");
                         return null;
                     }
-            }
+                }
 
-             return key;
+                return key;
             }
         }
 
@@ -127,7 +129,8 @@ namespace SaveDataSync.Servers
                 var response = client.SendAsync(request).Result;
                 var content = response.Content.ReadAsByteArrayAsync().Result;
                 return content;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
                 return null;
@@ -143,7 +146,7 @@ namespace SaveDataSync.Servers
             var request = new HttpRequestMessage(HttpMethod.Post, "https://api.dropboxapi.com/2/files/list_folder");
             request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
             request.Content = new StringContent(reqBody.ToString());
-            
+
             var response = client.SendAsync(request).Result;
             JObject responseObject = new JObject(response.Content.ToString());
             JArray entries = (JArray)responseObject.GetValue("entries");
@@ -166,7 +169,8 @@ namespace SaveDataSync.Servers
                 request.Content = new StringContent("{\"query\": \"verify\"}", Encoding.UTF8, "application/json");
                 var response = client.SendAsync(request).Result;
                 return response.StatusCode == System.Net.HttpStatusCode.OK;
-            } catch (AggregateException)
+            }
+            catch (AggregateException)
             {
                 return false;
             }

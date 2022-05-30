@@ -62,7 +62,8 @@ namespace SaveDataSync
                         saveSize = saveSize / 1024;
                     }
                     saveItem.SubItems.Add(string.Format("{0:0.##} {1}", saveSize, sizes[order]));
-                } catch (Exception)
+                }
+                catch (Exception)
                 {
                     saveItem.SubItems.Add("N/A");
                 }
@@ -85,7 +86,7 @@ namespace SaveDataSync
                 serverType = server.Name();
                 serverHost = server.Host();
                 try
-                {   
+                {
                     var serverOnline = server.ServerOnline();
                     status = serverOnline ? "Online" : "Offline";
                     statusColor = serverOnline ? Color.Green : Color.Gold;
@@ -212,7 +213,8 @@ namespace SaveDataSync
             {
                 var url = "http://" + host.Text;
                 Process.Start(url);
-            } catch (Exception) { }
+            }
+            catch (Exception) { }
         }
 
 
