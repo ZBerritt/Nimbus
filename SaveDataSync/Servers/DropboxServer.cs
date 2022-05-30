@@ -127,6 +127,10 @@ namespace SaveDataSync.Servers
                 request.Headers.Add("Dropbox-API-Arg", body);
 
                 var response = client.SendAsync(request).Result;
+                if (response.StatusCode == HttpStatusCode.Conflict)
+                {
+                    return null;
+                }
                 var content = response.Content.ReadAsByteArrayAsync().Result;
                 return content;
             }
