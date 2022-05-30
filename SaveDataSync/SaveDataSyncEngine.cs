@@ -27,7 +27,7 @@ namespace SaveDataSync
         {
             return localSaveList;
         }
-        
+
         public Settings GetSettings()
         {
             return settings;

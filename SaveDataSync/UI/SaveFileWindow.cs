@@ -36,15 +36,16 @@ namespace SaveDataSync
                 if (openFile.ShowDialog() == DialogResult.OK)
                 {
                     locationTextBox.Text = openFile.FileName;
-                }  
-            } else
+                }
+            }
+            else
             {
                 if (folderBrowser.ShowDialog() == DialogResult.OK)
                 {
                     locationTextBox.Text = folderBrowser.SelectedPath;
                 }
             }
-           
+
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
@@ -62,7 +63,8 @@ namespace SaveDataSync
             {
                 engine.CreateSaveFile(name, location);
                 Close();
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }

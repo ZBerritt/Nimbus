@@ -138,7 +138,7 @@ namespace SaveDataSync
 
             using (FileStream localSettingsStream = File.Open(Path.Combine(location, "settings.json"), FileMode.Open))
             {
-               using (StreamReader sr = new StreamReader(localSettingsStream))
+                using (StreamReader sr = new StreamReader(localSettingsStream))
                 {
                     var content = sr.ReadToEnd();
                     JObject settingsData = JObject.Parse(content);
