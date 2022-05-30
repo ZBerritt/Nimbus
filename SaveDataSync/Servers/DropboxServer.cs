@@ -140,21 +140,28 @@ namespace SaveDataSync.Servers
 
         public override string[] SaveNames()
         {
-            JObject reqBody = new JObject();
-            reqBody.Add("path", "");
-            reqBody.Add("include_non_downloadable_files", false);
+            JObject reqBody = new JObject
+            {
+                { "path", "" },
+                { "include_has_explicit_shared_members", false },
+                { "recursive", false },
+                { "include_deleted", false },
+                { "include_non_downloadable_files", false }
+            };
             var request = new HttpRequestMessage(HttpMethod.Post, "https://api.dropboxapi.com/2/files/list_folder");
             request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
             request.Content = new StringContent(reqBody.ToString());
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var response = client.SendAsync(request).Result;
-            JObject responseObject = new JObject(response.Content.ToString());
+            var result = response.Content.ReadAsStringAsync().Result;
+            JObject responseObject = JObject.Parse(result);
             JArray entries = (JArray)responseObject.GetValue("entries");
             List<string> names = new List<string>();
             foreach (JObject entry in entries)
             {
                 var name = (string)entry.GetValue("name");
-                names.Add(name);
+                names.Add(name.Substring(0, name.Length - 4));
             }
 
             return names.ToArray();

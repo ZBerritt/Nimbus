@@ -32,6 +32,9 @@ namespace SaveDataSync
             // Auto sizes the last column of the save list
             saveFileList.Columns[saveFileList.Columns.Count - 1].Width = -2;
 
+            // Forces the save list to sort correctly
+            saveFileList.ListViewItemSorter = new SaveListSorter();
+
             // Loads the save list with the imported data from the engine
             ReloadUI();
         }
@@ -77,6 +80,7 @@ namespace SaveDataSync
 
             /* Check server status */
             var server = engine.GetServer();
+            bool serverOnline = false; // Defaulting to false, shouldn't matter though.
             string serverType = "None";
             string status = "N/A";
             Color statusColor = Color.Black;
@@ -87,7 +91,7 @@ namespace SaveDataSync
                 serverHost = server.Host();
                 try
                 {
-                    var serverOnline = server.ServerOnline();
+                    serverOnline = server.ServerOnline();
                     status = serverOnline ? "Online" : "Offline";
                     statusColor = serverOnline ? Color.Green : Color.Gold;
                 }
@@ -103,6 +107,23 @@ namespace SaveDataSync
             host.Text = serverHost;
             serverStatus.Text = status;
             serverStatus.ForeColor = statusColor;
+
+            /* Add remove save files */
+            if (server != null && serverOnline)
+            {
+                var remoteSaveNames = server.SaveNames();
+                var filtered = remoteSaveNames.Where(c => !new List<string>(engine.GetLocalSaveList().GetSaves().Keys).Contains(c)).ToList();
+                foreach (var save in filtered)
+                {
+                    ListViewItem saveItem = new ListViewItem(save);
+                    saveItem.ForeColor = Color.DarkRed;
+                    saveItem.SubItems.Add("Remote");
+                    saveItem.SubItems.Add("N/A");
+                    saveItem.SubItems.Add("On Server");
+                    saveFileList.Items.Add(saveItem);
+                }
+
+            }
         }
 
         // Click Events
@@ -176,15 +197,20 @@ namespace SaveDataSync
             var quickExport = menu.Items.Add("Quick Export");
             quickExport.Click += (object sender3, EventArgs e3) =>
             {
-                var savesToExport = GetSelectedSaves();
-
-                savesToExport.ForEach(i => Console.WriteLine("Export: {0}", i));
+                try
+                {
+                    var savesToExport = GetSelectedSaves(true);
+                    savesToExport.ForEach(i => Console.WriteLine("Export: {0}", i));
+                } catch (Exception)
+                {
+                    MessageBox.Show("Cannot export remote files (you know better than that :P)", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             };
 
             var quickImport = menu.Items.Add("Quick Import");
             quickImport.Click += (object sender4, EventArgs e4) =>
             {
-                var savesToImport = GetSelectedSaves();
+                var savesToImport = GetSelectedSaves(false);
 
                 savesToImport.ForEach(i => Console.WriteLine("Import: {0}", i));
             };
@@ -218,12 +244,13 @@ namespace SaveDataSync
         }
 
 
-        private List<string> GetSelectedSaves()
+        private List<string> GetSelectedSaves(bool noRemote)
         {
             var selected = saveFileList.SelectedItems;
             List<string> saves = new List<string>();
             foreach (ListViewItem item in selected)
             {
+                if (noRemote && item.SubItems[1].Text == "Remote") throw new Exception();
                 saves.Add(item.SubItems[0].Text); // The first sub item will always be the name
             }
 
