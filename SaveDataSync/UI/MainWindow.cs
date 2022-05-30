@@ -7,8 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
-
-
 namespace SaveDataSync
 {
     /// <summary>
@@ -16,8 +14,8 @@ namespace SaveDataSync
     /// </summary>
     public partial class MainWindow : Form
     {
-
         private SaveDataSyncEngine engine;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -26,7 +24,7 @@ namespace SaveDataSync
         // Loading Events
         private void OnLoad(object sender, EventArgs e)
         {
-            // Grabs the engine which allows communication with the backend 
+            // Grabs the engine which allows communication with the backend
             engine = SaveDataSyncEngine.CreateInstance();
 
             // Auto sizes the last column of the save list
@@ -122,7 +120,6 @@ namespace SaveDataSync
                     saveItem.SubItems.Add("On Server");
                     saveFileList.Items.Add(saveItem);
                 }
-
             }
         }
 
@@ -149,7 +146,6 @@ namespace SaveDataSync
             ReloadUI();
         }
 
-
         private void serverSettingsBtn_Click(object sender, EventArgs e)
         {
             ServerSettings ss = new ServerSettings(engine)
@@ -164,13 +160,13 @@ namespace SaveDataSync
         private void Export_Click(object sender, EventArgs e)
         {
             Console.WriteLine("Export");
-            engine.ExportSaveData();
+            //engine.ExportSaves();
         }
 
         private void Import_Click(object sender, EventArgs e)
         {
             Console.WriteLine("Import");
-            engine.ImportSaveData();
+            //engine.ImportSaves();
         }
 
         private void SaveFileList_MouseClick(object sender, MouseEventArgs e)
@@ -180,23 +176,13 @@ namespace SaveDataSync
                 var selectedItem = saveFileList.FocusedItem;
                 if (selectedItem == null) return;
                 SaveFileContextMenu(selectedItem.Text).Show(saveFileList, new Point(e.X, e.Y));
-
             }
         }
 
         private ContextMenuStrip SaveFileContextMenu(string name)
         {
             var menu = new ContextMenuStrip();
-            bool hasRemote = false;
-            // Small workaround to see if selected contains remote saves
-            try
-            {
-                var saves = GetSelectedSaves(true);
-            } catch (Exception)
-            {
-                hasRemote = true;
-            }
-
+            bool hasRemote = SelectingRemoteSave();
 
             if (!hasRemote)
             {
@@ -219,29 +205,26 @@ namespace SaveDataSync
                 {
                     try
                     {
-                        var savesToExport = GetSelectedSaves(true);
-                        savesToExport.ForEach(i => Console.WriteLine("Export: {0}", i));
+                        List<string> savesToExport = GetSelectedSaves(true);
+                        engine.ExportSaves(savesToExport.ToArray());
                     }
                     catch (Exception)
                     {
                         MessageBox.Show("Cannot export remote files (you know better than that :P)", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 };
-
             }
-            
 
             var quickImport = menu.Items.Add("Quick Import");
             quickImport.Click += (object sender4, EventArgs e4) =>
             {
-                var savesToImport = GetSelectedSaves(false);
-
-                savesToImport.ForEach(i => Console.WriteLine("Import: {0}", i));
+                List<string> savesToImport = GetSelectedSaves(false);
+                engine.ImportSaves(savesToImport.ToArray());
             };
 
             if (!hasRemote)
             {
-                var removeSave = menu.Items.Add("Remove Save");
+                var removeSave = menu.Items.Add("Remove Local Save");
                 removeSave.Click += (object sender5, EventArgs e5) =>
                 {
                     var confirm = MessageBox.Show("Are you sure you want to remove this save file?",
@@ -253,7 +236,6 @@ namespace SaveDataSync
                         engine.GetLocalSaveList().RemoveSave(name);
                         engine.Save();
                         ReloadUI();
-
                     }
                 };
             }
@@ -270,7 +252,6 @@ namespace SaveDataSync
             catch (Exception) { }
         }
 
-
         private List<string> GetSelectedSaves(bool noRemote)
         {
             var selected = saveFileList.SelectedItems;
@@ -282,6 +263,18 @@ namespace SaveDataSync
             }
 
             return saves;
+        }
+
+        private bool SelectingRemoteSave()
+        {
+            var selected = saveFileList.SelectedItems;
+            foreach (ListViewItem item in selected)
+            {
+                if (item.SubItems[1].Text == "Remote")
+                    return true;
+            }
+
+            return false;
         }
     }
 }

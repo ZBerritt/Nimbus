@@ -57,14 +57,14 @@ namespace SaveDataSync
             Save();
         }
 
-        public void ExportSaveData()
+        public void ExportSaves(string[] saves)
         {
-
+            Console.WriteLine("Exporting {0}", string.Join(", ", saves));
         }
 
-        public void ImportSaveData()
+        public void ImportSaves(string[] saves)
         {
-
+            Console.WriteLine("Importing {0}", string.Join(", ", saves));
         }
 
         public void Save()
