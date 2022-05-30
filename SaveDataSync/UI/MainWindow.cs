@@ -187,25 +187,49 @@ namespace SaveDataSync
         private ContextMenuStrip SaveFileContextMenu(string name)
         {
             var menu = new ContextMenuStrip();
-            var goToLocation = menu.Items.Add("Open File Location");
-            goToLocation.Click += (object sender2, EventArgs e2) =>
+            bool hasRemote = false;
+            // Small workaround to see if selected contains remote saves
+            try
             {
-                string savePath = engine.GetLocalSaveList().GetSavePath(name);
-                Process.Start("explorer.exe", string.Format("/select, \"{0}\"", savePath));
-            };
+                var saves = GetSelectedSaves(true);
+            } catch (Exception)
+            {
+                hasRemote = true;
+            }
 
-            var quickExport = menu.Items.Add("Quick Export");
-            quickExport.Click += (object sender3, EventArgs e3) =>
+
+            if (!hasRemote)
             {
-                try
+                var goToLocation = menu.Items.Add("Open File Location");
+                goToLocation.Click += (object sender2, EventArgs e2) =>
                 {
-                    var savesToExport = GetSelectedSaves(true);
-                    savesToExport.ForEach(i => Console.WriteLine("Export: {0}", i));
-                } catch (Exception)
+                    try
+                    {
+                        string savePath = engine.GetLocalSaveList().GetSavePath(name);
+                        Process.Start("explorer.exe", string.Format("/select, \"{0}\"", savePath));
+                    }
+                    catch (Exception) { }
+                };
+            }
+
+            if (!hasRemote)
+            {
+                var quickExport = menu.Items.Add("Quick Export");
+                quickExport.Click += (object sender3, EventArgs e3) =>
                 {
-                    MessageBox.Show("Cannot export remote files (you know better than that :P)", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            };
+                    try
+                    {
+                        var savesToExport = GetSelectedSaves(true);
+                        savesToExport.ForEach(i => Console.WriteLine("Export: {0}", i));
+                    }
+                    catch (Exception)
+                    {
+                        MessageBox.Show("Cannot export remote files (you know better than that :P)", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                };
+
+            }
+            
 
             var quickImport = menu.Items.Add("Quick Import");
             quickImport.Click += (object sender4, EventArgs e4) =>
@@ -215,21 +239,24 @@ namespace SaveDataSync
                 savesToImport.ForEach(i => Console.WriteLine("Import: {0}", i));
             };
 
-            var removeSave = menu.Items.Add("Remove Save");
-            removeSave.Click += (object sender5, EventArgs e5) =>
+            if (!hasRemote)
             {
-                var confirm = MessageBox.Show("Are you sure you want to remove this save file?",
-                    "Confirm",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
-                if (confirm == DialogResult.Yes)
+                var removeSave = menu.Items.Add("Remove Save");
+                removeSave.Click += (object sender5, EventArgs e5) =>
                 {
-                    engine.GetLocalSaveList().RemoveSave(name);
-                    engine.Save();
-                    ReloadUI();
+                    var confirm = MessageBox.Show("Are you sure you want to remove this save file?",
+                        "Confirm",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question);
+                    if (confirm == DialogResult.Yes)
+                    {
+                        engine.GetLocalSaveList().RemoveSave(name);
+                        engine.Save();
+                        ReloadUI();
 
-                }
-            };
+                    }
+                };
+            }
             return menu;
         }
 
