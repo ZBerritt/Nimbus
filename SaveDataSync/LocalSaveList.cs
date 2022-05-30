@@ -56,7 +56,7 @@ namespace SaveDataSync
                         string[] files = FileUtils.GetFileList(location);
                         foreach (string file in files)
                         {
-                            string entryName = file.Substring(location.Length + 1, file.Length - location.Length - 1);
+                            string entryName = Path.Combine(name, file.Substring(location.Length + 1, file.Length - location.Length - 1));
                             ZipEntry entry = new ZipEntry(entryName);
                             OutputStream.PutNextEntry(entry);
                             using (FileStream fs = File.OpenRead(file))
@@ -90,7 +90,7 @@ namespace SaveDataSync
                     OutputStream.Close();
 
                     // Read from temporary file
-                    Console.Write(tmpFile.FilePath);
+                    Console.WriteLine(tmpFile.FilePath);
                     return File.ReadAllBytes(tmpFile.FilePath);
                 }
             }
