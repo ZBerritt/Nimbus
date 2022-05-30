@@ -10,10 +10,12 @@ namespace SaveDataSync
     internal class DataManagement
     {
         /* Server Management */
+
         public static LocalSaveList GetLocalSaveList()
         {
             return GetLocalSaveList(Locations.DataDirectory());
         }
+
         public static LocalSaveList GetLocalSaveList(string location)
         {
             if (!Directory.Exists(location) || !File.Exists(Path.Combine(location, "local_saves.json")))
@@ -38,20 +40,14 @@ namespace SaveDataSync
             // Check to see if the location exists, otherwise create it
             if (!Directory.Exists(location)) Directory.CreateDirectory(location);
 
-            using (FileStream localSaveStream = File.Open(Path.Combine(location, "local_saves.json"), FileMode.OpenOrCreate))
-            {
-                using (StreamWriter localSaveStreamWriter = new StreamWriter(localSaveStream))
-                {
-                    localSaveStreamWriter.Write(localSaveList.ToJson());
-                }
-            }
+            File.WriteAllText(Path.Combine(location, "local_saves.json"), localSaveList.ToJson());
         }
 
         public static void SaveServerData(Server server)
         {
             SaveServerData(Locations.DataDirectory(), server);
-
         }
+
         public static void SaveServerData(string location, Server server)
         {
             if (server == null) return;
@@ -71,10 +67,12 @@ namespace SaveDataSync
                 localSaveStream.Write(encData, 0, encData.Length);
             }
         }
+
         public static Server GetServerData()
         {
             return GetServerData(Locations.DataDirectory());
         }
+
         public static Server GetServerData(string location)
         {
             if (!Directory.Exists(location) || !File.Exists(Path.Combine(location, "server_data.dat")))
@@ -97,6 +95,7 @@ namespace SaveDataSync
                     {
                         case "Dropbox":
                             return DropboxServer.BuildFromJson(serverData);
+
                         default:
                             return null;
                     }
@@ -105,6 +104,7 @@ namespace SaveDataSync
         }
 
         /* Settings Management */
+
         public static void SaveSettings(Settings settings)
         {
             SaveSettings(Locations.DataDirectory(), settings);
@@ -113,15 +113,9 @@ namespace SaveDataSync
         public static void SaveSettings(string location, Settings settings)
         {
             var json = settings.ToJSON();
-            using (FileStream localSaveStream = File.Open(Path.Combine(location, "settings.json"), FileMode.OpenOrCreate))
-            {
-                using (StreamWriter writer = new StreamWriter(localSaveStream))
-                {
-                    writer.Write(json.ToString());
-                }
-
-            }
+            File.WriteAllText(Path.Combine(location, "settings.json"), json.ToString());
         }
+
         public static Settings GetSettings()
         {
             return GetSettings(Locations.DataDirectory());
@@ -146,8 +140,6 @@ namespace SaveDataSync
                     return settings;
                 }
             }
-
-
         }
     }
 }

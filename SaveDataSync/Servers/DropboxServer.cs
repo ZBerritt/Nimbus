@@ -17,7 +17,6 @@ namespace SaveDataSync.Servers
         public static string APP_ID = "i136jjbqxg4aaci";
         private static readonly HttpClient client = new HttpClient();
 
-
         private string bearerKey; // The acual key used to make requests
         private string refreshKey; // A key used to refresh the bearer key when expires
         private DateTime expires; // When the bearer key expires
@@ -103,8 +102,8 @@ namespace SaveDataSync.Servers
             DateTime expires = (DateTime)json.GetValue("expires");
             string apiKey = (string)json.GetValue("apiKey");
             return new DropboxServer(bearer, refresh, expires, apiKey);
-
         }
+
         public override string Name()
         {
             return "Dropbox";
@@ -114,6 +113,7 @@ namespace SaveDataSync.Servers
         {
             return "dropbox.com";
         }
+
         public override byte[] GetSaveData(string name)
         {
             string urlPath = "/" + name + ".zip"; // Stored on dropbox under this name
@@ -121,10 +121,10 @@ namespace SaveDataSync.Servers
             {
                 JObject reqBody = new JObject();
                 reqBody.Add("path", urlPath);
+                string body = reqBody.ToString().Replace("\n", "\n "); // Add a whitespace after line breaks because it doesn't do that for us
                 var request = new HttpRequestMessage(HttpMethod.Post, "https://content.dropboxapi.com/2/files/download");
                 request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
-                request.Headers.Add("Dropbox-API-Arg", reqBody.ToString());
-
+                request.Headers.Add("Dropbox-API-Arg", body);
 
                 var response = client.SendAsync(request).Result;
                 var content = response.Content.ReadAsByteArrayAsync().Result;
@@ -135,7 +135,6 @@ namespace SaveDataSync.Servers
                 Console.WriteLine(ex);
                 return null;
             }
-
         }
 
         public override string[] SaveNames()
@@ -195,7 +194,7 @@ namespace SaveDataSync.Servers
 
             var request = new HttpRequestMessage(HttpMethod.Post, "https://content.dropboxapi.com/2/files/upload");
             request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
-            request.Headers.Add("Dropbox-API-Arg", reqBody.ToString());
+            request.Headers.Add("Dropbox-API-Arg", reqBody.ToString().Replace("\n", "\n "));
             request.Content = new ByteArrayContent(data);
             request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
 

@@ -219,6 +219,10 @@ namespace SaveDataSync
                     {
                         MessageBox.Show("An erorr has occured: " + ex.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
+                    finally
+                    {
+                        ReloadUI();
+                    }
                 };
             }
 
@@ -240,6 +244,10 @@ namespace SaveDataSync
                 catch (Exception ex)
                 {
                     MessageBox.Show("An erorr has occured: " + ex.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    ReloadUI();
                 }
             };
 
