@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31808.319
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaveDataSync", "SaveDataSync\SaveDataSync.csproj", "{FA283CC2-159E-416E-B177-AC318FCE73AB}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SaveDataSyncInstaller", "SaveDataSyncInstaller\SaveDataSyncInstaller.vdproj", "{E0C11D37-73E3-4700-967B-2C0CEE7ACA0E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,8 @@ Global
 		{FA283CC2-159E-416E-B177-AC318FCE73AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA283CC2-159E-416E-B177-AC318FCE73AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA283CC2-159E-416E-B177-AC318FCE73AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0C11D37-73E3-4700-967B-2C0CEE7ACA0E}.Debug|Any CPU.ActiveCfg = Debug
+		{E0C11D37-73E3-4700-967B-2C0CEE7ACA0E}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
