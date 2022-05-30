@@ -84,13 +84,13 @@ namespace SaveDataSync
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Warning);
                         return;
-                    } 
+                    }
                     else
                     {
-                    var response = MessageBox.Show("Save file/folder does not exist for " + save + ". Would you like to continue anyways?",
-                            "Warning",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Warning);
+                        var response = MessageBox.Show("Save file/folder does not exist for " + save + ". Would you like to continue anyways?",
+                                "Warning",
+                                MessageBoxButtons.YesNo,
+                                MessageBoxIcon.Warning);
                         if (response == DialogResult.No) return; // Abort on pressing no
                         continue;
                     }

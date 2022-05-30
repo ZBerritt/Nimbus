@@ -10,6 +10,7 @@ namespace SaveDataSync
     internal class OAuthToken
     {
         private string code;
+
         public OAuthToken(string url)
         {
             // Start callback server
