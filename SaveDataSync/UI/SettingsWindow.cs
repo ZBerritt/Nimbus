@@ -7,6 +7,7 @@ namespace SaveDataSync.UI
     {
         private SaveDataSyncEngine engine;
         private Settings settingsCopy;
+
         public SettingsWindow(SaveDataSyncEngine engine)
         {
             this.engine = engine;

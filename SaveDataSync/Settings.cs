@@ -6,12 +6,10 @@ namespace SaveDataSync
     {
         public Settings()
         {
-
         }
 
         public Settings(JObject json)
         {
-
         }
 
         public Settings Clone()

@@ -11,11 +11,11 @@ namespace SaveDataSync
     {
         private Dictionary<string, string> saveGameLocations = new Dictionary<string, string>();
 
-
         public Dictionary<string, string> GetSaves()
         {
             return saveGameLocations;
         }
+
         public void AddSave(string name, string location)
         {
             if (saveGameLocations.ContainsKey(name)) throw new Exception("Save game with name " + name + " already exists.");
@@ -45,6 +45,8 @@ namespace SaveDataSync
             string location = GetSavePath(name);
             FileAttributes attr = File.GetAttributes(location);
             bool isDirectory = attr.HasFlag(FileAttributes.Directory);
+
+            // This entire mess basically just zips the file into what we need. We need to do it manually isntead of using fastzip
             using (var tmpFile = new FileUtils.TemporaryFile())
             {
                 using (ZipOutputStream OutputStream = new ZipOutputStream(File.Open(tmpFile.FilePath, FileMode.Open)))
@@ -153,6 +155,5 @@ namespace SaveDataSync
 
             return list;
         }
-
     }
 }

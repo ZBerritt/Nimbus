@@ -4,11 +4,10 @@ namespace SaveDataSync
 {
     internal abstract class Server
     {
-
         public Server()
         {
-
         }
+
         // The name/type of host
         public abstract string Name();
 
@@ -23,7 +22,6 @@ namespace SaveDataSync
 
         // Uploads local save data
         public abstract void UploadSaveData(string name, byte[] data);
-
 
         // Is the server online?
         public abstract bool ServerOnline();

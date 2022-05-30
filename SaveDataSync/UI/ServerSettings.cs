@@ -11,6 +11,7 @@ namespace SaveDataSync.UI
         public Server server;
 
         private string dropboxVerifier;
+
         public ServerSettings(SaveDataSyncEngine engine)
         {
             this.engine = engine;
@@ -27,7 +28,6 @@ namespace SaveDataSync.UI
                         break;
                 }
             }
-            
         }
 
         private void saveButton_Click(object sender, EventArgs e)
@@ -50,7 +50,6 @@ namespace SaveDataSync.UI
                         if (!serverOnline) throw new Exception("Server is not online!");
                         engine.SetServer(newServer);
                         break;
-
                 }
                 Close();
             }
@@ -58,7 +57,6 @@ namespace SaveDataSync.UI
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
         }
 
         private void closeButton_Click(object sender, EventArgs e)
