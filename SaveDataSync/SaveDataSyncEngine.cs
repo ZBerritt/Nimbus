@@ -62,11 +62,62 @@ namespace SaveDataSync
             Save();
         }
 
+        // TODO: Return the successful exports (and imports :p)
         public void ExportSaves(string[] saves, ProgressBarControl progress)
         {
             foreach (string save in saves)
             {
                 progress.Increment("Exporting '" + save + "'");
+                // Remote saves should NEVER be called in this but it'll check anyways
+                if (!new List<string>(localSaveList.GetSaves().Keys).Contains(save))
+                {
+                    throw new Exception("Remote files cannot be exported");
+                }
+
+                var saveLocation = localSaveList.GetSavePath(save);
+                if (!Directory.Exists(saveLocation) && !File.Exists(saveLocation))
+                {
+                    if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
+                    {
+                        MessageBox.Show("Save file/folder does not exist for " + save + ".",
+                            "Warning",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+                        return;
+                    } 
+                    else
+                    {
+                    var response = MessageBox.Show("Save file/folder does not exist for " + save + ". Would you like to continue anyways?",
+                            "Warning",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Warning);
+                        if (response == DialogResult.No) return; // Abort on pressing no
+                        continue;
+                    }
+                }
+
+                var zipData = localSaveList.GetSaveZipData(save);
+                if (zipData == null || zipData.Length == 0)
+                {
+                    if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
+                    {
+                        MessageBox.Show("Save folder is empty for " + save + ".",
+                            "Warning",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+                        return;
+                    }
+                    else
+                    {
+                        var response = MessageBox.Show("Save folder is empty for " + save + ". Would you like to continue anyways?",
+                            "Warning",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Warning);
+                        if (response == DialogResult.No) return; // Abort on pressing no
+                        continue;
+                    }
+                }
+                server.UploadSaveData(save, zipData);
             }
         }
 

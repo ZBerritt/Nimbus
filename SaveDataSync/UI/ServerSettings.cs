@@ -16,13 +16,18 @@ namespace SaveDataSync.UI
             this.engine = engine;
             this.server = engine.GetServer();
             InitializeComponent();
-            switch (server.Name())
+            if (server != null)
             {
-                case "Dropbox":
-                    var apiKey = ((DropboxServer)server).GetServerApiKey();
-                    if (apiKey != null) dropboxApiKey.Text = apiKey;
-                    break;
+                var serverName = server.Name();
+                switch (serverName)
+                {
+                    case "Dropbox":
+                        var apiKey = ((DropboxServer)server).GetServerApiKey();
+                        if (apiKey != null) dropboxApiKey.Text = apiKey;
+                        break;
+                }
             }
+            
         }
 
         private void saveButton_Click(object sender, EventArgs e)
