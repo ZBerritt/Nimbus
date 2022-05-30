@@ -140,38 +140,38 @@ namespace SaveDataSync
 
                 var saveLocation = localSaveList.GetSavePath(save);
                 var remoteZipData = server.GetSaveData(save);
-                var tempFile = Path.GetTempFileName();
-                var tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-                Directory.CreateDirectory(tempDir);
-                File.WriteAllBytes(tempFile, remoteZipData);
-                FastZip fastZip = new FastZip();
-                fastZip.ExtractZip(tempFile, tempDir, null);
-                string[] content = Directory.GetFiles(tempDir, "*.*", SearchOption.TopDirectoryOnly);
-                if (content.Length == 0) content = Directory.GetDirectories(tempDir, "*.*", SearchOption.TopDirectoryOnly);
-                var saveContent = content[0]; // There should be only one output
-                FileAttributes attr = File.GetAttributes(saveContent);
-                if (attr.HasFlag(FileAttributes.Directory))
+                using (var tmpFile = new FileUtils.TemporaryFile())
+                using (var tmpDir = new FileUtils.TemporaryFolder())
                 {
-                    // Handle as a dir
-                    foreach (string dir in Directory.GetDirectories(saveContent, "*", SearchOption.AllDirectories))
+                    var tempFile = tmpFile.FilePath;
+                    var tempDir = tmpDir.FolderPath;
+                    Directory.CreateDirectory(tempDir);
+                    File.WriteAllBytes(tempFile, remoteZipData);
+                    FastZip fastZip = new FastZip();
+                    fastZip.ExtractZip(tempFile, tempDir, null);
+                    string[] content = Directory.GetFiles(tempDir, "*.*", SearchOption.TopDirectoryOnly);
+                    if (content.Length == 0) content = Directory.GetDirectories(tempDir, "*.*", SearchOption.TopDirectoryOnly);
+                    var saveContent = content[0]; // There should be only one output
+                    FileAttributes attr = File.GetAttributes(saveContent);
+                    if (attr.HasFlag(FileAttributes.Directory))
                     {
-                        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir.Replace(saveContent, saveLocation));
-                    }
+                        // Handle as a dir
+                        foreach (string dir in Directory.GetDirectories(saveContent, "*", SearchOption.AllDirectories))
+                        {
+                            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir.Replace(saveContent, saveLocation));
+                        }
 
-                    foreach (string file in Directory.GetFiles(saveContent, "*", SearchOption.AllDirectories))
+                        foreach (string file in Directory.GetFiles(saveContent, "*", SearchOption.AllDirectories))
+                        {
+                            File.Copy(file, file.Replace(saveContent, saveLocation), true);
+                        }
+                    }
+                    else
                     {
-                        File.Copy(file, file.Replace(saveContent, saveLocation), true);
+                        // Handle as a file
+                        File.Copy(saveContent, saveLocation, true);
                     }
                 }
-                else
-                {
-                    // Handle as a file
-                    File.Copy(saveContent, saveLocation, true);
-                }
-
-                // Dispose temp stuff
-                File.Delete(tempFile);
-                Directory.Delete(tempDir, true);
             }
         }
 
