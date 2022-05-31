@@ -73,7 +73,7 @@ namespace SaveDataSync.UI
                         "&client_id=" + DropboxServer.APP_ID +
                         "&code_challenge=" + DropboxServer.GenerateCodeChallenge(dropboxVerifier) +
                         "&code_challenge_method=S256";
-            Process.Start(url);
+            Utils.OpenUrl(url);
             string key = DropboxServer.GetApiKey();
             if (key != null) dropboxApiKey.Text = key;
         }

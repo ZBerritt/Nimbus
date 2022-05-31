@@ -26,6 +26,12 @@ namespace SaveDataSync
         // Is the server online?
         public abstract bool ServerOnline();
 
+        // Get remote save hash
+        public abstract string GetRemoteSaveHash(string name);
+
+        // Get local save has to compare (different servers may have different methods)
+        public abstract string GetLocalSaveHash(byte[] data);
+
         // Server data in JSON format
         public abstract JObject ToJson();
     }
