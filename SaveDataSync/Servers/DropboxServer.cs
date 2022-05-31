@@ -273,5 +273,59 @@ namespace SaveDataSync.Servers
         {
             return apiKey;
         }
+
+        public override string GetRemoteSaveHash(string name)
+        {
+            string urlPath = "/" + name + ".zip"; // Stored on dropbox under this name
+            JObject reqBody = new JObject
+            {
+                { "path", urlPath },
+                {"include_media_info", false },
+                { "include_deleted", false },
+                { "include_has_explicit_shared_members", false },
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://api.dropboxapi.com/2/files/get_metadata");
+            request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
+            request.Content = new StringContent(reqBody.ToString());
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var response = client.SendAsync(request).Result;
+            var jsonResponse = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            string hash = (string)jsonResponse.GetValue("content_hash");
+            return hash;
+        }
+
+        public override string GetLocalSaveHash(byte[] data)
+        {
+            int BLOCK_SIZE = 1024 * 1024 * 4; // 4 MB Blocks
+            List<byte> concatHashes = new List<byte>(); // SHA-256 hashes for each block
+            var sha256 = SHA256.Create();
+
+            int i = 0;
+            while (i < data.Length)
+            {
+                if (i + BLOCK_SIZE > data.Length - 1) // If the file doens't have another 4 MB left...
+                {
+                    var smallSegment = new byte[data.Length - i]; // Create smaller segment to the end
+                    Array.Copy(data, i, smallSegment, 0, data.Length - i);
+                    var lastHash = sha256.ComputeHash(smallSegment);
+                    concatHashes.AddRange(lastHash);
+                    break;
+                }
+                var segment = new byte[BLOCK_SIZE];
+                Array.Copy(data, i, segment, 0, BLOCK_SIZE); // 4 MB segment of array
+                var hash = sha256.ComputeHash(segment);
+                concatHashes.AddRange(hash);
+
+                i += BLOCK_SIZE;
+            }
+
+            byte[] bytes = concatHashes.ToArray();
+            var concatHash = sha256.ComputeHash(bytes);
+            var hex = BitConverter.ToString(concatHash, 0, bytes.Length).Replace("-", "").ToLower();
+
+            return hex;
+        }
     }
 }
