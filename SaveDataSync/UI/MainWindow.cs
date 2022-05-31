@@ -178,6 +178,28 @@ namespace SaveDataSync
             var menu = new ContextMenuStrip();
             bool hasRemote = SelectingRemoteSave();
 
+            // BEGIN TESTING
+
+            if (!hasRemote)
+            {
+                var getHashes = menu.Items.Add("[DEBUG] Get Hashes");
+                getHashes.Click += (object sender, EventArgs e) =>
+                {
+                    var selected = GetSelectedSaves(true);
+                    var first = selected[0]; // I don't care I just want the first one
+                    var localSaveData = engine.GetLocalSaveList().GetSaveZipData(first);
+                    var remoteHash = engine.GetServer().GetRemoteSaveHash(first);
+                    var localHash = engine.GetServer().GetLocalSaveHash(localSaveData);
+                    MessageBox.Show("Remote Hash: " + remoteHash +
+                        " (Length: " + remoteHash.Length + ")\nLocal Hash: " + localHash +
+                        " (Length: " + remoteHash.Length + ")",
+                               "Debug",
+                               MessageBoxButtons.OK,
+                               MessageBoxIcon.Information);
+                };
+            }
+            // END TESTING
+
             if (!hasRemote)
             {
                 var goToLocation = menu.Items.Add("Open File Location");
