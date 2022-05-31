@@ -28,15 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsWindow));
             this.closeBtn = new System.Windows.Forms.Button();
             this.saveBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // closeBtn
             // 
-            this.closeBtn.Location = new System.Drawing.Point(12, 191);
+            this.closeBtn.Location = new System.Drawing.Point(14, 220);
+            this.closeBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.closeBtn.Name = "closeBtn";
-            this.closeBtn.Size = new System.Drawing.Size(97, 39);
+            this.closeBtn.Size = new System.Drawing.Size(113, 45);
             this.closeBtn.TabIndex = 0;
             this.closeBtn.Text = "Close";
             this.closeBtn.UseVisualStyleBackColor = true;
@@ -44,9 +46,10 @@
             // 
             // saveBtn
             // 
-            this.saveBtn.Location = new System.Drawing.Point(308, 191);
+            this.saveBtn.Location = new System.Drawing.Point(359, 220);
+            this.saveBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.saveBtn.Name = "saveBtn";
-            this.saveBtn.Size = new System.Drawing.Size(97, 39);
+            this.saveBtn.Size = new System.Drawing.Size(113, 45);
             this.saveBtn.TabIndex = 1;
             this.saveBtn.Text = "Save";
             this.saveBtn.UseVisualStyleBackColor = true;
@@ -54,11 +57,13 @@
             // 
             // SettingsWindow
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(417, 242);
+            this.ClientSize = new System.Drawing.Size(486, 279);
             this.Controls.Add(this.saveBtn);
             this.Controls.Add(this.closeBtn);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "SettingsWindow";
             this.Text = "SaveDataSync - Settings";
             this.ResumeLayout(false);
