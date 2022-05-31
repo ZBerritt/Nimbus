@@ -40,6 +40,7 @@ namespace SaveDataSync
             return saveGameLocations[name];
         }
 
+        // TODO: Store original permissions/date and put them back when extracting
         public byte[] GetSaveZipData(string name)
         {
             string location = GetSavePath(name);
