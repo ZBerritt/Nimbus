@@ -63,9 +63,9 @@ namespace SaveDataSync.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon sfs {
+        internal static System.Drawing.Icon SaveDataSync {
             get {
-                object obj = ResourceManager.GetObject("sfs", resourceCulture);
+                object obj = ResourceManager.GetObject("SaveDataSync", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }
