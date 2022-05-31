@@ -40,6 +40,7 @@ namespace SaveDataSync
             return saveGameLocations[name];
         }
 
+        // TODO: Store original permissions/date and put them back when extracting
         public byte[] GetSaveZipData(string name)
         {
             string location = GetSavePath(name);
@@ -52,6 +53,7 @@ namespace SaveDataSync
                 using (ZipOutputStream OutputStream = new ZipOutputStream(File.Open(tmpFile.FilePath, FileMode.Open)))
                 {
                     byte[] buffer = new byte[4096];
+                    int perm = Convert.ToInt32("444", 8);
 
                     if (isDirectory)
                     {
@@ -60,6 +62,8 @@ namespace SaveDataSync
                         {
                             string entryName = Path.Combine(name, file.Substring(location.Length + 1, file.Length - location.Length - 1));
                             ZipEntry entry = new ZipEntry(entryName);
+                            entry.DateTime = DateTimeOffset.FromUnixTimeMilliseconds(0).DateTime; // Reset date time
+                            entry.ExternalFileAttributes = (1 | perm) << 16; // Do something with the perms idk it works
                             OutputStream.PutNextEntry(entry);
                             using (FileStream fs = File.OpenRead(file))
                             {
@@ -76,6 +80,8 @@ namespace SaveDataSync
                     else
                     {
                         ZipEntry entry = new ZipEntry(Path.GetFileName(location));
+                        entry.DateTime = DateTimeOffset.FromUnixTimeMilliseconds(0).DateTime;
+                        entry.ExternalFileAttributes = (1 | perm) << 16;
                         OutputStream.PutNextEntry(entry);
                         using (FileStream fs = File.OpenRead(location))
                         {
