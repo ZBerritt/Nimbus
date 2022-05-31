@@ -40,12 +40,43 @@ namespace SaveDataSync
         //Used to reload all UI data
         public void ReloadUI()
         {
+            /* Check server status */
+            var server = engine.GetServer();
+            bool serverOnline = false; // Defaulting to false, shouldn't matter though.
+            string serverType = "None";
+            string status = "N/A";
+            Color statusColor = Color.Black;
+            string serverHost = "N/A";
+            if (server != null)
+            {
+                serverType = server.Name();
+                serverHost = server.Host();
+                try
+                {
+                    serverOnline = server.ServerOnline();
+                    status = serverOnline ? "Online" : "Offline";
+                    statusColor = serverOnline ? Color.Green : Color.DarkGoldenrod;
+                }
+                catch (Exception)
+                {
+                    status = "Error";
+                    statusColor = Color.Red;
+                }
+            }
+
+            // Set the text of the server information
+            type.Text = serverType;
+            host.Text = serverHost;
+            serverStatus.Text = status;
+            serverStatus.ForeColor = statusColor;
+
             /* Reload the save file list */
             saveFileList.Items.Clear();
             var saves = engine.GetLocalSaveList().GetSaves();
             foreach (var save in saves)
             {
                 ListViewItem saveItem = new ListViewItem(save.Key);
+                saveItem.UseItemStyleForSubItems = false;
                 saveItem.SubItems.Add(save.Value);
 
                 // Get file size
@@ -64,41 +95,48 @@ namespace SaveDataSync
                 }
 
                 // Get file sync status
-                saveItem.SubItems.Add("Not implemented");
+                ListViewItem.ListViewSubItem statusItem = new ListViewItem.ListViewSubItem(saveItem, "");
+                if (serverOnline && (File.Exists(save.Value) || Directory.Exists(save.Value)))
+                {
+                    var localSaveData = engine.GetLocalSaveList().GetSaveZipData(save.Key);
+                    var remoteHash = engine.GetServer().GetRemoteSaveHash(save.Key);
+                    var localHash = engine.GetServer().GetLocalSaveHash(localSaveData);
+                    if (remoteHash == null)
+                    {
+                        statusItem.Text = "Not Uploaded";
+                        statusItem.ForeColor = Color.Gray;
+                    }
+                    else if (remoteHash == localHash)
+                    {
+                        statusItem.Text = "Synced";
+                        statusItem.ForeColor = Color.Green;
+                    }
+                    else
+                    {
+                        statusItem.Text = "Not Synced";
+                        statusItem.ForeColor = Color.DarkRed;
+                    }
+                }
+                else if (!File.Exists(save.Value) && !Directory.Exists(save.Value))
+                {
+                    statusItem.Text = "No Local Save";
+                    statusItem.ForeColor = Color.Gray;
+                }
+                else if (server != null)
+                {
+                    statusItem.Text = "Offline";
+                    statusItem.ForeColor = Color.DarkGoldenrod;
+                }
+                else
+                {
+                    statusItem.Text = "No Server";
+                    statusItem.ForeColor = Color.Black;
+                }
+                saveItem.SubItems.Add(statusItem);
 
                 // Add to the table
                 saveFileList.Items.Add(saveItem);
             }
-
-            /* Check server status */
-            var server = engine.GetServer();
-            bool serverOnline = false; // Defaulting to false, shouldn't matter though.
-            string serverType = "None";
-            string status = "N/A";
-            Color statusColor = Color.Black;
-            string serverHost = "N/A";
-            if (server != null)
-            {
-                serverType = server.Name();
-                serverHost = server.Host();
-                try
-                {
-                    serverOnline = server.ServerOnline();
-                    status = serverOnline ? "Online" : "Offline";
-                    statusColor = serverOnline ? Color.Green : Color.Gold;
-                }
-                catch (Exception)
-                {
-                    status = "Error";
-                    statusColor = Color.Red;
-                }
-            }
-
-            // Set the text of the server information
-            type.Text = serverType;
-            host.Text = serverHost;
-            serverStatus.Text = status;
-            serverStatus.ForeColor = statusColor;
 
             /* Add remove save files */
             if (server != null && serverOnline)
