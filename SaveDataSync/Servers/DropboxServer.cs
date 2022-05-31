@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -123,10 +124,11 @@ namespace SaveDataSync.Servers
                 {
                     { "path", urlPath }
                 };
-                string body = reqBody.ToString().Replace("\n", "\n "); // Add a whitespace after line breaks because it doesn't do that for us
+                var jsonData = JsonConvert.SerializeObject(reqBody);
+
                 var request = new HttpRequestMessage(HttpMethod.Post, "https://content.dropboxapi.com/2/files/download");
                 request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
-                request.Headers.Add("Dropbox-API-Arg", body);
+                request.Headers.Add("Dropbox-API-Arg", jsonData);
 
                 var response = client.SendAsync(request).Result;
                 if (response.StatusCode == HttpStatusCode.Conflict) return null; // Return nothing if the server errors
@@ -196,10 +198,11 @@ namespace SaveDataSync.Servers
                 { "mute", false },
                 { "strict_conflict", false }
             };
+            var jsonData = JsonConvert.SerializeObject(reqBody);
 
             var request = new HttpRequestMessage(HttpMethod.Post, "https://content.dropboxapi.com/2/files/upload");
             request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
-            request.Headers.Add("Dropbox-API-Arg", reqBody.ToString().Replace("\n", "\n "));
+            request.Headers.Add("Dropbox-API-Arg", jsonData);
             request.Content = new ByteArrayContent(data);
             request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
 
