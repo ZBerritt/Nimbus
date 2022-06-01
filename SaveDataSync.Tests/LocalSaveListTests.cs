@@ -56,9 +56,6 @@ namespace SaveDataSync.Tests
             // Illegal characters
             Assert.ThrowsException<Exception>(() => localSaves.AddSave("\\ /", testPath));
 
-            // Path that doesn't exist
-            Assert.ThrowsException<Exception>(() => localSaves.AddSave("fake_folder", "not/a/path"));
-
             // Longer than 32 chars
             Assert.ThrowsException<Exception>(() => localSaves.AddSave("Lorem ipsum dolor sit amet fusce.", testPath));
         }
@@ -68,7 +65,7 @@ namespace SaveDataSync.Tests
         {
             localSaves.AddSave("testing", testPath);
             var saves = localSaves.GetSaves();
-            Assert.AreEqual(saves["testing"], testPath);
+            Assert.AreEqual(saves["testing"], FileUtils.Normalize(testPath));
             localSaves.RemoveSave("testing");
 
             // Delete a file that doesn't exist

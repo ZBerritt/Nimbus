@@ -22,12 +22,8 @@ namespace SaveDataSync
 
         public void AddSave(string name, string location)
         {
-            // Get full path to file
-            var fullPath = Path.GetFullPath(location);
-
-            // Path should exist
-            if (!File.Exists(fullPath) && !Directory.Exists(fullPath))
-                throw new Exception("File/Folder does not exist!");
+            // Get normalized path to file
+            var normalizedPath = FileUtils.Normalize(location);
 
             // No slashes
             if (name.Contains("/") || name.Contains("\\"))
@@ -42,16 +38,17 @@ namespace SaveDataSync
 
             foreach (var loc in saveGameLocations.Values)
             {
-                var locFullPath = Path.GetFullPath(loc);
+                var locNormalizedPath = FileUtils.Normalize(loc);
+
                 // Same path exists
-                if (locFullPath.Equals(fullPath))
+                if (locNormalizedPath.Equals(normalizedPath))
                     throw new Exception("Save game with location " + location + " already exists.");
 
                 // Path contains one another
-                if (locFullPath.Contains(fullPath) || fullPath.Contains(locFullPath))
+                if ((FileUtils.NotAFile(normalizedPath) && locNormalizedPath.Contains(normalizedPath)) || (FileUtils.NotAFile(locNormalizedPath) && normalizedPath.Contains(locNormalizedPath)))
                     throw new Exception("Save locations cannot contain each other.");
             }
-            saveGameLocations[name] = fullPath;
+            saveGameLocations[name] = normalizedPath;
         }
 
         public void RemoveSave(string name)

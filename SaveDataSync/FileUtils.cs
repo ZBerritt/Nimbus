@@ -6,6 +6,18 @@ namespace SaveDataSync
 {
     public class FileUtils
     {
+        public static string Normalize(string path)
+        {
+            return NotAFile(path)
+                ? Path.GetFullPath(path.Replace('/', '\\').WithEnding("\\")) : Path.GetFullPath(path.Replace('/', '\\'));
+        }
+
+        // Returns true if the path leads to anything but a file (dir or nothing)
+        public static bool NotAFile(string path)
+        {
+            return !File.Exists(path) && !Directory.Exists(path) || ((File.GetAttributes(path) & FileAttributes.Directory)) == FileAttributes.Directory;
+        }
+
         public sealed class TemporaryFile : IDisposable
         {
             public TemporaryFile() :
