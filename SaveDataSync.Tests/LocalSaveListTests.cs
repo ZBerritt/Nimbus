@@ -54,7 +54,7 @@ namespace SaveDataSync.Tests
             Assert.ThrowsException<Exception>(() => localSaves.AddSave("temp_directory", Path.GetTempPath()));
 
             // Illegal characters
-            Assert.ThrowsException<Exception>(() => localSaves.AddSave("`~!@#$%^&*()_+-=\\|,<>.?/", testPath));
+            Assert.ThrowsException<Exception>(() => localSaves.AddSave("\\ /", testPath));
 
             // Path that doesn't exist
             Assert.ThrowsException<Exception>(() => localSaves.AddSave("fake_folder", "not/a/path"));

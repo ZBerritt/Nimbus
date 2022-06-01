@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace SaveDataSync
 {
@@ -21,14 +22,36 @@ namespace SaveDataSync
 
         public void AddSave(string name, string location)
         {
+            // Get full path to file
+            var fullPath = Path.GetFullPath(location);
+
+            // Path should exist
+            if (!File.Exists(fullPath) && !Directory.Exists(fullPath))
+                throw new Exception("File/Folder does not exist!");
+
+            // No slashes
+            if (name.Contains("/") || name.Contains("\\"))
+                throw new Exception("Invalid characters detected! Please do not use slashes (\\ or /)");
+
+            // Name cannot be longer than 32 characters
+            if (name.Length > 32)
+                throw new Exception("Save file names must be shorter than 32 characters.");
+
+            // Duplicate names
             if (saveGameLocations.ContainsKey(name)) throw new Exception("Save game with name " + name + " already exists.");
-            var locations = saveGameLocations.Values;
-            foreach (var loc in locations)
+
+            foreach (var loc in saveGameLocations.Values)
             {
-                if (Path.GetFullPath(loc).Equals(Path.GetFullPath(location)))
+                var locFullPath = Path.GetFullPath(loc);
+                // Same path exists
+                if (locFullPath.Equals(fullPath))
                     throw new Exception("Save game with location " + location + " already exists.");
+
+                // Path contains one another
+                if (locFullPath.Contains(fullPath) || fullPath.Contains(locFullPath))
+                    throw new Exception("Save locations cannot contain each other.");
             }
-            saveGameLocations[name] = location;
+            saveGameLocations[name] = fullPath;
         }
 
         public void RemoveSave(string name)
