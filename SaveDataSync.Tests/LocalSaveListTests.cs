@@ -39,7 +39,7 @@ namespace SaveDataSync.Tests
             localSaves.AddSave("test_folder2", testFolder2);
         }
 
-        [TestMethod]
+        [TestMethod("Name Validation Functionality")]
         public void LocalSaveList_NameValidationWorks()
         {
             // Dupe file name
@@ -63,7 +63,7 @@ namespace SaveDataSync.Tests
             Assert.ThrowsException<Exception>(() => localSaves.AddSave("Lorem ipsum dolor sit amet fusce.", testPath));
         }
 
-        [TestMethod]
+        [TestMethod("Save Management Tests")]
         public void LocalSaveList_SaveManagementTests()
         {
             localSaves.AddSave("testing", testPath);
@@ -81,8 +81,8 @@ namespace SaveDataSync.Tests
             Assert.ThrowsException<Exception>(() => localSaves.GetSaveZipData("testing"));
         }
 
-        [TestMethod]
-        public void LocalSaveList_JsonTests()
+        [TestMethod("Json Test")]
+        public void LocalSaveList_JsonTest()
         {
             var json = localSaves.ToJson();
             var fromJson = LocalSaveList.FromJson(json);
@@ -90,7 +90,7 @@ namespace SaveDataSync.Tests
             Assert.AreEqual(json, json2);
         }
 
-        [TestMethod]
+        [TestMethod("Zip is Deterministic")]
         public void LocalSaveList_ZipIsDeterministic()
         {
             var sha256 = SHA256.Create();
