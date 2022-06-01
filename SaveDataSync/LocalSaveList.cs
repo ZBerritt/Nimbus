@@ -7,9 +7,12 @@ using System.IO;
 
 namespace SaveDataSync
 {
-    internal class LocalSaveList
+    public class LocalSaveList
     {
         private Dictionary<string, string> saveGameLocations = new Dictionary<string, string>();
+
+        public LocalSaveList()
+        { }
 
         public Dictionary<string, string> GetSaves()
         {
