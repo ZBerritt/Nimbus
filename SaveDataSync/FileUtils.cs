@@ -4,7 +4,7 @@ using System.IO;
 
 namespace SaveDataSync
 {
-    internal class FileUtils
+    public class FileUtils
     {
         public sealed class TemporaryFile : IDisposable
         {
