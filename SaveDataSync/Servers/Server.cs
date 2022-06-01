@@ -2,7 +2,7 @@
 
 namespace SaveDataSync
 {
-    internal abstract class Server
+    public abstract class Server
     {
         public Server()
         {

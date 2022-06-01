@@ -7,7 +7,7 @@ using System.Text;
 
 namespace SaveDataSync
 {
-    internal class DataManagement
+    public class DataManagement
     {
         /* Server Management */
 

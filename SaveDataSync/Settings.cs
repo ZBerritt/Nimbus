@@ -2,7 +2,7 @@
 
 namespace SaveDataSync
 {
-    internal class Settings
+    public class Settings
     {
         public Settings()
         {

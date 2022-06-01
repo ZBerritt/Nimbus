@@ -13,7 +13,7 @@ using System.Text.RegularExpressions;
 
 namespace SaveDataSync.Servers
 {
-    internal class DropboxServer : Server
+    public class DropboxServer : Server
     {
         public static string APP_ID = "i136jjbqxg4aaci";
         private static readonly HttpClient client = new HttpClient();
