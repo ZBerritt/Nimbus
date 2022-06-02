@@ -153,6 +153,9 @@ namespace SaveDataSync
                     saveFileList.Items.Add(saveItem);
                 }
             }
+
+            /* Change buttons */
+            UpdateButtons();
         }
 
         // Click Events
@@ -191,22 +194,24 @@ namespace SaveDataSync
 
         private void Export_Click(object sender, EventArgs e)
         {
-            Console.WriteLine("Export");
-            //engine.ExportSaves();
+            Export();
         }
 
         private void Import_Click(object sender, EventArgs e)
         {
-            Console.WriteLine("Import");
-            //engine.ImportSaves();
+            Import();
         }
 
         private void SaveFileList_MouseClick(object sender, MouseEventArgs e)
         {
+            UpdateButtons();
             if (e.Button == MouseButtons.Right)
             {
                 var selectedItem = saveFileList.FocusedItem;
-                if (selectedItem == null) return;
+                if (selectedItem == null)
+                {
+                    return;
+                }
                 SaveFileContextMenu(selectedItem.Text).Show(saveFileList, new Point(e.X, e.Y));
             }
         }
@@ -257,58 +262,14 @@ namespace SaveDataSync
                 var quickExport = menu.Items.Add("Quick Export");
                 quickExport.Click += (object sender3, EventArgs e3) =>
                 {
-                    try
-                    {
-                        List<string> savesToExport = GetSelectedSaves(true);
-                        using (var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToExport.Count))
-                        {
-                            var success = engine.ExportSaves(savesToExport.ToArray(), progressBar);
-                            if (success.Length != 0)
-                            {
-                                MessageBox.Show("Successfully Exported:\n- " + string.Join("\n- ", success),
-                                "Success!",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Information);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("An erorr has occured: " + ex.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    finally
-                    {
-                        ReloadUI();
-                    }
+                    Export();
                 };
             }
 
             var quickImport = menu.Items.Add("Quick Import");
             quickImport.Click += (object sender4, EventArgs e4) =>
             {
-                try
-                {
-                    List<string> savesToImport = GetSelectedSaves(false);
-                    using (var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToImport.Count))
-                    {
-                        var success = engine.ImportSaves(savesToImport.ToArray(), progressBar);
-                        if (success.Length != 0)
-                        {
-                            MessageBox.Show("Successfully Imported:\n- " + string.Join("\n- ", success),
-                                "Success!",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Information);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("An erorr has occured: " + ex.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                finally
-                {
-                    ReloadUI();
-                }
+                Import();
             };
 
             if (!hasRemote)
@@ -364,6 +325,70 @@ namespace SaveDataSync
             }
 
             return false;
+        }
+
+        private void UpdateButtons()
+        {
+            var selectingSaves = GetSelectedSaves(false).Count > 0;
+            var CanExportAndImport = engine.GetServer() != null && engine.GetServer().ServerOnline() && selectingSaves;
+            exportButton.Enabled = !SelectingRemoteSave() && CanExportAndImport; // Don't want to export remote saves
+            importButton.Enabled = CanExportAndImport;
+        }
+
+        private void Export()
+        {
+            {
+                try
+                {
+                    List<string> savesToExport = GetSelectedSaves(true);
+                    using (var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToExport.Count))
+                    {
+                        var success = engine.ExportSaves(savesToExport.ToArray(), progressBar);
+                        if (success.Length != 0)
+                        {
+                            MessageBox.Show("Successfully Exported:\n- " + string.Join("\n- ", success),
+                            "Success!",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("An erorr has occured: " + ex.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    ReloadUI();
+                }
+            }
+        }
+
+        private void Import()
+        {
+            try
+            {
+                List<string> savesToImport = GetSelectedSaves(false);
+                using (var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToImport.Count))
+                {
+                    var success = engine.ImportSaves(savesToImport.ToArray(), progressBar);
+                    if (success.Length != 0)
+                    {
+                        MessageBox.Show("Successfully Imported:\n- " + string.Join("\n- ", success),
+                            "Success!",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An erorr has occured: " + ex.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                ReloadUI();
+            }
         }
     }
 }
