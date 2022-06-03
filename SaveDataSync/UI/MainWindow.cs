@@ -221,8 +221,7 @@ namespace SaveDataSync
             var menu = new ContextMenuStrip();
             bool hasRemote = SelectingRemoteSave();
 
-            // BEGIN TESTING
-
+#if DEBUG
             if (!hasRemote)
             {
                 var getHashes = menu.Items.Add("[DEBUG] Get Hashes");
@@ -241,7 +240,7 @@ namespace SaveDataSync
                                MessageBoxIcon.Information);
                 };
             }
-            // END TESTING
+#endif
 
             if (!hasRemote)
             {

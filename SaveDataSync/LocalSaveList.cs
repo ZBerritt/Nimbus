@@ -120,7 +120,6 @@ namespace SaveDataSync
                     OutputStream.Close();
 
                     // Read from temporary file
-                    Console.WriteLine(tmpFile.FilePath);
                     return File.ReadAllBytes(tmpFile.FilePath);
                 }
             }

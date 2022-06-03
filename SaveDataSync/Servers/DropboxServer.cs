@@ -46,7 +46,6 @@ namespace SaveDataSync.Servers
             var response = client.PostAsync("https://api.dropboxapi.com/oauth2/token", content).Result;
             var responseString = response.Content.ReadAsStringAsync().Result;
             JObject responseObject = JObject.Parse(responseString);
-            Console.WriteLine(responseObject.ToString());
             try
             {
                 long expiresIn = long.Parse(responseObject.GetValue("expires_in").ToString());
@@ -137,7 +136,6 @@ namespace SaveDataSync.Servers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
                 return null;
             }
         }
