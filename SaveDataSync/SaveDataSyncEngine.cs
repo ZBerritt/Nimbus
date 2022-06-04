@@ -15,6 +15,8 @@ namespace SaveDataSync
         public IServer Server { get; set; }
         public Settings Settings { get; set; }
 
+        private DataManager DataManager { get; set; }
+
         public static SaveDataSyncEngine Start()
         {
             return Start(Locations.DataDirectory);
@@ -22,11 +24,13 @@ namespace SaveDataSync
 
         public static SaveDataSyncEngine Start(string dataLocation)
         {
-            DataManagement.Init(dataLocation);
+            Instance.DataManager = new DataManager(dataLocation);
 
-            Instance.LocalSaves = DataManagement.GetLocalSaves(dataLocation);
-            Instance.Server = DataManagement.GetServerData(dataLocation);
-            Instance.Settings = DataManagement.GetSettings(dataLocation);
+            Instance.LocalSaves = Instance.DataManager.GetLocalSaves();
+            Instance.Server = Instance.DataManager.GetServerData();
+            Instance.Settings = Instance.DataManager.GetSettings();
+
+            Instance.Save(); // Prevents some possible errors
 
             return Instance;
         }
@@ -181,7 +185,7 @@ namespace SaveDataSync
 
         public void Save()
         {
-            DataManagement.SaveAll(LocalSaves, Server, Settings);
+            DataManager.SaveAll(LocalSaves, Server, Settings);
         }
     }
 }
