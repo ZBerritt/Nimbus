@@ -65,6 +65,7 @@ namespace SaveDataSync.Servers
         internal static string GetApiKey()
         {
             string key = null;
+            byte[] response = Array.Empty<byte>();
             int port = 1235;
             var listener = new TcpListener(IPAddress.Parse("127.0.0.01"), port);
             listener.Start();
@@ -80,14 +81,17 @@ namespace SaveDataSync.Servers
                 {
                     string substring = inputLine.Substring(inputLine.IndexOf("code=") + "code=".Length);
                     key = substring.Substring(0, substring.IndexOf(" "));
-                    var response = Encoding.ASCII.GetBytes("Key obtained! You may now close this tab!");
+                    response = Encoding.ASCII.GetBytes("Key obtained! You may now close this tab!");
                     client.Client.Send(response);
                 }
             }
             catch (Exception)
             {
-                var response = Encoding.ASCII.GetBytes("Some error has occured, please try again...");
-                return null;
+                response = Encoding.ASCII.GetBytes("Some error has occured, please try again...");
+            }
+            finally
+            {
+                client.Client.Send(response);
             }
 
             return key;
@@ -275,6 +279,8 @@ namespace SaveDataSync.Servers
 
             var response = client.SendAsync(request).Result;
             var jsonResponse = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            if (response.StatusCode != HttpStatusCode.OK)
+                return string.Empty;
             string hash = jsonResponse.GetValue("content_hash").ToObject<string>();
             return hash;
         }
@@ -306,7 +312,7 @@ namespace SaveDataSync.Servers
 
             byte[] bytes = concatHashes.ToArray();
             var concatHash = sha256.ComputeHash(bytes);
-            var hex = BitConverter.ToString(concatHash, 0, bytes.Length).Replace("-", "").ToLower();
+            var hex = BitConverter.ToString(concatHash, 0, concatHash.Length).Replace("-", "").ToLower();
 
             return hex;
         }

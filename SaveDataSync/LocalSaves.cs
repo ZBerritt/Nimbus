@@ -5,10 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+// TODO: Handle large files
 namespace SaveDataSync
 {
     public class LocalSaves
     {
+        private static readonly int MAX_FILE_SIZE = 1024 * 1024 * 128; // 128 mb
         public Dictionary<string, string> Saves { get; } = new Dictionary<string, string>();
 
         public void AddSave(string name, string location)
