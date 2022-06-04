@@ -25,7 +25,7 @@ namespace SaveDataSync
         private void OnLoad(object sender, EventArgs e)
         {
             // Grabs the engine which allows communication with the backend
-            engine = SaveDataSyncEngine.CreateInstance();
+            engine = SaveDataSyncEngine.Start();
 
             // Auto sizes the last column of the save list
             saveFileList.Columns[saveFileList.Columns.Count - 1].Width = -2;
@@ -41,7 +41,7 @@ namespace SaveDataSync
         public void ReloadUI()
         {
             /* Check server status */
-            var server = engine.GetServer();
+            var server = engine.Server;
             bool serverOnline = false; // Defaulting to false, shouldn't matter though.
             string serverType = "None";
             string status = "N/A";
@@ -72,7 +72,7 @@ namespace SaveDataSync
 
             /* Reload the save file list */
             saveFileList.Items.Clear();
-            var saves = engine.GetLocalSaveList().GetSaves();
+            var saves = engine.LocalSaves.Saves;
             foreach (var save in saves)
             {
                 ListViewItem saveItem = new ListViewItem(save.Key);
@@ -98,9 +98,9 @@ namespace SaveDataSync
                 ListViewItem.ListViewSubItem statusItem = new ListViewItem.ListViewSubItem(saveItem, "");
                 if (serverOnline && (File.Exists(save.Value) || Directory.Exists(save.Value)))
                 {
-                    var localSaveData = engine.GetLocalSaveList().GetSaveZipData(save.Key);
-                    var remoteHash = engine.GetServer().GetRemoteSaveHash(save.Key);
-                    var localHash = engine.GetServer().GetLocalSaveHash(localSaveData);
+                    var localSaveData = engine.LocalSaves.GetSaveZipData(save.Key);
+                    var remoteHash = engine.Server.GetRemoteSaveHash(save.Key);
+                    var localHash = engine.Server.GetLocalSaveHash(localSaveData);
                     if (remoteHash == null)
                     {
                         statusItem.Text = "Not Uploaded";
@@ -142,7 +142,7 @@ namespace SaveDataSync
             if (server != null && serverOnline)
             {
                 var remoteSaveNames = server.SaveNames();
-                var filtered = remoteSaveNames.Where(c => !new List<string>(engine.GetLocalSaveList().GetSaves().Keys).Contains(c)).ToList();
+                var filtered = remoteSaveNames.Where(c => !engine.LocalSaves.Saves.ContainsKey(c));
                 foreach (var save in filtered)
                 {
                     ListViewItem saveItem = new ListViewItem(save);
@@ -229,9 +229,9 @@ namespace SaveDataSync
                 {
                     var selected = GetSelectedSaves(true);
                     var first = selected[0]; // I don't care I just want the first one
-                    var localSaveData = engine.GetLocalSaveList().GetSaveZipData(first);
-                    var remoteHash = engine.GetServer().GetRemoteSaveHash(first);
-                    var localHash = engine.GetServer().GetLocalSaveHash(localSaveData);
+                    var localSaveData = engine.LocalSaves.GetSaveZipData(first);
+                    var remoteHash = engine.Server.GetRemoteSaveHash(first);
+                    var localHash = engine.Server.GetLocalSaveHash(localSaveData);
                     MessageBox.Show("Remote Hash: " + remoteHash +
                         " (Length: " + remoteHash.Length + ")\nLocal Hash: " + localHash +
                         " (Length: " + remoteHash.Length + ")",
@@ -249,7 +249,7 @@ namespace SaveDataSync
                 {
                     try
                     {
-                        string savePath = engine.GetLocalSaveList().GetSavePath(name);
+                        string savePath = engine.LocalSaves.GetSavePath(name);
                         Process.Start("explorer.exe", string.Format("/select, \"{0}\"", savePath));
                     }
                     catch (Exception) { }
@@ -282,7 +282,7 @@ namespace SaveDataSync
                         MessageBoxIcon.Question);
                     if (confirm == DialogResult.Yes)
                     {
-                        engine.GetLocalSaveList().RemoveSave(name);
+                        engine.LocalSaves.RemoveSave(name);
                         engine.Save();
                         ReloadUI();
                     }
@@ -329,7 +329,7 @@ namespace SaveDataSync
         private void UpdateButtons()
         {
             var selectingSaves = GetSelectedSaves(false).Count > 0;
-            var CanExportAndImport = engine.GetServer() != null && engine.GetServer().ServerOnline() && selectingSaves;
+            var CanExportAndImport = engine.Server != null && engine.Server.ServerOnline() && selectingSaves;
             exportButton.Enabled = !SelectingRemoteSave() && CanExportAndImport; // Don't want to export remote saves
             importButton.Enabled = CanExportAndImport;
         }

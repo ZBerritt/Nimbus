@@ -8,14 +8,14 @@ namespace SaveDataSync.UI
     internal partial class ServerSettings : Form
     {
         public SaveDataSyncEngine engine;
-        public Server server;
+        public IServer server;
 
         private string dropboxVerifier;
 
         public ServerSettings(SaveDataSyncEngine engine)
         {
             this.engine = engine;
-            this.server = engine.GetServer();
+            this.server = engine.Server;
             InitializeComponent();
             if (server != null)
             {
@@ -48,7 +48,7 @@ namespace SaveDataSync.UI
                         }
                         var serverOnline = newServer.ServerOnline();
                         if (!serverOnline) throw new Exception("Server is not online!");
-                        engine.SetServer(newServer);
+                        engine.Server = newServer;
                         break;
                 }
                 Close();

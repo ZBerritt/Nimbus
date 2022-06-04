@@ -65,7 +65,7 @@ namespace SaveDataSync
             if (location == null || (!Directory.Exists(location) && !File.Exists(location))) return;
             try
             {
-                engine.CreateSaveFile(name, location);
+                engine.AddSave(name, location);
                 Close();
             }
             catch (Exception ex)

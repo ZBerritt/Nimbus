@@ -13,7 +13,7 @@ using System.Text.RegularExpressions;
 
 namespace SaveDataSync.Servers
 {
-    public class DropboxServer : Server
+    public class DropboxServer : IServer
     {
         public static string APP_ID = "i136jjbqxg4aaci";
         private static readonly HttpClient client = new HttpClient();
@@ -104,17 +104,17 @@ namespace SaveDataSync.Servers
             return new DropboxServer(bearer, refresh, expires, apiKey);
         }
 
-        public override string Name()
+        public string Name()
         {
             return "Dropbox";
         }
 
-        public override string Host()
+        public string Host()
         {
             return "dropbox.com";
         }
 
-        public override byte[] GetSaveData(string name)
+        public byte[] GetSaveData(string name)
         {
             string urlPath = "/" + name + ".zip"; // Stored on dropbox under this name
             try
@@ -134,13 +134,13 @@ namespace SaveDataSync.Servers
                 var content = response.Content.ReadAsByteArrayAsync().Result;
                 return content;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }
         }
 
-        public override string[] SaveNames()
+        public string[] SaveNames()
         {
             JObject reqBody = new JObject
             {
@@ -169,7 +169,7 @@ namespace SaveDataSync.Servers
             return names.ToArray();
         }
 
-        public override bool ServerOnline()
+        public bool ServerOnline()
         {
             try
             {
@@ -185,7 +185,7 @@ namespace SaveDataSync.Servers
             }
         }
 
-        public override void UploadSaveData(string name, byte[] data)
+        public void UploadSaveData(string name, byte[] data)
         {
             string urlPath = "/" + name + ".zip"; // Stored on dropbox under this name
             JObject reqBody = new JObject
@@ -258,7 +258,7 @@ namespace SaveDataSync.Servers
             return code;
         }
 
-        public override JObject ToJson()
+        public JObject ToJson()
         {
             JObject json = new JObject
             {
@@ -275,7 +275,7 @@ namespace SaveDataSync.Servers
             return apiKey;
         }
 
-        public override string GetRemoteSaveHash(string name)
+        public string GetRemoteSaveHash(string name)
         {
             string urlPath = "/" + name + ".zip"; // Stored on dropbox under this name
             JObject reqBody = new JObject
@@ -297,7 +297,7 @@ namespace SaveDataSync.Servers
             return hash;
         }
 
-        public override string GetLocalSaveHash(byte[] data)
+        public string GetLocalSaveHash(byte[] data)
         {
             int BLOCK_SIZE = 1024 * 1024 * 4; // 4 MB Blocks
             List<byte> concatHashes = new List<byte>(); // SHA-256 hashes for each block

@@ -3,10 +3,10 @@ using System.Security.Cryptography;
 namespace SaveDataSync.Tests
 {
     [TestClass]
-    public class LocalSaveListTests
+    public class LocalSavesTests
     {
-        private static LocalSaveList localSaves = new LocalSaveList();
-        private static string testPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        private static readonly LocalSaves localSaves = new LocalSaves();
+        private static readonly string testPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
         [ClassInitialize]
         public static void Setup(TestContext testContext)
@@ -40,7 +40,7 @@ namespace SaveDataSync.Tests
         }
 
         [TestMethod("Name Validation Functionality")]
-        public void LocalSaveList_NameValidationWorks()
+        public void LocalSaves_NameValidationWorks()
         {
             // Dupe file name
             Assert.ThrowsException<Exception>(() => localSaves.AddSave("test_file1", testPath));
@@ -61,10 +61,10 @@ namespace SaveDataSync.Tests
         }
 
         [TestMethod("Save Management Tests")]
-        public void LocalSaveList_SaveManagementTests()
+        public void LocalSaves_SaveManagementTests()
         {
             localSaves.AddSave("testing", testPath);
-            var saves = localSaves.GetSaves();
+            var saves = localSaves.Saves;
             Assert.AreEqual(saves["testing"], FileUtils.Normalize(testPath));
             localSaves.RemoveSave("testing");
 
@@ -79,16 +79,16 @@ namespace SaveDataSync.Tests
         }
 
         [TestMethod("Json Test")]
-        public void LocalSaveList_JsonTest()
+        public void LocalSaves_JsonTest()
         {
-            var json = localSaves.ToJson();
-            var fromJson = LocalSaveList.FromJson(json);
-            var json2 = fromJson.ToJson();
+            var json = localSaves.Serialize();
+            var fromJson = LocalSaves.Deserialize(json);
+            var json2 = fromJson.Serialize();
             Assert.AreEqual(json, json2);
         }
 
         [TestMethod("Zip is Deterministic")]
-        public void LocalSaveList_ZipIsDeterministic()
+        public void LocalSaves_ZipIsDeterministic()
         {
             var sha256 = SHA256.Create();
 
@@ -116,7 +116,7 @@ namespace SaveDataSync.Tests
         [ClassCleanup]
         public static void Cleanup()
         {
-            var saveLocations = localSaves.GetSaves().Values.ToList();
+            var saveLocations = localSaves.Saves.Values.ToList();
             foreach (var location in saveLocations)
             {
                 FileAttributes attr = File.GetAttributes(location);

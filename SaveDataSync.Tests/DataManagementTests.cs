@@ -20,7 +20,7 @@ namespace SaveDataSync.Tests
         [TestMethod("Local Save List - Save/Load")]
         public void DataManagementTests_LocalSaveListTests()
         {
-            LocalSaveList list = new LocalSaveList();
+            LocalSaves list = new LocalSaves();
             var testFile = Path.GetTempFileName();
             list.AddSave("test", testFile);
 
@@ -28,20 +28,20 @@ namespace SaveDataSync.Tests
             Assert.ThrowsException<Exception>(() => DataManagement.SaveLocalSaveList("invalid_path", list));
 
             // Load empty data
-            Assert.ThrowsException<Exception>(() => DataManagement.GetLocalSaveList(dataDir));
+            Assert.ThrowsException<Exception>(() => DataManagement.GetLocalSaves(dataDir));
 
             // Save to data directory
             DataManagement.SaveLocalSaveList(dataDir, list);
 
             // Load from directory
-            var list2 = DataManagement.GetLocalSaveList(dataDir);
+            var list2 = DataManagement.GetLocalSaves(dataDir);
             Assert.AreEqual(list.GetSavePath("test"), list2.GetSavePath("test"));
         }
 
         [TestMethod("Servers - Save/Load")]
         public void DataManagementTests_ServerTests()
         {
-            Server server = new DropboxServer("random data", "doesn't matter", DateTime.Now, "we're not testing server functionlity");
+            IServer server = new DropboxServer("random data", "doesn't matter", DateTime.Now, "we're not testing server functionlity");
 
             // Save to invalid path
             Assert.ThrowsException<Exception>(() => DataManagement.SaveServerData("invalid_path", server));
@@ -53,7 +53,7 @@ namespace SaveDataSync.Tests
             DataManagement.SaveServerData(dataDir, server);
 
             // Load from directory
-            Server server2 = DataManagement.GetServerData(dataDir);
+            IServer server2 = DataManagement.GetServerData(dataDir);
             Assert.AreEqual(server, server2);
         }
 

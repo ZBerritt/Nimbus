@@ -29,11 +29,6 @@ namespace SaveDataSync
                 Create(Path.Combine(directory, Path.GetRandomFileName()));
             }
 
-            ~TemporaryFile()
-            {
-                Delete();
-            }
-
             public void Dispose()
             {
                 Delete();
@@ -65,11 +60,6 @@ namespace SaveDataSync
             public TemporaryFolder(string directory)
             {
                 Create(Path.Combine(directory, Path.GetRandomFileName()));
-            }
-
-            ~TemporaryFolder()
-            {
-                Delete();
             }
 
             public void Dispose()
