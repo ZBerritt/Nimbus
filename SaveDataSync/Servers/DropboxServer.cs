@@ -16,19 +16,22 @@ namespace SaveDataSync.Servers
     public class DropboxServer : IServer
     {
         public static string APP_ID = "i136jjbqxg4aaci";
-        private static readonly HttpClient client = new HttpClient();
+        private static readonly HttpClient client = new();
 
-        private string bearerKey; // The acual key used to make requests
-        private string refreshKey; // A key used to refresh the bearer key when expires
-        private DateTime expires; // When the bearer key expires
-        private readonly string apiKey; // Does nothing honestly
+        public string BearerKey { get; private set; } // The acual key used to make requests
+        public string RefreshKey { get; private set; } // A key used to refresh the bearer key when expires
+        public DateTime Expires { get; private set; } // When the bearer key expires
+        public string ApiKey { get; private set; } // Does nothing honestly
+
+        public string Name { get; } = "Dropbox";
+        public string Host { get; } = "dropbox.com";
 
         public DropboxServer(string bearerKey, string refreshKey, DateTime expires, string apiKey)
         {
-            this.bearerKey = bearerKey;
-            this.refreshKey = refreshKey;
-            this.expires = expires;
-            this.apiKey = apiKey;
+            BearerKey = bearerKey;
+            RefreshKey = refreshKey;
+            Expires = expires;
+            ApiKey = apiKey;
         }
 
         public static DropboxServer Build(string apiKey, string verifier)
@@ -45,7 +48,7 @@ namespace SaveDataSync.Servers
 
             var response = client.PostAsync("https://api.dropboxapi.com/oauth2/token", content).Result;
             var responseString = response.Content.ReadAsStringAsync().Result;
-            JObject responseObject = JObject.Parse(responseString);
+            var responseObject = JObject.Parse(responseString);
             try
             {
                 long expiresIn = long.Parse(responseObject.GetValue("expires_in").ToString());
@@ -55,7 +58,7 @@ namespace SaveDataSync.Servers
             }
             catch (Exception)
             {
-                return null;
+                return null; // TODO: Refactor the error handling
             }
         }
 
@@ -63,63 +66,48 @@ namespace SaveDataSync.Servers
         {
             string key = null;
             int port = 1235;
-            TcpListener listener = new TcpListener(IPAddress.Parse("127.0.0.01"), port);
+            var listener = new TcpListener(IPAddress.Parse("127.0.0.01"), port);
             listener.Start();
 
-            using (TcpClient client = listener.AcceptTcpClient())
-            using (NetworkStream stream = client.GetStream())
-            using (StreamWriter writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true })
-            using (StreamReader reader = new StreamReader(stream, Encoding.ASCII))
+            using var client = listener.AcceptTcpClient();
+            using var stream = client.GetStream();
+            using var writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true };
+            using var reader = new StreamReader(stream, Encoding.ASCII);
+            try
             {
-                while (key == null)
+                string inputLine = reader.ReadLine(); // First line contains the request
+                if (inputLine.Contains("code="))
                 {
-                    try
-                    {
-                        string inputLine = reader.ReadLine(); // First line contains the request
-                        if (inputLine.Contains("code="))
-                        {
-                            string substring = inputLine.Substring(inputLine.IndexOf("code=") + "code=".Length);
-                            key = substring.Substring(0, substring.IndexOf(" "));
-                            var response = Encoding.ASCII.GetBytes("Key obtained! You may now close this tab!");
-                            client.Client.Send(response);
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        var response = Encoding.ASCII.GetBytes("Some error has occured, please try again...");
-                        return null;
-                    }
+                    string substring = inputLine.Substring(inputLine.IndexOf("code=") + "code=".Length);
+                    key = substring.Substring(0, substring.IndexOf(" "));
+                    var response = Encoding.ASCII.GetBytes("Key obtained! You may now close this tab!");
+                    client.Client.Send(response);
                 }
-
-                return key;
             }
+            catch (Exception)
+            {
+                var response = Encoding.ASCII.GetBytes("Some error has occured, please try again...");
+                return null;
+            }
+
+            return key;
         }
 
         public static DropboxServer BuildFromJson(JObject json)
         {
-            string bearer = (string)json.GetValue("bearerKey");
-            string refresh = (string)json.GetValue("refreshKey");
-            DateTime expires = (DateTime)json.GetValue("expires");
-            string apiKey = (string)json.GetValue("apiKey");
+            var bearer = json.GetValue("bearerKey").ToObject<string>();
+            var refresh = json.GetValue("refreshKey").ToObject<string>();
+            var expires = json.GetValue("expires").ToObject<DateTime>();
+            var apiKey = json.GetValue("apiKey").ToObject<string>();
             return new DropboxServer(bearer, refresh, expires, apiKey);
-        }
-
-        public string Name()
-        {
-            return "Dropbox";
-        }
-
-        public string Host()
-        {
-            return "dropbox.com";
         }
 
         public byte[] GetSaveData(string name)
         {
-            string urlPath = "/" + name + ".zip"; // Stored on dropbox under this name
+            string urlPath = $"/{name}.zip"; // ALWAYS on dropbox under this name
             try
             {
-                JObject reqBody = new JObject
+                var reqBody = new JObject
                 {
                     { "path", urlPath }
                 };
@@ -130,19 +118,19 @@ namespace SaveDataSync.Servers
                 request.Headers.Add("Dropbox-API-Arg", jsonData);
 
                 var response = client.SendAsync(request).Result;
-                if (response.StatusCode == HttpStatusCode.Conflict) return null; // Return nothing if the server errors
+                if (response.StatusCode == HttpStatusCode.Conflict) return Array.Empty<byte>(); // Return nothing if the server errors
                 var content = response.Content.ReadAsByteArrayAsync().Result;
                 return content;
             }
             catch (Exception)
             {
-                return null;
+                return Array.Empty<byte>();
             }
         }
 
         public string[] SaveNames()
         {
-            JObject reqBody = new JObject
+            var reqBody = new JObject
             {
                 { "path", "" },
                 { "include_has_explicit_shared_members", false },
@@ -157,13 +145,13 @@ namespace SaveDataSync.Servers
 
             var response = client.SendAsync(request).Result;
             var result = response.Content.ReadAsStringAsync().Result;
-            JObject responseObject = JObject.Parse(result);
-            JArray entries = (JArray)responseObject.GetValue("entries");
-            List<string> names = new List<string>();
+            var responseObject = JObject.Parse(result);
+            var entries = responseObject.GetValue("entries").ToObject<JArray>();
+            var names = new List<string>();
             foreach (JObject entry in entries)
             {
-                var name = (string)entry.GetValue("name");
-                names.Add(name.Substring(0, name.Length - 4));
+                var name = entry.GetValue("name").ToObject<string>();
+                names.Add(name[..^4]);
             }
 
             return names.ToArray();
@@ -177,9 +165,9 @@ namespace SaveDataSync.Servers
                 request.Headers.Add("Authorization", "Bearer " + GetBearerKey());
                 request.Content = new StringContent("{\"query\": \"verify\"}", Encoding.UTF8, "application/json");
                 var response = client.SendAsync(request).Result;
-                return response.StatusCode == System.Net.HttpStatusCode.OK;
+                return response.StatusCode == HttpStatusCode.OK;
             }
-            catch (AggregateException)
+            catch (Exception)
             {
                 return false;
             }
@@ -187,8 +175,8 @@ namespace SaveDataSync.Servers
 
         public void UploadSaveData(string name, byte[] data)
         {
-            string urlPath = "/" + name + ".zip"; // Stored on dropbox under this name
-            JObject reqBody = new JObject
+            string urlPath = $"/{name}.zip"; // ALWAYS on dropbox under this name
+            var reqBody = new JObject
             {
                 { "path", urlPath },
                 { "mode", "overwrite" },
@@ -209,14 +197,14 @@ namespace SaveDataSync.Servers
 
         private string GetBearerKey()
         {
-            if (expires.CompareTo(DateTime.Now) > 0) return bearerKey;
+            if (Expires.CompareTo(DateTime.Now) > 0) return BearerKey;
 
             // Key expired, generate a new one
             var values = new Dictionary<string, string>
             {
                 { "client_id", APP_ID },
                 { "grant_type", "refresh_token"},
-                { "refresh_token", refreshKey }
+                { "refresh_token", RefreshKey }
             };
             var content = new FormUrlEncodedContent(values);
             var response = client.PostAsync("https://api.dropboxapi.com/oauth2/token", content).Result;
@@ -225,13 +213,13 @@ namespace SaveDataSync.Servers
             long expiresIn = long.Parse(responseObject.GetValue("expires_in").ToString());
             string access = responseObject.GetValue("access_token").ToString();
             RenewBearerKey(access, expiresIn);
-            return bearerKey;
+            return BearerKey;
         }
 
         private void RenewBearerKey(string key, long expiresIn)
         {
-            bearerKey = key;
-            expires = DateTime.Now.Add(TimeSpan.FromSeconds(expiresIn));
+            BearerKey = key;
+            Expires = DateTime.Now.Add(TimeSpan.FromSeconds(expiresIn));
         }
 
         public static string GenerateVerifier()
@@ -260,25 +248,19 @@ namespace SaveDataSync.Servers
 
         public JObject ToJson()
         {
-            JObject json = new JObject
+            return new JObject
             {
-                { "bearerKey", bearerKey },
-                { "refreshKey", refreshKey },
-                { "expires", expires },
-                { "apiKey", apiKey }
+                { "bearerKey", BearerKey },
+                { "refreshKey", RefreshKey },
+                { "expires", Expires },
+                { "apiKey", ApiKey }
             };
-            return json;
-        }
-
-        public string GetServerApiKey()
-        {
-            return apiKey;
         }
 
         public string GetRemoteSaveHash(string name)
         {
-            string urlPath = "/" + name + ".zip"; // Stored on dropbox under this name
-            JObject reqBody = new JObject
+            string urlPath = $"/{name}.zip"; // ALWAYS on dropbox under this name
+            var reqBody = new JObject
             {
                 { "path", urlPath },
                 {"include_media_info", false },
@@ -293,14 +275,14 @@ namespace SaveDataSync.Servers
 
             var response = client.SendAsync(request).Result;
             var jsonResponse = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            string hash = (string)jsonResponse.GetValue("content_hash");
+            string hash = jsonResponse.GetValue("content_hash").ToObject<string>();
             return hash;
         }
 
         public string GetLocalSaveHash(byte[] data)
         {
             int BLOCK_SIZE = 1024 * 1024 * 4; // 4 MB Blocks
-            List<byte> concatHashes = new List<byte>(); // SHA-256 hashes for each block
+            var concatHashes = new List<byte>(); // SHA-256 hashes for each block
             var sha256 = SHA256.Create();
 
             int i = 0;

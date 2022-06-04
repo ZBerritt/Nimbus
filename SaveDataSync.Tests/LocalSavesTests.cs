@@ -78,7 +78,7 @@ namespace SaveDataSync.Tests
             Assert.ThrowsException<Exception>(() => localSaves.GetSaveZipData("testing"));
         }
 
-        [TestMethod("Json Test")]
+        [TestMethod("Serialization")]
         public void LocalSaves_JsonTest()
         {
             var json = localSaves.Serialize();

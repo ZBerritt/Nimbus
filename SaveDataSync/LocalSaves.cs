@@ -72,7 +72,7 @@ namespace SaveDataSync
                 string[] files = FileUtils.GetFileList(location); // Recursively get all files
                 foreach (string file in files)
                 {
-                    string entryName = Path.Combine(name, file.Substring(location.Length + 1, file.Length - location.Length - 1));
+                    string entryName = Path.Combine(name, file[location.Length..]);
                     var fileEntry = new ZipEntry(entryName)
                     {
                         DateTime = File.GetCreationTime(file) // Date time uses creation time
@@ -87,7 +87,7 @@ namespace SaveDataSync
                 return File.ReadAllBytes(tmpFile.FilePath);
             }
 
-            var entry = new ZipEntry(location)
+            var entry = new ZipEntry(Path.GetFileName(location))
             {
                 DateTime = File.GetCreationTime(location) // Date time uses creation time
             };

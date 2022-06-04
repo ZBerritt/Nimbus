@@ -19,7 +19,7 @@ namespace SaveDataSync.UI
             InitializeComponent();
             if (server != null)
             {
-                var serverName = server.Name();
+                var serverName = server.Name;
                 switch (serverName)
                 {
                     case "Dropbox":

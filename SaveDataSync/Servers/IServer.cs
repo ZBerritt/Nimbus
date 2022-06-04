@@ -2,14 +2,15 @@
 
 namespace SaveDataSync
 {
+    // TODO: handle import/export errors properly
     public interface IServer
 
     {
         // The name/type of host
-        public string Name();
+        public string Name { get; }
 
         // The server being hosted on (may vary if selfhosted)
-        public string Host();
+        public string Host { get; }
 
         // An array of all saves on the server
         public string[] SaveNames();

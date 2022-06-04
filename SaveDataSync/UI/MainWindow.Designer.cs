@@ -222,7 +222,7 @@
             this.host.Size = new System.Drawing.Size(19, 25);
             this.host.TabIndex = 16;
             this.host.Text = "-";
-            this.host.Click += new System.EventHandler(this.label2_Click);
+            this.host.Click += new System.EventHandler(this.Label2_Click);
             // 
             // serverSettingsBtn
             // 
@@ -233,7 +233,7 @@
             this.serverSettingsBtn.TabIndex = 17;
             this.serverSettingsBtn.Text = "Manage Server";
             this.serverSettingsBtn.UseVisualStyleBackColor = true;
-            this.serverSettingsBtn.Click += new System.EventHandler(this.serverSettingsBtn_Click);
+            this.serverSettingsBtn.Click += new System.EventHandler(this.ServerSettingsBtn_Click);
             // 
             // progressLabel
             // 

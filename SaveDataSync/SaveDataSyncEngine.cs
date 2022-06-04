@@ -125,7 +125,6 @@ namespace SaveDataSync
                     if (location == "") throw new Exception("Import aborted by user!");
                 }
 
-                var saveLocation = LocalSaves.GetSavePath(save);
                 var remoteZipData = Server.GetSaveData(save);
                 if (remoteZipData == null || remoteZipData.Length == 0)
                 {
@@ -147,36 +146,8 @@ namespace SaveDataSync
                         continue;
                     }
                 }
-                using var tmpFile = new FileUtils.TemporaryFile();
-                using var tmpDir = new FileUtils.TemporaryFolder();
-                var tempFile = tmpFile.FilePath;
-                var tempDir = tmpDir.FolderPath;
-                File.WriteAllBytes(tempFile, remoteZipData);
-                FastZip fastZip = new FastZip();
-                fastZip.ExtractZip(tempFile, tempDir, null);
-                string[] content = Directory.GetFiles(tempDir, "*.*", SearchOption.TopDirectoryOnly);
-                if (content.Length == 0) content = Directory.GetDirectories(tempDir, "*.*", SearchOption.TopDirectoryOnly);
-                var saveContent = content[0]; // There should be only one output
-                FileAttributes attr = File.GetAttributes(saveContent);
-                if (attr.HasFlag(FileAttributes.Directory))
-                {
-                    // Handle as a dir
-                    foreach (string dir in Directory.GetDirectories(saveContent, "*", SearchOption.AllDirectories))
-                    {
-                        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir.Replace(saveContent, saveLocation)); // Add all dirs
-                    }
 
-                    foreach (string file in Directory.GetFiles(saveContent, "*", SearchOption.AllDirectories))
-                    {
-                        File.Copy(file, file.Replace(saveContent, saveLocation), true); // Add all files
-                    }
-                }
-                else
-                {
-                    // Handle as a file
-                    File.Copy(saveContent, saveLocation, true);
-                }
-
+                LocalSaves.ExtractSaveData(save, remoteZipData);
                 success.Add(save);
             }
 
