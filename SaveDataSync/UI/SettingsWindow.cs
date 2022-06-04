@@ -11,7 +11,7 @@ namespace SaveDataSync.UI
         public SettingsWindow(SaveDataSyncEngine engine)
         {
             this.engine = engine;
-            this.settingsCopy = engine.GetSettings().Clone();
+            this.settingsCopy = engine.Settings.Clone();
             InitializeComponent();
         }
 
@@ -23,7 +23,7 @@ namespace SaveDataSync.UI
         private void saveBtn_Click(object sender, EventArgs e)
         {
             // Get the new settings from the UI here
-            engine.SetSettings(settingsCopy);
+            engine.Settings = settingsCopy;
             engine.Save();
             Close();
         }

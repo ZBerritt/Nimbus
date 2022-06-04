@@ -7,48 +7,59 @@ using System.Text;
 
 namespace SaveDataSync
 {
-    public class DataManagement
+    public static class DataManagement
     {
         /* Server Management */
 
-        public static LocalSaveList GetLocalSaveList()
+        public static LocalSaves GetLocalSaves()
         {
-            return GetLocalSaveList(Locations.DataDirectory());
+            return GetLocalSaves(Locations.DataDirectory);
         }
 
-        public static LocalSaveList GetLocalSaveList(string location)
+        public static LocalSaves GetLocalSaves(string location)
         {
             if (!Directory.Exists(location) || !File.Exists(Path.Combine(location, "local_saves.json")))
-                return new LocalSaveList();
+                return new LocalSaves();
             using (FileStream localSaveStream = File.Open(Path.Combine(location, "local_saves.json"), FileMode.Open))
             {
                 using (StreamReader sr = new StreamReader(localSaveStream))
                 {
-                    LocalSaveList localSaveList = LocalSaveList.FromJson(sr.ReadToEnd());
+                    LocalSaves localSaveList = LocalSaves.Deserialize(sr.ReadToEnd());
                     return localSaveList;
                 }
             }
         }
 
-        public static void SaveLocalSaveList(LocalSaveList localSaveList)
+        public static void Init(string location)
         {
-            SaveLocalSaveList(Locations.DataDirectory(), localSaveList);
+            if (!Directory.Exists(location))
+                Directory.CreateDirectory(location);
         }
 
-        public static void SaveLocalSaveList(string location, LocalSaveList localSaveList)
+        public static void Init()
+        {
+            Init(Locations.DataDirectory);
+        }
+
+        public static void SaveLocalSaveList(LocalSaves localSaveList)
+        {
+            SaveLocalSaveList(Locations.DataDirectory, localSaveList);
+        }
+
+        public static void SaveLocalSaveList(string location, LocalSaves localSaveList)
         {
             // Check to see if the location exists, otherwise create it
             if (!Directory.Exists(location)) Directory.CreateDirectory(location);
 
-            File.WriteAllText(Path.Combine(location, "local_saves.json"), localSaveList.ToJson());
+            File.WriteAllText(Path.Combine(location, "local_saves.json"), localSaveList.Serialize());
         }
 
-        public static void SaveServerData(Server server)
+        public static void SaveServerData(IServer server)
         {
-            SaveServerData(Locations.DataDirectory(), server);
+            SaveServerData(Locations.DataDirectory, server);
         }
 
-        public static void SaveServerData(string location, Server server)
+        public static void SaveServerData(string location, IServer server)
         {
             if (server == null) return;
             var json = new JObject();
@@ -68,12 +79,12 @@ namespace SaveDataSync
             }
         }
 
-        public static Server GetServerData()
+        public static IServer GetServerData()
         {
-            return GetServerData(Locations.DataDirectory());
+            return GetServerData(Locations.DataDirectory);
         }
 
-        public static Server GetServerData(string location)
+        public static IServer GetServerData(string location)
         {
             if (!Directory.Exists(location) || !File.Exists(Path.Combine(location, "server_data.dat")))
                 return null;
@@ -107,7 +118,7 @@ namespace SaveDataSync
 
         public static void SaveSettings(Settings settings)
         {
-            SaveSettings(Locations.DataDirectory(), settings);
+            SaveSettings(Locations.DataDirectory, settings);
         }
 
         public static void SaveSettings(string location, Settings settings)
@@ -118,7 +129,7 @@ namespace SaveDataSync
 
         public static Settings GetSettings()
         {
-            return GetSettings(Locations.DataDirectory());
+            return GetSettings(Locations.DataDirectory);
         }
 
         public static Settings GetSettings(string location)
@@ -140,6 +151,13 @@ namespace SaveDataSync
                     return settings;
                 }
             }
+        }
+
+        internal static void SaveAll(LocalSaves localSaveList, IServer server, Settings settings)
+        {
+            SaveLocalSaveList(localSaveList);
+            SaveServerData(server);
+            SaveSettings(settings);
         }
     }
 }

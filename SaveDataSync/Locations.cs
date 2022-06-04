@@ -5,9 +5,6 @@ namespace SaveDataSync
 {
     internal class Locations
     {
-        public static string DataDirectory()
-        {
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SaveDataSync");
-        }
+        public static string DataDirectory { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SaveDataSync");
     }
 }

@@ -9,73 +9,50 @@ namespace SaveDataSync
 {
     internal class SaveDataSyncEngine
     {
-        private static SaveDataSyncEngine instance;
-        private LocalSaveList localSaveList;
-        private Server server;
-        private Settings settings;
+        private static SaveDataSyncEngine Instance { get; } = new SaveDataSyncEngine();
 
-        public static SaveDataSyncEngine CreateInstance()
+        public LocalSaves LocalSaves { get; set; }
+        public IServer Server { get; set; }
+        public Settings Settings { get; set; }
+
+        public static SaveDataSyncEngine Start()
         {
-            if (instance != null) throw new Exception("Engine instance already exists!");
-            instance = new SaveDataSyncEngine();
-            return instance;
+            return Start(Locations.DataDirectory);
         }
 
-        private SaveDataSyncEngine()
+        public static SaveDataSyncEngine Start(string dataLocation)
         {
-            localSaveList = DataManagement.GetLocalSaveList();
-            server = DataManagement.GetServerData();
-            settings = DataManagement.GetSettings();
+            DataManagement.Init(dataLocation);
+
+            Instance.LocalSaves = DataManagement.GetLocalSaves(dataLocation);
+            Instance.Server = DataManagement.GetServerData(dataLocation);
+            Instance.Settings = DataManagement.GetSettings(dataLocation);
+
+            return Instance;
         }
 
-        public LocalSaveList GetLocalSaveList()
+        public void AddSave(string name, string location)
         {
-            return localSaveList;
-        }
-
-        public Settings GetSettings()
-        {
-            return settings;
-        }
-
-        public void SetSettings(Settings settings)
-        {
-            this.settings = settings;
-            Save();
-        }
-
-        public Server GetServer()
-        {
-            return server;
-        }
-
-        public void SetServer(Server server)
-        {
-            this.server = server;
-            Save();
-        }
-
-        // Button actions
-        public void CreateSaveFile(string name, string location)
-        {
-            localSaveList.AddSave(name, location);
+            LocalSaves.AddSave(name, location);
             Save();
         }
 
         // Returns all files successfully exported
+        // TODO: Refactor
         public string[] ExportSaves(string[] saves, ProgressBarControl progress)
         {
             var success = new List<string>();
             foreach (string save in saves)
             {
-                progress.Increment("Exporting '" + save + "'");
+                progress.Increment($"Exporting {save}");
+
                 // Remote saves should NEVER be called in this but it'll check anyways
-                if (!new List<string>(localSaveList.GetSaves().Keys).Contains(save))
+                if (!LocalSaves.Saves.ContainsKey(save))
                 {
                     throw new Exception("Remote files cannot be exported");
                 }
 
-                var saveLocation = localSaveList.GetSavePath(save);
+                var saveLocation = LocalSaves.GetSavePath(save);
                 if (!Directory.Exists(saveLocation) && !File.Exists(saveLocation))
                 {
                     if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
@@ -97,7 +74,7 @@ namespace SaveDataSync
                     }
                 }
 
-                var zipData = localSaveList.GetSaveZipData(save);
+                var zipData = LocalSaves.GetSaveZipData(save);
                 if (zipData == null || zipData.Length == 0)
                 {
                     if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
@@ -118,23 +95,25 @@ namespace SaveDataSync
                         continue;
                     }
                 }
-                server.UploadSaveData(save, zipData);
+                Server.UploadSaveData(save, zipData);
                 success.Add(save);
             }
 
             return success.ToArray();
         }
 
+        // TODO: Refactor
         public string[] ImportSaves(string[] saves, ProgressBarControl progress)
         {
             var success = new List<string>();
             foreach (string save in saves)
             {
-                progress.Increment("Importing '" + save + "'");
+                progress.Increment($"Importing {save}");
+
                 // If save is remote, prompt for a location
-                if (!new List<string>(localSaveList.GetSaves().Keys).Contains(save))
+                if (!LocalSaves.Saves.ContainsKey(save))
                 {
-                    SaveFileWindow prompt = new SaveFileWindow(instance)
+                    var prompt = new SaveFileWindow(Instance)
                     {
                         ShowIcon = true
                     };
@@ -142,8 +121,8 @@ namespace SaveDataSync
                     if (location == "") throw new Exception("Import aborted by user!");
                 }
 
-                var saveLocation = localSaveList.GetSavePath(save);
-                var remoteZipData = server.GetSaveData(save);
+                var saveLocation = LocalSaves.GetSavePath(save);
+                var remoteZipData = Server.GetSaveData(save);
                 if (remoteZipData == null || remoteZipData.Length == 0)
                 {
                     if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
@@ -164,39 +143,37 @@ namespace SaveDataSync
                         continue;
                     }
                 }
-                using (var tmpFile = new FileUtils.TemporaryFile())
-                using (var tmpDir = new FileUtils.TemporaryFolder())
+                using var tmpFile = new FileUtils.TemporaryFile();
+                using var tmpDir = new FileUtils.TemporaryFolder();
+                var tempFile = tmpFile.FilePath;
+                var tempDir = tmpDir.FolderPath;
+                File.WriteAllBytes(tempFile, remoteZipData);
+                FastZip fastZip = new FastZip();
+                fastZip.ExtractZip(tempFile, tempDir, null);
+                string[] content = Directory.GetFiles(tempDir, "*.*", SearchOption.TopDirectoryOnly);
+                if (content.Length == 0) content = Directory.GetDirectories(tempDir, "*.*", SearchOption.TopDirectoryOnly);
+                var saveContent = content[0]; // There should be only one output
+                FileAttributes attr = File.GetAttributes(saveContent);
+                if (attr.HasFlag(FileAttributes.Directory))
                 {
-                    var tempFile = tmpFile.FilePath;
-                    var tempDir = tmpDir.FolderPath;
-                    File.WriteAllBytes(tempFile, remoteZipData);
-                    FastZip fastZip = new FastZip();
-                    fastZip.ExtractZip(tempFile, tempDir, null);
-                    string[] content = Directory.GetFiles(tempDir, "*.*", SearchOption.TopDirectoryOnly);
-                    if (content.Length == 0) content = Directory.GetDirectories(tempDir, "*.*", SearchOption.TopDirectoryOnly);
-                    var saveContent = content[0]; // There should be only one output
-                    FileAttributes attr = File.GetAttributes(saveContent);
-                    if (attr.HasFlag(FileAttributes.Directory))
+                    // Handle as a dir
+                    foreach (string dir in Directory.GetDirectories(saveContent, "*", SearchOption.AllDirectories))
                     {
-                        // Handle as a dir
-                        foreach (string dir in Directory.GetDirectories(saveContent, "*", SearchOption.AllDirectories))
-                        {
-                            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir.Replace(saveContent, saveLocation)); // Add all dirs
-                        }
-
-                        foreach (string file in Directory.GetFiles(saveContent, "*", SearchOption.AllDirectories))
-                        {
-                            File.Copy(file, file.Replace(saveContent, saveLocation), true); // Add all files
-                        }
-                    }
-                    else
-                    {
-                        // Handle as a file
-                        File.Copy(saveContent, saveLocation, true);
+                        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir.Replace(saveContent, saveLocation)); // Add all dirs
                     }
 
-                    success.Add(save);
+                    foreach (string file in Directory.GetFiles(saveContent, "*", SearchOption.AllDirectories))
+                    {
+                        File.Copy(file, file.Replace(saveContent, saveLocation), true); // Add all files
+                    }
                 }
+                else
+                {
+                    // Handle as a file
+                    File.Copy(saveContent, saveLocation, true);
+                }
+
+                success.Add(save);
             }
 
             return success.ToArray();
@@ -204,9 +181,7 @@ namespace SaveDataSync
 
         public void Save()
         {
-            DataManagement.SaveLocalSaveList(localSaveList);
-            DataManagement.SaveServerData(server);
-            DataManagement.SaveSettings(settings);
+            DataManagement.SaveAll(LocalSaves, Server, Settings);
         }
     }
 }

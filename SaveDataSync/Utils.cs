@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SaveDataSync
 {
@@ -13,14 +7,7 @@ namespace SaveDataSync
     {
         public static void OpenUrl(string url)
         {
-            try
-            {
-                Process.Start(url);
-            }
-            catch
-            {
-                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-            }
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
         }
 
         /* String Utils - https://stackoverflow.com/questions/5617320/given-full-path-check-if-path-is-subdirectory-of-some-other-path-or-otherwise */
@@ -49,14 +36,14 @@ namespace SaveDataSync
         {
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
             if (length < 0)
             {
-                throw new ArgumentOutOfRangeException("length", length, "Length is less than zero");
+                throw new ArgumentOutOfRangeException(nameof(length), length, "Length is less than zero");
             }
 
-            return (length < value.Length) ? value.Substring(value.Length - length) : value;
+            return (length < value.Length) ? value[^length..] : value;
         }
     }
 }

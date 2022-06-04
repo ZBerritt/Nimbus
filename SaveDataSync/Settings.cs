@@ -14,7 +14,7 @@ namespace SaveDataSync
 
         public Settings Clone()
         {
-            return (Settings)MemberwiseClone();
+            return MemberwiseClone() as Settings;
         }
 
         public JObject ToJSON()
