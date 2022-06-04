@@ -23,7 +23,7 @@ namespace SaveDataSync.UI
                 switch (serverName)
                 {
                     case "Dropbox":
-                        var apiKey = ((DropboxServer)server).GetServerApiKey();
+                        var apiKey = (server as DropboxServer).ApiKey;
                         if (apiKey != null) dropboxApiKey.Text = apiKey;
                         break;
                 }
