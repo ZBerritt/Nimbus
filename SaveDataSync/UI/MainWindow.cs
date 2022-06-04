@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace SaveDataSync
@@ -28,7 +29,7 @@ namespace SaveDataSync
             engine = SaveDataSyncEngine.Start();
 
             // Auto sizes the last column of the save list
-            saveFileList.Columns[saveFileList.Columns.Count - 1].Width = -2;
+            saveFileList.Columns[^1].Width = -2;
 
             // Forces the save list to sort correctly
             saveFileList.ListViewItemSorter = new SaveListSorter();
@@ -47,10 +48,10 @@ namespace SaveDataSync
             string status = "N/A";
             Color statusColor = Color.Black;
             string serverHost = "N/A";
-            if (server != null)
+            if (server is not null)
             {
-                serverType = server.Name();
-                serverHost = server.Host();
+                serverType = server.Name;
+                serverHost = server.Host;
                 try
                 {
                     serverOnline = server.ServerOnline();
@@ -75,27 +76,22 @@ namespace SaveDataSync
             var saves = engine.LocalSaves.Saves;
             foreach (var save in saves)
             {
-                ListViewItem saveItem = new ListViewItem(save.Key);
-                saveItem.UseItemStyleForSubItems = false;
+                var saveItem = new ListViewItem(save.Key)
+                {
+                    UseItemStyleForSubItems = false
+                };
                 saveItem.SubItems.Add(save.Value);
 
                 // Get file size
-                if (!File.Exists(save.Value) && !Directory.Exists(save.Value))
-                {
-                    saveItem.SubItems.Add("N/A");
-                }
-                else
-                {
-                    FileAttributes attr = File.GetAttributes(save.Value);
-                    long saveSize = attr.HasFlag(FileAttributes.Directory)
-                        ? new DirectoryInfo(save.Value).EnumerateFiles("*.*", SearchOption.AllDirectories).Sum(fi => fi.Length)
-                        : new FileInfo(save.Value).Length; // The size of the file/folder in bytes
-                    string readableSize = FileUtils.ReadableFileSize(saveSize);
-                    saveItem.SubItems.Add(readableSize);
-                }
+                var fileSize = File.Exists(save.Value) || Directory.Exists(save.Value)
+                    ? FileUtils.ReadableFileSize(File.GetAttributes(save.Value).HasFlag(FileAttributes.Directory)
+                        ? FileUtils.GetFileList(save.Value).Sum(fi => new FileInfo(fi).Length)
+                        : new FileInfo(save.Value).Length)
+                    : "N/A";
+                saveItem.SubItems.Add(fileSize);
 
                 // Get file sync status
-                ListViewItem.ListViewSubItem statusItem = new ListViewItem.ListViewSubItem(saveItem, "");
+                var statusItem = new ListViewItem.ListViewSubItem(saveItem, "");
                 if (serverOnline && (File.Exists(save.Value) || Directory.Exists(save.Value)))
                 {
                     var localSaveData = engine.LocalSaves.GetSaveZipData(save.Key);
@@ -145,8 +141,10 @@ namespace SaveDataSync
                 var filtered = remoteSaveNames.Where(c => !engine.LocalSaves.Saves.ContainsKey(c));
                 foreach (var save in filtered)
                 {
-                    ListViewItem saveItem = new ListViewItem(save);
-                    saveItem.ForeColor = Color.DarkRed;
+                    var saveItem = new ListViewItem(save)
+                    {
+                        ForeColor = Color.DarkRed
+                    };
                     saveItem.SubItems.Add("Remote");
                     saveItem.SubItems.Add("N/A");
                     saveItem.SubItems.Add("On Server");
@@ -161,7 +159,7 @@ namespace SaveDataSync
         // Click Events
         private void NewSaveFile_Click(object sender, EventArgs e)
         {
-            SaveFileWindow sfw = new SaveFileWindow(engine)
+            var sfw = new SaveFileWindow(engine)
             {
                 Owner = this,
                 ShowInTaskbar = false
@@ -172,7 +170,7 @@ namespace SaveDataSync
 
         private void Settings_Click(object sender, EventArgs e)
         {
-            SettingsWindow sw = new SettingsWindow(engine)
+            var sw = new SettingsWindow(engine)
             {
                 Owner = this,
                 ShowInTaskbar = true
@@ -181,9 +179,9 @@ namespace SaveDataSync
             ReloadUI();
         }
 
-        private void serverSettingsBtn_Click(object sender, EventArgs e)
+        private void ServerSettingsBtn_Click(object sender, EventArgs e)
         {
-            ServerSettings ss = new ServerSettings(engine)
+            var ss = new ServerSettings(engine)
             {
                 Owner = this,
                 ShowInTaskbar = true
@@ -291,20 +289,16 @@ namespace SaveDataSync
             return menu;
         }
 
-        private void label2_Click(object sender, EventArgs e)
+        private void Label2_Click(object sender, EventArgs e)
         {
-            try
-            {
-                var url = "http://" + host.Text;
-                Process.Start(url);
-            }
-            catch (Exception) { }
+            var url = "http://" + host.Text;
+            Utils.OpenUrl(url);
         }
 
         private List<string> GetSelectedSaves(bool noRemote)
         {
             var selected = saveFileList.SelectedItems;
-            List<string> saves = new List<string>();
+            var saves = new List<string>();
             foreach (ListViewItem item in selected)
             {
                 if (noRemote && item.SubItems[1].Text == "Remote") throw new Exception("Remote save detected");
@@ -340,16 +334,20 @@ namespace SaveDataSync
                 try
                 {
                     List<string> savesToExport = GetSelectedSaves(true);
-                    using (var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToExport.Count))
+                    using var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToExport.Count);
+                    var success = engine.ExportSaves(savesToExport.ToArray(), progressBar);
+                    if (success.Length != 0)
                     {
-                        var success = engine.ExportSaves(savesToExport.ToArray(), progressBar);
-                        if (success.Length != 0)
+                        var successMessage = new StringBuilder();
+                        successMessage.Append("Successfully Exported:");
+                        foreach (var name in success)
                         {
-                            MessageBox.Show("Successfully Exported:\n- " + string.Join("\n- ", success),
-                            "Success!",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information);
+                            successMessage.Append($"\n• {name}");
                         }
+                        MessageBox.Show(successMessage.ToString(),
+                        "Success!",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
                     }
                 }
                 catch (Exception ex)
@@ -368,16 +366,20 @@ namespace SaveDataSync
             try
             {
                 List<string> savesToImport = GetSelectedSaves(false);
-                using (var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToImport.Count))
+                using var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToImport.Count);
+                var success = engine.ImportSaves(savesToImport.ToArray(), progressBar);
+                if (success.Length != 0)
                 {
-                    var success = engine.ImportSaves(savesToImport.ToArray(), progressBar);
-                    if (success.Length != 0)
+                    var successMessage = new StringBuilder();
+                    successMessage.Append("Successfully Imported:");
+                    foreach (var name in success)
                     {
-                        MessageBox.Show("Successfully Imported:\n- " + string.Join("\n- ", success),
-                            "Success!",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information);
+                        successMessage.Append($"\n• {name}");
                     }
+                    MessageBox.Show(successMessage.ToString(),
+                    "Success!",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)

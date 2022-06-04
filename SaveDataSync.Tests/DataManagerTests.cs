@@ -15,6 +15,11 @@ namespace SaveDataSync.Tests
         [ClassInitialize]
         public static void Setup(TestContext testContext)
         {
+            if (testContext is null)
+            {
+                throw new ArgumentNullException(nameof(testContext));
+            }
+
             Directory.CreateDirectory(dataDir);
         }
 

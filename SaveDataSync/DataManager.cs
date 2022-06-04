@@ -92,7 +92,7 @@ namespace SaveDataSync
             if (server is null) return;
             var json = new JObject();
             var serverDataJson = server.ToJson();
-            var serverName = server.Name();
+            var serverName = server.Name;
             json.Add("name", serverName);
             json.Add("data", serverDataJson);
             var result = json.ToString();
