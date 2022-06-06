@@ -97,7 +97,7 @@ namespace SaveDataSync
                     var localSaveData = engine.LocalSaves.GetSaveZipData(save.Key);
                     var remoteHash = engine.Server.GetRemoteSaveHash(save.Key);
                     var localHash = engine.Server.GetLocalSaveHash(localSaveData);
-                    if (remoteHash == null)
+                    if (remoteHash is null)
                     {
                         statusItem.Text = "Not Uploaded";
                         statusItem.ForeColor = Color.Gray;
@@ -118,7 +118,7 @@ namespace SaveDataSync
                     statusItem.Text = "No Local Save";
                     statusItem.ForeColor = Color.Gray;
                 }
-                else if (server != null)
+                else if (server is not null)
                 {
                     statusItem.Text = "Offline";
                     statusItem.ForeColor = Color.DarkGoldenrod;
