@@ -84,9 +84,7 @@ namespace SaveDataSync
 
                 // Get file size
                 var fileSize = File.Exists(save.Value) || Directory.Exists(save.Value)
-                    ? FileUtils.ReadableFileSize(File.GetAttributes(save.Value).HasFlag(FileAttributes.Directory)
-                        ? FileUtils.GetFileList(save.Value).Sum(fi => new FileInfo(fi).Length)
-                        : new FileInfo(save.Value).Length)
+                    ? FileUtils.ReadableFileSize(FileUtils.GetSize(save.Value))
                     : "N/A";
                 saveItem.SubItems.Add(fileSize);
 

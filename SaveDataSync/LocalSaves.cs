@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Windows.Forms;
 
 // TODO: Handle large files
 namespace SaveDataSync
@@ -20,15 +21,15 @@ namespace SaveDataSync
 
             // No slashes
             if (name.Contains('/') || name.Contains('\\'))
-                throw new Exception("Invalid characters detected! Please do not use slashes (\\ or /)");
+                throw new InvalidSaveException("Invalid characters detected! Please do not use slashes (\\ or /).");
 
             // Name cannot be longer than 32 characters
             if (name.Length > 32)
-                throw new Exception("Save file names must be shorter than 32 characters.");
+                throw new InvalidSaveException("Save file names must be shorter than 32 characters.");
 
             // Duplicate names
             if (Saves.ContainsKey(name))
-                throw new Exception("Save game with name " + name + " already exists.");
+                throw new InvalidSaveException("Save game with name " + name + " already exists.");
 
             foreach (var loc in Saves.Values)
             {
@@ -36,12 +37,16 @@ namespace SaveDataSync
 
                 // Same path exists
                 if (locNormalizedPath.Equals(normalizedPath))
-                    throw new Exception("Save game with location " + location + " already exists.");
+                    throw new InvalidSaveException("Save game with location " + location + " already exists.");
 
                 // Path contains one another
                 if ((FileUtils.NotAFile(normalizedPath) && locNormalizedPath.Contains(normalizedPath)) || (FileUtils.NotAFile(locNormalizedPath) && normalizedPath.Contains(locNormalizedPath)))
-                    throw new Exception("Save locations cannot contain each other.");
+                    throw new InvalidSaveException("Save locations cannot contain each other.");
             }
+
+            // Save file exceeds max size
+            if (FileUtils.GetSize(normalizedPath) > MAX_FILE_SIZE)
+                throw new SaveTooLargeException();
 
             Saves[name] = normalizedPath; // Always add the save using the normalized path to avoid errors
         }
@@ -169,7 +174,20 @@ namespace SaveDataSync
             {
                 string name = save.GetValue("name").ToString();
                 string location = save.GetValue("location").ToString();
-                list.AddSave(name, location);
+
+                try
+                {
+                    list.AddSave(name, location);
+                }
+                catch (SaveTooLargeException ex)
+                {
+                    // TODO: Handle large save files from load differently
+                    MessageBox.Show($"{ex.Message} Save will be removed locally.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (InvalidSaveException ex)
+                {
+                    MessageBox.Show($"{ex.Message} Save will be removed locally.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
 
             return list;

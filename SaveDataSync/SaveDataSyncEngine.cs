@@ -37,8 +37,18 @@ namespace SaveDataSync
 
         public void AddSave(string name, string location)
         {
-            LocalSaves.AddSave(name, location);
-            Save();
+            try
+            {
+                LocalSaves.AddSave(name, location);
+            }
+            catch (InvalidSaveException)
+            {
+                throw;
+            }
+            finally
+            {
+                Save();
+            }
         }
 
         // Returns all files successfully exported

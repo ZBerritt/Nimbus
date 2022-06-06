@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace SaveDataSync
 {
@@ -111,6 +112,14 @@ namespace SaveDataSync
             }
 
             return string.Format("{0:0.##} {1}", size, sizes[order]);
+        }
+
+        public static long GetSize(string location)
+        {
+            if (!File.Exists(location) && !Directory.Exists(location)) return 0;
+            return File.GetAttributes(location).HasFlag(FileAttributes.Directory)
+                        ? GetFileList(location).Sum(fi => new FileInfo(fi).Length)
+                        : new FileInfo(location).Length;
         }
     }
 }

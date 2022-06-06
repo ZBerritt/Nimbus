@@ -68,7 +68,7 @@ namespace SaveDataSync
                 engine.AddSave(name, location);
                 Close();
             }
-            catch (Exception ex)
+            catch (InvalidSaveException ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
