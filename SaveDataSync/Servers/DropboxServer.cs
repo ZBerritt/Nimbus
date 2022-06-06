@@ -280,7 +280,7 @@ namespace SaveDataSync.Servers
             var response = client.SendAsync(request).Result;
             var jsonResponse = JObject.Parse(response.Content.ReadAsStringAsync().Result);
             if (response.StatusCode != HttpStatusCode.OK)
-                return string.Empty;
+                return null;
             string hash = jsonResponse.GetValue("content_hash").ToObject<string>();
             return hash;
         }
