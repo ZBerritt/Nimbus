@@ -214,6 +214,19 @@ namespace SaveDataSync
             return success.ToArray();
         }
 
+        public string GetLocalHash(string save)
+        {
+            using var tmpFile = new FileUtils.TemporaryFile();
+            LocalSaves.ArchiveSaveData(save, tmpFile.FilePath);
+            var saveHash = Server.GetLocalSaveHash(tmpFile.FilePath);
+            return saveHash;
+        }
+
+        public string GetRemoteHash(string save)
+        {
+            return Server.GetRemoteSaveHash(save);
+        }
+
         public void SaveAllData()
         {
             DataManager.SaveAll(_localsaves, _server, _settings);

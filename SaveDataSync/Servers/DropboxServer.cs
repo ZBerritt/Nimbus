@@ -284,35 +284,23 @@ namespace SaveDataSync.Servers
             return hash;
         }
 
-        public string GetLocalSaveHash(byte[] data)
+        public string GetLocalSaveHash(string location)
         {
-            int BLOCK_SIZE = 1024 * 1024 * 4; // 4 MB Blocks
-            var concatHashes = new List<byte>(); // SHA-256 hashes for each block
-            var sha256 = SHA256.Create();
+            if (!File.Exists(location)) return string.Empty;
+            using var fileStream = File.Open(location, FileMode.Open);
 
-            int i = 0;
-            while (i < data.Length)
+            var buffer = new byte[4096];
+            var hasher = new DropboxContentHasher();
+
+            var n = fileStream.Read(buffer, 0, buffer.Length);
+            while (n > 0)
             {
-                if (i + BLOCK_SIZE > data.Length - 1) // If the file doens't have another 4 MB left...
-                {
-                    var smallSegment = new byte[data.Length - i]; // Create smaller segment to the end
-                    Array.Copy(data, i, smallSegment, 0, data.Length - i);
-                    var lastHash = sha256.ComputeHash(smallSegment);
-                    concatHashes.AddRange(lastHash);
-                    break;
-                }
-                var segment = new byte[BLOCK_SIZE];
-                Array.Copy(data, i, segment, 0, BLOCK_SIZE); // 4 MB segment of array
-                var hash = sha256.ComputeHash(segment);
-                concatHashes.AddRange(hash);
-
-                i += BLOCK_SIZE;
+                hasher.TransformBlock(buffer, 0, n, buffer, 0);
+                n = fileStream.Read(buffer, 0, buffer.Length);
             }
 
-            byte[] bytes = concatHashes.ToArray();
-            var concatHash = sha256.ComputeHash(bytes);
-            var hex = BitConverter.ToString(concatHash, 0, concatHash.Length).Replace("-", "").ToLower();
-
+            hasher.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+            var hex = DropboxContentHasher.ToHex(hasher.Hash);
             return hex;
         }
     }
