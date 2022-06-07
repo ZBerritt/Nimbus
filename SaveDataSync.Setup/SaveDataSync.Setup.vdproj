@@ -76,6 +76,16 @@
         {
             "LaunchCondition"
             {
+                "{A06ECF26-33A3-4562-8140-9B0E340D4F24}:_8A0D5CFD9DBF43568ABC9F49DCB4697A"
+                {
+                "Name" = "8:.NET Core"
+                "Message" = "8:[VSDNETCOREMSG]"
+                "AllowLaterVersions" = "11:FALSE"
+                "InstallUrl" = "8:https://dotnet.microsoft.com/download/dotnet-core/[NetCoreVerMajorDotMinor]"
+                "IsNETCore" = "11:TRUE"
+                "Architecture" = "2:0"
+                "Runtime" = "2:0"
+                }
             }
         }
         "File"
@@ -119,7 +129,7 @@
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_3527BDC0679D4B2EA913692D48E4861A"
             {
-            "DefaultLocation" = "8:[ProgramFilesFolder][Manufacturer]\\[ProductName]"
+            "DefaultLocation" = "8:[ProgramFilesFolder][ProductName]"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -157,7 +167,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:SaveDataSync"
         "ProductCode" = "8:{E01B07DA-BDFE-43E5-9DBD-CD9D132A35D0}"
-        "PackageCode" = "8:{D954B815-2A61-4A3F-AA33-051F2FC336B6}"
+        "PackageCode" = "8:{EF291E6B-2076-4DCE-BAF1-3B1C3A714CEB}"
         "UpgradeCode" = "8:{AD2C53D2-BBBD-4779-829E-064D4E256E6D}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -706,7 +716,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_9D27A860DDBB4C9E9B58EF3C9F8AB674"
             {
-            "SourcePath" = "8:..\\SaveDataSync\\obj\\Debug\\net6.0-windows\\apphost.exe"
+            "SourcePath" = "8:..\\SaveDataSync\\obj\\Release\\net6.0-windows\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_3527BDC0679D4B2EA913692D48E4861A"
