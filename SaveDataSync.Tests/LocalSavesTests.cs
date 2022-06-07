@@ -43,21 +43,21 @@ namespace SaveDataSync.Tests
         public void LocalSaves_NameValidationWorks()
         {
             // Dupe file name
-            Assert.ThrowsException<Exception>(() => localSaves.AddSave("test_file1", testPath));
-            Assert.ThrowsException<Exception>(() => localSaves.AddSave("test_folder1", testPath));
+            Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("test_file1", testPath));
+            Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("test_folder1", testPath));
 
             // Dupe folder
-            Assert.ThrowsException<Exception>(() => localSaves.AddSave("test_file3", localSaves.GetSavePath("test_file1")));
-            Assert.ThrowsException<Exception>(() => localSaves.AddSave("test_folder3", localSaves.GetSavePath("test_folder1")));
+            Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("test_file3", localSaves.GetSavePath("test_file1")));
+            Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("test_folder3", localSaves.GetSavePath("test_folder1")));
 
             // Contains current folder
-            Assert.ThrowsException<Exception>(() => localSaves.AddSave("temp_directory", Path.GetTempPath()));
+            Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("temp_directory", Path.GetTempPath()));
 
             // Illegal characters
-            Assert.ThrowsException<Exception>(() => localSaves.AddSave("\\ /", testPath));
+            Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("\\ /", testPath));
 
             // Longer than 32 chars
-            Assert.ThrowsException<Exception>(() => localSaves.AddSave("Lorem ipsum dolor sit amet fusce.", testPath));
+            Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("Lorem ipsum dolor sit amet fusce.", testPath));
         }
 
         [TestMethod("Save Management Tests")]

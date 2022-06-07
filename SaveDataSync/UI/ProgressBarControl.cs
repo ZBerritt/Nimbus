@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace SaveDataSync.UI
 {
-    internal class ProgressBarControl : IDisposable
+    public class ProgressBarControl : IDisposable
     {
         private ProgressBar progressBar;
         private Label label;

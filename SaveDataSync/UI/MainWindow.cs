@@ -215,75 +215,79 @@ namespace SaveDataSync
         private ContextMenuStrip SaveFileContextMenu(string name)
         {
             var menu = new ContextMenuStrip();
+            var selectedSaves = GetSelectedSaves(false);
+            bool singleSelected = selectedSaves.Count == 1;
             bool hasRemote = SelectingRemoteSave();
+            bool serverOnline = engine.Server is not null && engine.Server.ServerOnline();
 
 #if DEBUG
-            if (!hasRemote)
+            var getHashes = menu.Items.Add("[DEBUG] Get Hashes");
+            getHashes.Enabled = !hasRemote && serverOnline && singleSelected;
+            getHashes.Click += (object sender, EventArgs e) =>
             {
-                var getHashes = menu.Items.Add("[DEBUG] Get Hashes");
-                getHashes.Click += (object sender, EventArgs e) =>
-                {
-                    var selected = GetSelectedSaves(true);
-                    var first = selected[0]; // I don't care I just want the first one
-                    var localSaveData = engine.LocalSaves.GetSaveZipData(first);
-                    var remoteHash = engine.Server.GetRemoteSaveHash(first);
-                    var localHash = engine.Server.GetLocalSaveHash(localSaveData);
-                    MessageBox.Show("Remote Hash: " + remoteHash +
-                        " (Length: " + remoteHash.Length + ")\nLocal Hash: " + localHash +
-                        " (Length: " + remoteHash.Length + ")",
-                               "Debug",
-                               MessageBoxButtons.OK,
-                               MessageBoxIcon.Information);
-                };
-            }
+                var selected = GetSelectedSaves(true);
+                var first = selected[0]; // I don't care I just want the first one
+                var localSaveData = engine.LocalSaves.GetSaveZipData(first);
+                var remoteHash = engine.Server.GetRemoteSaveHash(first);
+                var localHash = engine.Server.GetLocalSaveHash(localSaveData);
+                MessageBox.Show($"Remote Hash: {remoteHash} (Length: {remoteHash.Length})\n" +
+                    $"Local Hash: {localHash} (Length: {remoteHash.Length})",
+                           "Debug",
+                           MessageBoxButtons.OK,
+                           MessageBoxIcon.Information);
+            };
+
 #endif
 
-            if (!hasRemote)
+            var goToLocation = menu.Items.Add("Open File Location");
+            goToLocation.Enabled = !hasRemote && singleSelected;
+            goToLocation.Click += (object sender2, EventArgs e2) =>
             {
-                var goToLocation = menu.Items.Add("Open File Location");
-                goToLocation.Click += (object sender2, EventArgs e2) =>
+                try
                 {
-                    try
-                    {
-                        string savePath = engine.LocalSaves.GetSavePath(name);
-                        Process.Start("explorer.exe", string.Format("/select, \"{0}\"", savePath));
-                    }
-                    catch (Exception) { }
-                };
-            }
+                    string savePath = engine.LocalSaves.GetSavePath(name);
+                    Process.Start("explorer.exe", string.Format("/select, \"{0}\"", savePath));
+                }
+                catch (Exception) { }
+            };
 
-            if (!hasRemote)
+            var quickExport = menu.Items.Add("Quick Export");
+            quickExport.Enabled = !hasRemote && serverOnline;
+            quickExport.Click += (object sender3, EventArgs e3) =>
             {
-                var quickExport = menu.Items.Add("Quick Export");
-                quickExport.Click += (object sender3, EventArgs e3) =>
-                {
-                    Export();
-                };
-            }
+                Export();
+            };
 
             var quickImport = menu.Items.Add("Quick Import");
+            quickImport.Enabled = !hasRemote && serverOnline;
             quickImport.Click += (object sender4, EventArgs e4) =>
             {
                 Import();
             };
 
-            if (!hasRemote)
+            var removeSave = menu.Items.Add("Remove Local Save");
+            removeSave.Enabled = !hasRemote;
+            removeSave.Click += (object sender5, EventArgs e5) =>
             {
-                var removeSave = menu.Items.Add("Remove Local Save");
-                removeSave.Click += (object sender5, EventArgs e5) =>
+                StringBuilder messageBuilder = new StringBuilder();
+                messageBuilder.Append("Are you sure you want to remove the following saves?");
+                foreach (var save in selectedSaves)
                 {
-                    var confirm = MessageBox.Show("Are you sure you want to remove this save file?",
-                        "Confirm",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question);
-                    if (confirm == DialogResult.Yes)
-                    {
-                        engine.LocalSaves.RemoveSave(name);
-                        engine.Save();
-                        ReloadUI();
-                    }
+                    messageBuilder.Append($"\n• {save}");
                 };
-            }
+
+                var confirm = MessageBox.Show(messageBuilder.ToString(),
+                    "Confirm",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+                if (confirm == DialogResult.Yes)
+                {
+                    engine.LocalSaves.RemoveSave(name);
+                    engine.SaveAllData();
+                    ReloadUI();
+                }
+            };
+
             return menu;
         }
 

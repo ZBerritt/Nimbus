@@ -24,7 +24,7 @@ namespace SaveDataSync.UI
         {
             // Get the new settings from the UI here
             engine.Settings = settingsCopy;
-            engine.Save();
+            engine.SaveAllData();
             Close();
         }
     }
