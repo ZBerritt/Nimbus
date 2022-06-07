@@ -79,10 +79,9 @@ namespace SaveDataSync.Servers
                 string inputLine = reader.ReadLine(); // First line contains the request
                 if (inputLine.Contains("code="))
                 {
-                    string substring = inputLine.Substring(inputLine.IndexOf("code=") + "code=".Length);
-                    key = substring.Substring(0, substring.IndexOf(" "));
+                    string substring = inputLine[(inputLine.IndexOf("code=") + "code=".Length)..];
+                    key = substring[..substring.IndexOf(" ")];
                     response = Encoding.ASCII.GetBytes("Key obtained! You may now close this tab!");
-                    client.Client.Send(response);
                 }
             }
             catch (Exception)

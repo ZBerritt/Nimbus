@@ -7,15 +7,45 @@ using System.Windows.Forms;
 
 namespace SaveDataSync
 {
-    internal class SaveDataSyncEngine
+    public class SaveDataSyncEngine
     {
-        private static SaveDataSyncEngine Instance { get; } = new SaveDataSyncEngine();
-
-        public LocalSaves LocalSaves { get; set; }
-        public IServer Server { get; set; }
-        public Settings Settings { get; set; }
+        public static SaveDataSyncEngine Instance { get; } = new SaveDataSyncEngine();
 
         private DataManager DataManager { get; set; }
+
+        private LocalSaves _localsaves;
+        private IServer _server;
+        private Settings _settings;
+
+        public LocalSaves LocalSaves
+        {
+            get => _localsaves;
+            set
+            {
+                _localsaves = value;
+                DataManager.SaveLocalSaves(_localsaves);
+            }
+        }
+
+        public IServer Server
+        {
+            get => _server;
+            set
+            {
+                _server = value;
+                DataManager.SaveServerData(_server);
+            }
+        }
+
+        public Settings Settings
+        {
+            get => _settings;
+            set
+            {
+                _settings = value;
+                DataManager.SaveSettings(_settings);
+            }
+        }
 
         public static SaveDataSyncEngine Start()
         {
@@ -29,8 +59,6 @@ namespace SaveDataSync
             Instance.LocalSaves = Instance.DataManager.GetLocalSaves();
             Instance.Server = Instance.DataManager.GetServerData();
             Instance.Settings = Instance.DataManager.GetSettings();
-
-            Instance.Save(); // Prevents some possible errors
 
             return Instance;
         }
@@ -47,7 +75,7 @@ namespace SaveDataSync
             }
             finally
             {
-                Save();
+                SaveAllData();
             }
         }
 
@@ -134,6 +162,28 @@ namespace SaveDataSync
                     string location = SaveFileWindow.ImportWindow(prompt, save);
                     if (location == "") throw new Exception("Import aborted by user!");
                 }
+                var saveLocation = LocalSaves.GetSavePath(save);
+
+                if (!Directory.Exists(saveLocation) && !File.Exists(saveLocation))
+                {
+                    if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
+                    {
+                        MessageBox.Show("Save file/folder does not exist for " + save + ".",
+                            "Warning",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+                        return success.ToArray();
+                    }
+                    else
+                    {
+                        var response = MessageBox.Show("Save file/folder does not exist for " + save + ". Would you like to continue importing other files?",
+                                "Warning",
+                                MessageBoxButtons.YesNo,
+                                MessageBoxIcon.Warning);
+                        if (response == DialogResult.No) return success.ToArray(); // Abort on pressing no
+                        continue;
+                    }
+                }
 
                 var remoteZipData = Server.GetSaveData(save);
                 if (remoteZipData == null || remoteZipData.Length == 0)
@@ -164,9 +214,9 @@ namespace SaveDataSync
             return success.ToArray();
         }
 
-        public void Save()
+        public void SaveAllData()
         {
-            DataManager.SaveAll(LocalSaves, Server, Settings);
+            DataManager.SaveAll(_localsaves, _server, _settings);
         }
     }
 }
