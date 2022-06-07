@@ -96,9 +96,8 @@ namespace SaveDataSync
                 var statusItem = new ListViewItem.ListViewSubItem(saveItem, "");
                 if (serverOnline && (File.Exists(save.Value) || Directory.Exists(save.Value)))
                 {
-                    var localSaveData = engine.LocalSaves.GetSaveZipData(save.Key);
-                    var remoteHash = engine.Server.GetRemoteSaveHash(save.Key);
-                    var localHash = engine.Server.GetLocalSaveHash(localSaveData);
+                    var localHash = engine.GetLocalHash(save.Key);
+                    var remoteHash = engine.GetRemoteHash(save.Key);
                     if (remoteHash is null)
                     {
                         statusItem.Text = "Not Uploaded";
@@ -136,7 +135,7 @@ namespace SaveDataSync
                 saveFileList.Items.Add(saveItem);
             }
 
-            /* Add remove save files */
+            /* Add remote save files */
             if (server != null && serverOnline)
             {
                 var remoteSaveNames = server.SaveNames();
@@ -232,9 +231,8 @@ namespace SaveDataSync
                 if (SelectingRemoteSave()) return;
                 var selected = GetSelectedSaves();
                 var first = selected[0]; // I don't care I just want the first one
-                var localSaveData = engine.LocalSaves.GetSaveZipData(first);
-                var remoteHash = engine.Server.GetRemoteSaveHash(first);
-                var localHash = engine.Server.GetLocalSaveHash(localSaveData);
+                var remoteHash = engine.GetRemoteHash(first);
+                var localHash = engine.GetLocalHash(first);
                 MessageBox.Show($"Remote Hash: {remoteHash} (Length: {remoteHash.Length})\n" +
                     $"Local Hash: {localHash} (Length: {remoteHash.Length})",
                            "Debug",

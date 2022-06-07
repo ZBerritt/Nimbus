@@ -63,14 +63,21 @@ namespace SaveDataSync
             return Saves[name];
         }
 
-        // TODO: Store original permissions/date and put them back when extracting
         public byte[] GetSaveZipData(string name)
+        {
+            using var tmpFile = new FileUtils.TemporaryFile(); // Used for file destination
+            ArchiveSaveData(name, tmpFile.FilePath); // Archives data to destination
+            return File.ReadAllBytes(tmpFile.FilePath);
+        }
+
+        // TODO: Store original permissions/date and put them back when extracting
+        public void ArchiveSaveData(string name, string destinationFile)
         {
             string location = GetSavePath(name);
 
             // This entire mess basically just zips the file into what we need. We need to do it manually isntead of using fastzip
-            using var tmpFile = new FileUtils.TemporaryFile();
-            using var zipOutputStream = new ZipOutputStream(File.Open(tmpFile.FilePath, FileMode.Open));
+
+            using var zipOutputStream = new ZipOutputStream(File.Open(destinationFile, FileMode.Open));
             byte[] buffer = new byte[4096];
 
             FileAttributes attr = File.GetAttributes(location);
@@ -79,32 +86,39 @@ namespace SaveDataSync
                 string[] files = FileUtils.GetFileList(location); // Recursively get all files
                 foreach (string file in files)
                 {
+                    using var fileStream = new FileStream(file, FileMode.Open);
                     string entryName = Path.Combine(name, file[location.Length..]);
                     var fileEntry = new ZipEntry(entryName)
                     {
-                        DateTime = File.GetCreationTime(file) // Date time uses creation time
+                        DateTime = File.GetCreationTime(file), // Date time uses creation time
+                        Size = fileStream.Length
                     };
                     zipOutputStream.PutNextEntry(fileEntry);
-                    var fileData = File.ReadAllBytes(file);
-                    zipOutputStream.Write(fileData);
-                }
 
-                zipOutputStream.Finish();
-                zipOutputStream.Close();
-                return File.ReadAllBytes(tmpFile.FilePath);
+                    var fcount = fileStream.Read(buffer, 0, buffer.Length);
+                    while (fcount > 0)
+                    {
+                        zipOutputStream.Write(buffer, 0, fcount);
+                        fcount = fileStream.Read(buffer, 0, buffer.Length);
+                    }
+                }
+                return;
             }
 
+            using var stream = new FileStream(location, FileMode.Open);
             var entry = new ZipEntry(Path.GetFileName(location))
             {
-                DateTime = File.GetCreationTime(location) // Date time uses creation time
+                DateTime = File.GetCreationTime(location), // Date time uses creation time
+                Size = stream.Length
             };
             zipOutputStream.PutNextEntry(entry);
-            var data = File.ReadAllBytes(location);
-            zipOutputStream.Write(data);
 
-            zipOutputStream.Finish();
-            zipOutputStream.Close();
-            return File.ReadAllBytes(tmpFile.FilePath);
+            var count = stream.Read(buffer, 0, buffer.Length);
+            while (count > 0)
+            {
+                zipOutputStream.Write(buffer, 0, count);
+                count = stream.Read(buffer, 0, buffer.Length);
+            }
         }
 
         public void ExtractSaveData(string name, byte[] data)

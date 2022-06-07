@@ -28,7 +28,7 @@ namespace SaveDataSync
         public string GetRemoteSaveHash(string name);
 
         // Get local save has to compare (different servers may have different methods)
-        public string GetLocalSaveHash(byte[] data);
+        public string GetLocalSaveHash(string archiveLocation);
 
         // Server data in JSON format
         public JObject ToJson();
