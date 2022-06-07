@@ -25,6 +25,10 @@ namespace SaveDataSync
         // Loading Events
         private void OnLoad(object sender, EventArgs e)
         {
+            // Set name as debug if the program is in debug mode
+#if DEBUG
+            this.Text = "SaveDataSync - DEBUG";
+#endif
             // Grabs the engine which allows communication with the backend
             engine = SaveDataSyncEngine.Start();
 
@@ -215,7 +219,7 @@ namespace SaveDataSync
         private ContextMenuStrip SaveFileContextMenu(string name)
         {
             var menu = new ContextMenuStrip();
-            var selectedSaves = GetSelectedSaves(false);
+            var selectedSaves = GetSelectedSaves();
             bool singleSelected = selectedSaves.Count == 1;
             bool hasRemote = SelectingRemoteSave();
             bool serverOnline = engine.Server is not null && engine.Server.ServerOnline();
@@ -225,7 +229,8 @@ namespace SaveDataSync
             getHashes.Enabled = !hasRemote && serverOnline && singleSelected;
             getHashes.Click += (object sender, EventArgs e) =>
             {
-                var selected = GetSelectedSaves(true);
+                if (SelectingRemoteSave()) return;
+                var selected = GetSelectedSaves();
                 var first = selected[0]; // I don't care I just want the first one
                 var localSaveData = engine.LocalSaves.GetSaveZipData(first);
                 var remoteHash = engine.Server.GetRemoteSaveHash(first);
@@ -246,7 +251,12 @@ namespace SaveDataSync
                 try
                 {
                     string savePath = engine.LocalSaves.GetSavePath(name);
-                    Process.Start("explorer.exe", string.Format("/select, \"{0}\"", savePath));
+                    if (!File.Exists(savePath) && !Directory.Exists(savePath))
+                    {
+                        MessageBox.Show("Save location cannot be found!", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    Process.Start("explorer.exe", $"/select, \"{savePath}\"");
                 }
                 catch (Exception) { }
             };
@@ -269,7 +279,7 @@ namespace SaveDataSync
             removeSave.Enabled = !hasRemote;
             removeSave.Click += (object sender5, EventArgs e5) =>
             {
-                StringBuilder messageBuilder = new StringBuilder();
+                var messageBuilder = new StringBuilder();
                 messageBuilder.Append("Are you sure you want to remove the following saves?");
                 foreach (var save in selectedSaves)
                 {
@@ -297,13 +307,12 @@ namespace SaveDataSync
             Utils.OpenUrl(url);
         }
 
-        private List<string> GetSelectedSaves(bool noRemote)
+        private List<string> GetSelectedSaves()
         {
             var selected = saveFileList.SelectedItems;
             var saves = new List<string>();
             foreach (ListViewItem item in selected)
             {
-                if (noRemote && item.SubItems[1].Text == "Remote") throw new Exception("Remote save detected");
                 saves.Add(item.SubItems[0].Text); // The first sub item will always be the name
             }
 
@@ -324,7 +333,7 @@ namespace SaveDataSync
 
         private void UpdateButtons()
         {
-            var selectingSaves = GetSelectedSaves(false).Count > 0;
+            var selectingSaves = GetSelectedSaves().Count > 0;
             var CanExportAndImport = engine.Server != null && engine.Server.ServerOnline() && selectingSaves;
             exportButton.Enabled = !SelectingRemoteSave() && CanExportAndImport; // Don't want to export remote saves
             importButton.Enabled = CanExportAndImport;
@@ -335,7 +344,12 @@ namespace SaveDataSync
             {
                 try
                 {
-                    List<string> savesToExport = GetSelectedSaves(true);
+                    if (SelectingRemoteSave())
+                    {
+                        MessageBox.Show("Cannot export remote saves. Aborting!", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    List<string> savesToExport = GetSelectedSaves();
                     using var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToExport.Count);
                     var success = engine.ExportSaves(savesToExport.ToArray(), progressBar);
                     if (success.Length != 0)
@@ -367,7 +381,7 @@ namespace SaveDataSync
         {
             try
             {
-                List<string> savesToImport = GetSelectedSaves(false);
+                List<string> savesToImport = GetSelectedSaves();
                 using var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToImport.Count);
                 var success = engine.ImportSaves(savesToImport.ToArray(), progressBar);
                 if (success.Length != 0)
