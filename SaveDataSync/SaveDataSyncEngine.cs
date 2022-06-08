@@ -192,7 +192,7 @@ namespace SaveDataSync
                 {
                     using var tmpFile = new FileUtils.TemporaryFile();
                     Server.GetSaveData(save, tmpFile.FilePath);
-                    LocalSaves.ExtractSaveData(save, File.ReadAllBytes(tmpFile.FilePath));
+                    LocalSaves.ExtractSaveData(save, tmpFile.FilePath);
                     success.Add(save);
                 }
                 catch (Exception)

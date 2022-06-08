@@ -140,7 +140,7 @@ namespace SaveDataSync
                 var remoteHash = engine.GetRemoteHash(first);
                 var localHash = engine.GetLocalHash(first);
                 MessageBox.Show($"Remote Hash: {remoteHash} (Length: {remoteHash.Length})\n" +
-                    $"Local Hash: {localHash} (Length: {remoteHash.Length})",
+                    $"Local Hash: {localHash} (Length: {localHash.Length})",
                            "Debug",
                            MessageBoxButtons.OK,
                            MessageBoxIcon.Information);

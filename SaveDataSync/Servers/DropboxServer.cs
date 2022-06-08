@@ -125,10 +125,17 @@ namespace SaveDataSync.Servers
 
         public string GetRemoteSaveHash(string name)
         {
-            var fileName = $"/{name}.zip";
-            var metadata = DropboxClient.Files.GetMetadataAsync(new GetMetadataArg(fileName,
-                includeMediaInfo: false, includeDeleted: false, includeHasExplicitSharedMembers: false)).Result;
-            return metadata.AsFile.ContentHash;
+            try
+            {
+                var fileName = $"/{name}.zip";
+                var metadata = DropboxClient.Files.GetMetadataAsync(new GetMetadataArg(fileName,
+                    includeMediaInfo: false, includeDeleted: false, includeHasExplicitSharedMembers: false)).Result;
+                return metadata.AsFile.ContentHash;
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
         }
 
         public string GetLocalSaveHash(string archiveLocation)
