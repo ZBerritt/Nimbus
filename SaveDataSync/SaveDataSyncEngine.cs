@@ -115,13 +115,18 @@ namespace SaveDataSync
                         continue;
                     }
                 }
-
-                var zipData = LocalSaves.GetSaveZipData(save);
-                if (zipData == null || zipData.Length == 0)
+                try
+                {
+                    using var tmpFile = new FileUtils.TemporaryFile();
+                    LocalSaves.ArchiveSaveData(save, tmpFile.FilePath);
+                    Server.UploadSaveData(save, tmpFile.FilePath);
+                    success.Add(save);
+                }
+                catch (Exception)
                 {
                     if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
                     {
-                        MessageBox.Show("Save folder is empty for " + save + ".",
+                        MessageBox.Show("Could not export save data for " + save + ".",
                             "Warning",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Warning);
@@ -129,7 +134,7 @@ namespace SaveDataSync
                     }
                     else
                     {
-                        var response = MessageBox.Show("Save folder is empty for " + save + ". Would you like to continue exporting other files?",
+                        var response = MessageBox.Show("Could not export save data for " + save + ". Would you like to continue exporting other files?",
                             "Warning",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Warning);
@@ -137,8 +142,6 @@ namespace SaveDataSync
                         continue;
                     }
                 }
-                Server.UploadSaveData(save, zipData);
-                success.Add(save);
             }
 
             return success.ToArray();
@@ -185,12 +188,18 @@ namespace SaveDataSync
                     }
                 }
 
-                var remoteZipData = Server.GetSaveData(save);
-                if (remoteZipData == null || remoteZipData.Length == 0)
+                try
+                {
+                    using var tmpFile = new FileUtils.TemporaryFile();
+                    Server.GetSaveData(save, tmpFile.FilePath);
+                    LocalSaves.ExtractSaveData(save, File.ReadAllBytes(tmpFile.FilePath));
+                    success.Add(save);
+                }
+                catch (Exception)
                 {
                     if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
                     {
-                        MessageBox.Show("No remote save data found for " + save + ".",
+                        MessageBox.Show("Could not retrieve remote save data for " + save + ".",
                             "Warning",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Warning);
@@ -198,7 +207,7 @@ namespace SaveDataSync
                     }
                     else
                     {
-                        var response = MessageBox.Show("No remote save data found for " + save + ". Would you like to continue importing other files?",
+                        var response = MessageBox.Show("Could not retrieve remote save data for " + save + ". Would you like to continue importing other files?",
                             "Warning",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Warning);
@@ -206,11 +215,7 @@ namespace SaveDataSync
                         continue;
                     }
                 }
-
-                LocalSaves.ExtractSaveData(save, remoteZipData);
-                success.Add(save);
             }
-
             return success.ToArray();
         }
 

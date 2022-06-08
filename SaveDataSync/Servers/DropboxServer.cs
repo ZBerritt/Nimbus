@@ -1,8 +1,12 @@
 ﻿using Dropbox.Api;
+using Dropbox.Api.Files;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace SaveDataSync.Servers
 {
@@ -73,24 +77,44 @@ namespace SaveDataSync.Servers
 
         public string[] SaveNames()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = DropboxClient.Files.ListFolderAsync(new ListFolderArg("",
+                    recursive: false, includeMediaInfo: false, includeDeleted: false, includeMountedFolders: false)).Result;
+
+                var entries = result.Entries;
+                var nameList = new List<string>();
+                return entries.Where(c => c.Name.EndsWith(".zip")).Select(s => s.Name[..^4]).ToArray();
+            }
+            catch (Exception)
+            {
+                return Array.Empty<string>();
+            }
         }
 
-        public byte[] GetSaveData(string name)
+        public void GetSaveData(string name, string destination)
         {
-            throw new NotImplementedException();
+            if (!File.Exists(destination)) throw new Exception("Destination file does not exist. Cannot retrieve data.");
+            using var destinationStream = File.OpenWrite(destination);
+            var fileName = $"/{name}.zip";
+            var response = DropboxClient.Files.DownloadAsync(new DownloadArg(fileName)).Result; // This will actually download the file
+            response.GetContentAsStreamAsync().Result.CopyTo(destinationStream);
         }
 
-        public void UploadSaveData(string name, byte[] data)
+        public void UploadSaveData(string name, string source)
         {
-            throw new NotImplementedException();
+            if (!File.Exists(source)) throw new Exception("Source file does not exist. Cannot upload.");
+            var fileName = $"/{name}.zip";
+            using var sourceStream = File.OpenRead(source);
+            DropboxClient.Files.UploadAsync(new UploadArg(fileName,
+                mode: WriteMode.Overwrite.Instance, autorename: false, mute: false, strictConflict: false), sourceStream).Wait();
         }
 
         public bool ServerOnline()
         {
             try
             {
-                var account = DropboxClient.Users.GetCurrentAccountAsync().Result;
+                var account = DropboxClient.Check.UserAsync().Result;
                 return account is not null;
             }
             catch (Exception)
@@ -101,12 +125,30 @@ namespace SaveDataSync.Servers
 
         public string GetRemoteSaveHash(string name)
         {
-            throw new NotImplementedException();
+            var fileName = $"/{name}.zip";
+            var metadata = DropboxClient.Files.GetMetadataAsync(new GetMetadataArg(fileName,
+                includeMediaInfo: false, includeDeleted: false, includeHasExplicitSharedMembers: false)).Result;
+            return metadata.AsFile.ContentHash;
         }
 
         public string GetLocalSaveHash(string archiveLocation)
         {
-            throw new NotImplementedException();
+            if (!File.Exists(archiveLocation)) return string.Empty;
+            using var fileStream = File.Open(archiveLocation, FileMode.Open);
+
+            var buffer = new byte[4096];
+            var hasher = new DropboxContentHasher();
+
+            var n = fileStream.Read(buffer, 0, buffer.Length);
+            while (n > 0)
+            {
+                hasher.TransformBlock(buffer, 0, n, buffer, 0);
+                n = fileStream.Read(buffer, 0, buffer.Length);
+            }
+
+            hasher.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+            var hex = DropboxContentHasher.ToHex(hasher.Hash);
+            return hex;
         }
 
         public JObject Serialize()

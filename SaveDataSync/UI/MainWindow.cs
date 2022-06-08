@@ -173,7 +173,7 @@ namespace SaveDataSync
             };
 
             var quickImport = menu.Items.Add("Quick Import");
-            quickImport.Enabled = !hasRemote && serverOnline;
+            quickImport.Enabled = serverOnline;
             quickImport.Click += (object sender4, EventArgs e4) =>
             {
                 Import();
