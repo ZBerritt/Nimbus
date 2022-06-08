@@ -31,6 +31,6 @@ namespace SaveDataSync
         public string GetLocalSaveHash(string archiveLocation);
 
         // Server data in JSON format
-        public JObject ToJson();
+        public JObject Serialize();
     }
 }

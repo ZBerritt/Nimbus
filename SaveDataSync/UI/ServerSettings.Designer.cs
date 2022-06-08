@@ -33,9 +33,8 @@
             this.saveButton = new System.Windows.Forms.Button();
             this.settingsTabs = new System.Windows.Forms.TabControl();
             this.dropboxTab = new System.Windows.Forms.TabPage();
-            this.label2 = new System.Windows.Forms.Label();
+            this.dropboxLoginNotice = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.dropboxApiKey = new System.Windows.Forms.TextBox();
             this.loginWithDropboxButton = new System.Windows.Forms.Button();
             this.settingsTabs.SuspendLayout();
             this.dropboxTab.SuspendLayout();
@@ -76,9 +75,8 @@
             // dropboxTab
             // 
             this.dropboxTab.AccessibleName = "dropbox";
-            this.dropboxTab.Controls.Add(this.label2);
+            this.dropboxTab.Controls.Add(this.dropboxLoginNotice);
             this.dropboxTab.Controls.Add(this.label1);
-            this.dropboxTab.Controls.Add(this.dropboxApiKey);
             this.dropboxTab.Controls.Add(this.loginWithDropboxButton);
             this.dropboxTab.Location = new System.Drawing.Point(4, 24);
             this.dropboxTab.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -89,16 +87,20 @@
             this.dropboxTab.Text = "Dropbox";
             this.dropboxTab.UseVisualStyleBackColor = true;
             // 
-            // label2
+            // dropboxLoginNotice
             // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label2.Location = new System.Drawing.Point(27, 84);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(250, 20);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "Paste the code that appears here:";
+            this.dropboxLoginNotice.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dropboxLoginNotice.AutoSize = true;
+            this.dropboxLoginNotice.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.dropboxLoginNotice.Location = new System.Drawing.Point(0, 107);
+            this.dropboxLoginNotice.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.dropboxLoginNotice.Name = "dropboxLoginNotice";
+            this.dropboxLoginNotice.Size = new System.Drawing.Size(242, 24);
+            this.dropboxLoginNotice.TabIndex = 3;
+            this.dropboxLoginNotice.Text = "❌ Not logged into Dropbox";
+            this.dropboxLoginNotice.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label1
             // 
@@ -110,14 +112,6 @@
             this.label1.Size = new System.Drawing.Size(230, 20);
             this.label1.TabIndex = 2;
             this.label1.Text = "Click here to login with dropbox:";
-            // 
-            // dropboxApiKey
-            // 
-            this.dropboxApiKey.Location = new System.Drawing.Point(7, 123);
-            this.dropboxApiKey.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.dropboxApiKey.Name = "dropboxApiKey";
-            this.dropboxApiKey.Size = new System.Drawing.Size(336, 23);
-            this.dropboxApiKey.TabIndex = 1;
             // 
             // loginWithDropboxButton
             // 
@@ -155,9 +149,8 @@
         private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.TabControl settingsTabs;
         private System.Windows.Forms.TabPage dropboxTab;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label dropboxLoginNotice;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox dropboxApiKey;
         private System.Windows.Forms.Button loginWithDropboxButton;
     }
 }

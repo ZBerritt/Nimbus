@@ -10,21 +10,21 @@ namespace SaveDataSync.UI
         public SaveDataSyncEngine engine;
         public IServer server;
 
-        private string dropboxVerifier;
+        private DropboxServer _dropboxServer;
 
         public ServerSettings(SaveDataSyncEngine engine)
         {
             this.engine = engine;
             this.server = engine.Server;
             InitializeComponent();
-            if (server != null)
+            if (server is not null)
             {
                 var serverName = server.Name;
                 switch (serverName)
                 {
                     case "Dropbox":
-                        var apiKey = (server as DropboxServer).ApiKey;
-                        if (apiKey != null) dropboxApiKey.Text = apiKey;
+                        _dropboxServer = server as DropboxServer;
+                        DropboxReloadUI();
                         break;
                 }
             }
@@ -34,21 +34,12 @@ namespace SaveDataSync.UI
         {
             try
             {
-                switch (settingsTabs.SelectedTab.AccessibleName)
+                switch (settingsTabs.SelectedTab.AccessibleName) // Active tab settings will be saved
                 {
                     case "dropbox":
-                        var key = dropboxApiKey.Text;
-                        var newServer = DropboxServer.Build(key, dropboxVerifier);
-                        if (newServer == null)
-                        {
-                            MessageBox.Show("An erorr occured building the dropbox server. " +
-                                "Please try getting a new API key. " +
-                                "If this persists, please submit an issue on GitHub.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
-                        var serverOnline = newServer.ServerOnline();
-                        if (!serverOnline) throw new Exception("Server is not online!");
-                        engine.Server = newServer;
+                        var serverOnline = _dropboxServer.ServerOnline();
+                        if (!serverOnline) throw new Exception("Server cannot be found or is not online!");
+                        engine.Server = _dropboxServer;
                         break;
                 }
                 Close();
@@ -64,18 +55,23 @@ namespace SaveDataSync.UI
             Close();
         }
 
-        private void loginWithDropboxButton_Click(object sender, EventArgs e)
+        private async void loginWithDropboxButton_Click(object sender, EventArgs e)
         {
-            if (dropboxVerifier == null) dropboxVerifier = DropboxServer.GenerateVerifier();
-            string url = "https://www.dropbox.com/oauth2/authorize" +
-                        "?response_type=code&token_access_type=offline" +
-                        "&redirect_uri=http://localhost:1235" +
-                        "&client_id=" + DropboxServer.APP_ID +
-                        "&code_challenge=" + DropboxServer.GenerateCodeChallenge(dropboxVerifier) +
-                        "&code_challenge_method=S256";
-            Utils.OpenUrl(url);
-            string key = DropboxServer.GetApiKey();
-            if (key != null) dropboxApiKey.Text = key;
+            var dropboxServer = await DropboxServer.Build();
+            _dropboxServer = dropboxServer;
+            DropboxReloadUI();
+        }
+
+        private void DropboxReloadUI()
+        {
+            if (_dropboxServer is null)
+            {
+                dropboxLoginNotice.Text = "❌ Not logged into Dropbox";
+            }
+            else
+            {
+                dropboxLoginNotice.Text = $"✔️ Logged in as user: {_dropboxServer.Uid}";
+            }
         }
     }
 }
