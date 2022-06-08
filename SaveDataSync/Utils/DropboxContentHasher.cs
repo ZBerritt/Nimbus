@@ -40,7 +40,9 @@ public class DropboxContentHasher : HashAlgorithm
 
     public const int BLOCK_SIZE = 4 * 1024 * 1024;
 
-    public DropboxContentHasher() : this(SHA256.Create(), SHA256.Create(), 0) {}
+    public DropboxContentHasher() : this(SHA256.Create(), SHA256.Create(), 0)
+    {
+    }
 
     public DropboxContentHasher(SHA256 overallHasher, SHA256 blockHasher, int blockPos)
     {
@@ -49,18 +51,21 @@ public class DropboxContentHasher : HashAlgorithm
         this.blockPos = blockPos;
     }
 
-    public override int HashSize { get { return overallHasher.HashSize; } }
+    public override int HashSize
+    { get { return overallHasher.HashSize; } }
 
     protected override void HashCore(byte[] input, int offset, int len)
     {
         int inputEnd = offset + len;
-        while (offset < inputEnd) {
-            if (blockPos == BLOCK_SIZE) {
+        while (offset < inputEnd)
+        {
+            if (blockPos == BLOCK_SIZE)
+            {
                 FinishBlock();
             }
 
             int spaceInBlock = BLOCK_SIZE - this.blockPos;
-            int inputPartEnd = Math.Min(inputEnd, offset+spaceInBlock);
+            int inputPartEnd = Math.Min(inputEnd, offset + spaceInBlock);
             int inputPartLength = inputPartEnd - offset;
             blockHasher.TransformBlock(input, offset, inputPartLength, input, offset);
 
@@ -71,7 +76,8 @@ public class DropboxContentHasher : HashAlgorithm
 
     protected override byte[] HashFinal()
     {
-        if (blockPos > 0) {
+        if (blockPos > 0)
+        {
             FinishBlock();
         }
         overallHasher.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
@@ -103,7 +109,8 @@ public class DropboxContentHasher : HashAlgorithm
     public static string ToHex(byte[] data)
     {
         var r = new System.Text.StringBuilder();
-        foreach (byte b in data) {
+        foreach (byte b in data)
+        {
             r.Append(HEX_DIGITS[(b >> 4)]);
             r.Append(HEX_DIGITS[(b & 0xF)]);
         }
