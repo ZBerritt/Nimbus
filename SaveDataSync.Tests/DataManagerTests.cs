@@ -48,7 +48,7 @@ namespace SaveDataSync.Tests
 
             // Load from directory
             var server2 = dataManager.GetServerData();
-            Assert.AreEqual(server.ToJson().ToString(), server2.ToJson().ToString());
+            Assert.AreEqual(server.Serialize().ToString(), server2.Serialize().ToString());
         }
 
         [TestMethod("Settings - Save/Load")]

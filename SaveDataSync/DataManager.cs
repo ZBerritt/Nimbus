@@ -82,7 +82,7 @@ namespace SaveDataSync
             // The only hardcoded instance where abstract server data cannot work. Methods to be implemented manually
             return serverName switch
             {
-                "Dropbox" => DropboxServer.BuildFromJson(serverData),
+                "Dropbox" => DropboxServer.Build(serverData),
                 _ => null,
             };
         }
@@ -91,7 +91,7 @@ namespace SaveDataSync
         {
             if (server is null) return;
             var json = new JObject();
-            var serverDataJson = server.ToJson();
+            var serverDataJson = server.Serialize();
             var serverName = server.Name;
             json.Add("name", serverName);
             json.Add("data", serverDataJson);

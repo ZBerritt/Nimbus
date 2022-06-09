@@ -140,7 +140,7 @@ namespace SaveDataSync
                 var remoteHash = engine.GetRemoteHash(first);
                 var localHash = engine.GetLocalHash(first);
                 MessageBox.Show($"Remote Hash: {remoteHash} (Length: {remoteHash.Length})\n" +
-                    $"Local Hash: {localHash} (Length: {remoteHash.Length})",
+                    $"Local Hash: {localHash} (Length: {localHash.Length})",
                            "Debug",
                            MessageBoxButtons.OK,
                            MessageBoxIcon.Information);
@@ -173,7 +173,7 @@ namespace SaveDataSync
             };
 
             var quickImport = menu.Items.Add("Quick Import");
-            quickImport.Enabled = !hasRemote && serverOnline;
+            quickImport.Enabled = serverOnline;
             quickImport.Click += (object sender4, EventArgs e4) =>
             {
                 Import();
