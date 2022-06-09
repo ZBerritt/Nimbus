@@ -40,11 +40,11 @@ namespace SaveDataSync
                 Directory.CreateDirectory(location);
         }
 
-        public void SaveAll(LocalSaves localSaves, IServer server, Settings settings)
+        public async Task SaveAll(LocalSaves localSaves, IServer server, Settings settings)
         {
-            SaveLocalSaves(localSaves);
-            SaveServerData(server);
-            SaveSettings(settings);
+            await SaveLocalSaves(localSaves);
+            await SaveServerData(server);
+            await SaveSettings(settings);
         }
 
         /* Local Saves */
@@ -53,14 +53,14 @@ namespace SaveDataSync
         {
             if (!File.Exists(LocalSavesFile))
                 return new LocalSaves();
-            using var localSaveStream = File.Open(LocalSavesFile, FileMode.Open);
+            using var localSaveStream = File.Open(LocalSavesFile, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var sr = new StreamReader(localSaveStream);
             return LocalSaves.Deserialize(sr.ReadToEnd());
         }
 
-        public void SaveLocalSaves(LocalSaves localSaves)
+        public async Task SaveLocalSaves(LocalSaves localSaves)
         {
-            File.WriteAllText(LocalSavesFile, localSaves.Serialize());
+            await File.WriteAllTextAsync(LocalSavesFile, localSaves.Serialize());
         }
 
         /* Server */
@@ -69,7 +69,7 @@ namespace SaveDataSync
         {
             if (!File.Exists(ServerFile))
                 return null;
-            using var localSaveStream = File.Open(ServerFile, FileMode.Open);
+            using var localSaveStream = File.Open(ServerFile, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var ms = new MemoryStream();
             localSaveStream.CopyTo(ms);
             var encData = ms.ToArray();
@@ -100,7 +100,7 @@ namespace SaveDataSync
 
             // Protect sensitive data from other users
             var encData = ProtectedData.Protect(Encoding.UTF8.GetBytes(result), null, DataProtectionScope.CurrentUser);
-            File.WriteAllBytes(ServerFile, encData);
+            await File.WriteAllBytesAsync(ServerFile, encData);
         }
 
         /* Settings */
@@ -110,7 +110,7 @@ namespace SaveDataSync
             if (!File.Exists(SettingsFile))
                 return new Settings();
 
-            using var localSettingsStream = File.Open(SettingsFile, FileMode.Open);
+            using var localSettingsStream = File.Open(SettingsFile, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var sr = new StreamReader(localSettingsStream);
             var content = sr.ReadToEnd();
             JObject settingsData = JObject.Parse(content);
@@ -118,10 +118,10 @@ namespace SaveDataSync
             return settings;
         }
 
-        public void SaveSettings(Settings settings)
+        public async Task SaveSettings(Settings settings)
         {
             var json = settings.ToJSON();
-            File.WriteAllText(SettingsFile, json.ToString());
+            await File.WriteAllTextAsync(SettingsFile, json.ToString());
         }
     }
 }
