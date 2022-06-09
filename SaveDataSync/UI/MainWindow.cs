@@ -47,28 +47,156 @@ namespace SaveDataSync
         //Used to reload all UI data
         public async Task ReloadUI()
         {
+            /* Setup */
+            saveFileList.Items.Clear();
+
             /* Get main window data asyncronously */
-            var statusData = await MainWindowData.GetServerStatus(engine);
-            type.Text = statusData.Type;
-            host.Text = statusData.Host;
-            serverStatus.Text = statusData.Status;
-            serverStatus.ForeColor = statusData.Color;
-
-            saveFileList.Items.Clear(); // Clear the items before adding new ones
-            var localSaveData = await MainWindowData.GetLocalServerList(engine);
-            foreach (var item in localSaveData)
-            {
-                saveFileList.Items.Add(item);
-            }
-
-            var remoteSaveData = await MainWindowData.GetRemoteServerList(engine);
-            foreach (var item in remoteSaveData)
-            {
-                saveFileList.Items.Add(item);
-            }
+            var serverOnline = engine.Server is not null && await engine.Server.ServerOnline();
+            var statusDataTask = SetServerStatus(serverOnline);
+            var localSaveDataTask = SetLocalServerList(serverOnline);
+            var remoteSaveDataTask = SetRemoteServerList(serverOnline);
+            await Task.WhenAll(statusDataTask, localSaveDataTask, remoteSaveDataTask);
 
             /* Change buttons */
             await UpdateButtons();
+        }
+
+        public async Task SetServerStatus(bool serverOnline)
+        {
+            var server = engine.Server;
+            string ServerType = "N/A";
+            string ServerHost = "N/A";
+            string ServerStatus = "None";
+            /* Check server status */
+            if (server is not null)
+            {
+                ServerType = server.Name;
+                ServerHost = server.Host;
+                try
+                {
+                    ServerStatus = serverOnline ? "Online" : "Offline";
+                }
+                catch (Exception)
+                {
+                    ServerStatus = "Error";
+                }
+            }
+
+            var StatusColor = ServerStatus switch
+            {
+                "Online" => Color.Green,
+                "Offline" => Color.DarkGoldenrod,
+                "Error" => Color.Red,
+                _ => Color.Black,
+            };
+
+            type.Text = ServerType;
+            host.Text = ServerHost;
+            serverStatus.Text = ServerStatus;
+            serverStatus.ForeColor = StatusColor;
+        }
+
+        public async Task SetLocalServerList(bool serverOnline)
+        {
+            /* Get a list of the data for the table */
+            var saves = engine.LocalSaves.Saves;
+            foreach (var save in saves)
+            {
+                var saveItem = new ListViewItem(save.Key)
+                {
+                    UseItemStyleForSubItems = false
+                };
+
+                // Get location
+                saveItem.SubItems.Add(save.Value);
+
+                // Get file size
+                var fileSize = File.Exists(save.Value) || Directory.Exists(save.Value)
+                    ? FileUtils.ReadableFileSize(FileUtils.GetSize(save.Value))
+                    : "N/A";
+                saveItem.SubItems.Add(fileSize);
+
+                // Get file sync status
+                var statusItem = new ListViewItem.ListViewSubItem(saveItem, "Checking...");
+                saveItem.SubItems.Add(statusItem);
+
+                // Add to the list
+                saveFileList.Items.Add(saveItem);
+            }
+
+            await SetLocalSaveStatuses(serverOnline);
+        }
+
+        public async Task SetRemoteServerList(bool serverOnline)
+        {
+            /* Add remote saves to the list */
+            var server = engine.Server;
+            var saveList = new List<ListViewItem>();
+            if (serverOnline)
+            {
+                var remoteSaveNames = await server.SaveNames();
+                var filtered = remoteSaveNames.Where(c => !engine.LocalSaves.Saves.ContainsKey(c));
+                foreach (var s in filtered)
+                {
+                    var remoteSaveItem = new ListViewItem(s)
+                    {
+                        ForeColor = Color.DarkRed
+                    };
+                    remoteSaveItem.SubItems.Add("Remote");
+                    remoteSaveItem.SubItems.Add("N/A");
+                    remoteSaveItem.SubItems.Add("On Server");
+                    saveFileList.Items.Add(remoteSaveItem);
+                }
+            }
+        }
+
+        public async Task SetLocalSaveStatuses(bool serverOnline)
+        {
+            foreach (ListViewItem item in saveFileList.Items)
+            {
+                var saveName = item.SubItems[0].Text;
+
+                var foundSave = engine.LocalSaves.Saves.TryGetValue(saveName, out string location);
+                if (!foundSave) return; // Ignore if its a remote save
+
+                var statusItem = item.SubItems[^1];
+
+                if (serverOnline && (File.Exists(location) || Directory.Exists(location)))
+                {
+                    var localHash = await engine.GetLocalHash(saveName);
+                    var remoteHash = await engine.GetRemoteHash(saveName);
+                    if (remoteHash is null)
+                    {
+                        statusItem.Text = "Not Uploaded";
+                        statusItem.ForeColor = Color.Gray;
+                    }
+                    else if (remoteHash == localHash)
+                    {
+                        statusItem.Text = "Synced";
+                        statusItem.ForeColor = Color.Green;
+                    }
+                    else
+                    {
+                        statusItem.Text = "Not Synced";
+                        statusItem.ForeColor = Color.DarkRed;
+                    }
+                }
+                else if (!File.Exists(location) && !Directory.Exists(location))
+                {
+                    statusItem.Text = "No Local Save";
+                    statusItem.ForeColor = Color.Gray;
+                }
+                else if (engine.Server is not null)
+                {
+                    statusItem.Text = "Offline";
+                    statusItem.ForeColor = Color.DarkGoldenrod;
+                }
+                else
+                {
+                    statusItem.Text = "No Server";
+                    statusItem.ForeColor = Color.Black;
+                }
+            }
         }
 
         // Click Events
@@ -266,7 +394,7 @@ namespace SaveDataSync
                     }
                     List<string> savesToExport = GetSelectedSaves();
                     using var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToExport.Count);
-                    var success = engine.ExportSaves(savesToExport.ToArray(), progressBar);
+                    var success = await engine.ExportSaves(savesToExport.ToArray(), progressBar);
                     if (success.Length != 0)
                     {
                         var successMessage = new StringBuilder();
@@ -298,7 +426,7 @@ namespace SaveDataSync
             {
                 List<string> savesToImport = GetSelectedSaves();
                 using var progressBar = ProgressBarControl.Start(mainProgressBar, progressLabel, savesToImport.Count);
-                var success = engine.ImportSaves(savesToImport.ToArray(), progressBar);
+                var success = await engine.ImportSaves(savesToImport.ToArray(), progressBar);
                 if (success.Length != 0)
                 {
                     var successMessage = new StringBuilder();
