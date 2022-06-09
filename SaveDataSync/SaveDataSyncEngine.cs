@@ -1,5 +1,4 @@
-﻿using ICSharpCode.SharpZipLib.Zip;
-using SaveDataSync.UI;
+﻿using SaveDataSync.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
