@@ -63,7 +63,7 @@ namespace SaveDataSync
             context.Response.ContentType = "text/html";
 
             var htmlPath = Path.Combine(Locations.WorkingDirectory, "oauth.html");
-            using var file = File.OpenRead(htmlPath); // TODO: Change this
+            using var file = File.Open(htmlPath, FileMode.Open, FileAccess.Read, FileShare.Read);
             file.CopyTo(context.Response.OutputStream);
             context.Response.OutputStream.Close();
         }

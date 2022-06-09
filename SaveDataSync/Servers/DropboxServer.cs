@@ -75,12 +75,12 @@ namespace SaveDataSync.Servers
             return new DropboxServer(accessToken, refreshToken, expires, uid);
         }
 
-        public string[] SaveNames()
+        public async Task<string[]> SaveNames()
         {
             try
             {
-                var result = DropboxClient.Files.ListFolderAsync(new ListFolderArg("",
-                    recursive: false, includeMediaInfo: false, includeDeleted: false, includeMountedFolders: false)).Result;
+                var result = await DropboxClient.Files.ListFolderAsync(new ListFolderArg("",
+                    recursive: false, includeMediaInfo: false, includeDeleted: false, includeMountedFolders: false));
 
                 var entries = result.Entries;
                 var nameList = new List<string>();
@@ -92,29 +92,30 @@ namespace SaveDataSync.Servers
             }
         }
 
-        public void GetSaveData(string name, string destination)
+        public async Task GetSaveData(string name, string destination)
         {
             if (!File.Exists(destination)) throw new Exception("Destination file does not exist. Cannot retrieve data.");
             using var destinationStream = File.OpenWrite(destination);
             var fileName = $"/{name}.zip";
-            var response = DropboxClient.Files.DownloadAsync(new DownloadArg(fileName)).Result; // This will actually download the file
-            response.GetContentAsStreamAsync().Result.CopyTo(destinationStream);
+            var response = await DropboxClient.Files.DownloadAsync(new DownloadArg(fileName)); // This will actually download the file
+            var responseStream = await response.GetContentAsStreamAsync();
+            await responseStream.CopyToAsync(destinationStream);
         }
 
-        public void UploadSaveData(string name, string source)
+        public async Task UploadSaveData(string name, string source)
         {
             if (!File.Exists(source)) throw new Exception("Source file does not exist. Cannot upload.");
             var fileName = $"/{name}.zip";
-            using var sourceStream = File.OpenRead(source);
-            DropboxClient.Files.UploadAsync(new UploadArg(fileName,
-                mode: WriteMode.Overwrite.Instance, autorename: false, mute: false, strictConflict: false), sourceStream).Wait();
+            using var sourceStream = File.Open(source, FileMode.Open, FileAccess.Read, FileShare.Read);
+            await DropboxClient.Files.UploadAsync(new UploadArg(fileName,
+                mode: WriteMode.Overwrite.Instance, autorename: false, mute: false, strictConflict: false), sourceStream);
         }
 
-        public bool ServerOnline()
+        public async Task<bool> ServerOnline()
         {
             try
             {
-                var account = DropboxClient.Check.UserAsync().Result;
+                var account = await DropboxClient.Check.UserAsync(); // This REALLY likes to hang...
                 return account is not null;
             }
             catch (Exception)
@@ -123,13 +124,13 @@ namespace SaveDataSync.Servers
             }
         }
 
-        public string GetRemoteSaveHash(string name)
+        public async Task<string> GetRemoteSaveHash(string name)
         {
             try
             {
                 var fileName = $"/{name}.zip";
-                var metadata = DropboxClient.Files.GetMetadataAsync(new GetMetadataArg(fileName,
-                    includeMediaInfo: false, includeDeleted: false, includeHasExplicitSharedMembers: false)).Result;
+                var metadata = await DropboxClient.Files.GetMetadataAsync(new GetMetadataArg(fileName,
+                    includeMediaInfo: false, includeDeleted: false, includeHasExplicitSharedMembers: false));
                 return metadata.AsFile.ContentHash;
             }
             catch (Exception)
@@ -138,19 +139,19 @@ namespace SaveDataSync.Servers
             }
         }
 
-        public string GetLocalSaveHash(string archiveLocation)
+        public async Task<string> GetLocalSaveHash(string archiveLocation)
         {
             if (!File.Exists(archiveLocation)) return string.Empty;
-            using var fileStream = File.Open(archiveLocation, FileMode.Open);
+            using var fileStream = File.Open(archiveLocation, FileMode.Open, FileAccess.Read, FileShare.Read);
 
             var buffer = new byte[4096];
             var hasher = new DropboxContentHasher();
 
-            var n = fileStream.Read(buffer, 0, buffer.Length);
+            var n = await fileStream.ReadAsync(buffer);
             while (n > 0)
             {
                 hasher.TransformBlock(buffer, 0, n, buffer, 0);
-                n = fileStream.Read(buffer, 0, buffer.Length);
+                n = await fileStream.ReadAsync(buffer);
             }
 
             hasher.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
@@ -158,15 +159,15 @@ namespace SaveDataSync.Servers
             return hex;
         }
 
-        public JObject Serialize()
+        public Task<JObject> Serialize()
         {
-            return new JObject
+            return Task.FromResult(new JObject
             {
                 { "accessToken", AccessToken },
                 { "refreshToken", RefreshToken },
                 { "expires", Expires },
                 { "uid", Uid }
-            };
+            });
         }
 
         public DropboxServer(string accessToken, string refreshToken, DateTime expires, string uid)

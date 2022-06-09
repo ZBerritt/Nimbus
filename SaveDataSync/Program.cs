@@ -3,7 +3,6 @@ using System.Windows.Forms;
 
 namespace SaveDataSync
 {
-    // TODO: async conversion on seperate feature branch
     internal static class Program
     {
         /// <summary>
