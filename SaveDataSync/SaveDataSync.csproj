@@ -45,7 +45,7 @@
     <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="oauth.html">
+    <Content Include="Assets\oauth.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SaveDataSync.ico" />
