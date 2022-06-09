@@ -71,7 +71,8 @@ namespace SaveDataSync
 
             // This entire mess basically just zips the file into what we need. We need to do it manually isntead of using fastzip
 
-            using var zipOutputStream = new ZipOutputStream(File.Open(destinationFile, FileMode.Open));
+            using var outputStream = File.OpenWrite(destinationFile);
+            using var zipOutputStream = new ZipOutputStream(outputStream);
             byte[] buffer = new byte[4096];
 
             FileAttributes attr = File.GetAttributes(location);
@@ -80,7 +81,7 @@ namespace SaveDataSync
                 string[] files = FileUtils.GetFileList(location); // Recursively get all files
                 foreach (string file in files)
                 {
-                    using var fileStream = new FileStream(file, FileMode.Open);
+                    using var fileStream = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read);
                     string entryName = Path.Combine(name, file[location.Length..]);
                     var fileEntry = new ZipEntry(entryName)
                     {
@@ -99,7 +100,7 @@ namespace SaveDataSync
                 return;
             }
 
-            using var stream = new FileStream(location, FileMode.Open);
+            using var stream = File.Open(location, FileMode.Open, FileAccess.Read, FileShare.Read);
             var entry = new ZipEntry(Path.GetFileName(location))
             {
                 DateTime = File.GetCreationTime(location), // Date time uses creation time

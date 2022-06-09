@@ -44,7 +44,8 @@ namespace SaveDataSync
             await ReloadUI();
         }
 
-        //Used to reload all UI data
+        // Used to reload all UI data
+        // TODO: Fix ability to stack reload tasks by spamming reload.
         public async Task ReloadUI()
         {
             /* Setup */
@@ -61,7 +62,7 @@ namespace SaveDataSync
             await UpdateButtons();
         }
 
-        public async Task SetServerStatus(bool serverOnline)
+        public Task SetServerStatus(bool serverOnline)
         {
             var server = engine.Server;
             string ServerType = "N/A";
@@ -94,6 +95,7 @@ namespace SaveDataSync
             host.Text = ServerHost;
             serverStatus.Text = ServerStatus;
             serverStatus.ForeColor = StatusColor;
+            return Task.CompletedTask;
         }
 
         public async Task SetLocalServerList(bool serverOnline)
