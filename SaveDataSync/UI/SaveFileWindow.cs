@@ -57,7 +57,7 @@ namespace SaveDataSync
             Close();
         }
 
-        private void SaveButton_Click(object sender, EventArgs e)
+        private async void SaveButton_Click(object sender, EventArgs e)
         {
             var name = nameTextBox.Text;
             if (name == null || name.Length == 0) return;
@@ -65,7 +65,7 @@ namespace SaveDataSync
             if (location == null || (!Directory.Exists(location) && !File.Exists(location))) return;
             try
             {
-                engine.AddSave(name, location);
+                await engine.AddSave(name, location);
                 Close();
             }
             catch (InvalidSaveException ex)

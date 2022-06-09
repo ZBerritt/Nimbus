@@ -61,7 +61,7 @@ namespace SaveDataSync.Tests
         }
 
         [TestMethod("Save Management Tests")]
-        public void LocalSaves_SaveManagementTests()
+        public async Task LocalSaves_SaveManagementTests()
         {
             localSaves.AddSave("testing", testPath);
             var saves = localSaves.Saves;
@@ -75,7 +75,7 @@ namespace SaveDataSync.Tests
             Assert.ThrowsException<Exception>(() => localSaves.GetSavePath("testing"));
 
             // Get zip data of a file that doesn't exist
-            Assert.ThrowsException<Exception>(() => localSaves.ArchiveSaveData("testing", "random_location"));
+            await Assert.ThrowsExceptionAsync<Exception>(async () => await localSaves.ArchiveSaveData("testing", "random_location"));
         }
 
         [TestMethod("Serialization")]
@@ -88,7 +88,7 @@ namespace SaveDataSync.Tests
         }
 
         [TestMethod("Zip is Deterministic")]
-        public void LocalSaves_ZipIsDeterministic()
+        public async Task LocalSaves_ZipIsDeterministic()
         {
             var sha256 = SHA256.Create();
 
@@ -97,24 +97,24 @@ namespace SaveDataSync.Tests
             using var tmpFile2 = new FileUtils.TemporaryFile();
             using var tmpFile3 = new FileUtils.TemporaryFile();
             using var tmpFile4 = new FileUtils.TemporaryFile();
-            localSaves.ArchiveSaveData("test_file1", tmpFile1.FilePath);
+            await localSaves.ArchiveSaveData("test_file1", tmpFile1.FilePath);
             using var stream1 = File.OpenRead(tmpFile1.FilePath);
             var hash1 = sha256.ComputeHash(stream1);
             var hex1 = BitConverter.ToString(hash1, 0, hash1.Length).Replace("-", "").ToLower();
-            Thread.Sleep(2000);
-            localSaves.ArchiveSaveData("test_file1", tmpFile2.FilePath);
+            await Task.Delay(2000);
+            await localSaves.ArchiveSaveData("test_file1", tmpFile2.FilePath);
             using var stream2 = File.OpenRead(tmpFile2.FilePath);
             var hash2 = sha256.ComputeHash(stream2);
             var hex2 = BitConverter.ToString(hash2, 0, hash2.Length).Replace("-", "").ToLower();
             Assert.AreEqual(hex1, hex2);
 
             // Folder test
-            localSaves.ArchiveSaveData("test_folder1", tmpFile3.FilePath);
+            await localSaves.ArchiveSaveData("test_folder1", tmpFile3.FilePath);
             using var stream3 = File.OpenRead(tmpFile3.FilePath);
             var hash3 = sha256.ComputeHash(stream3);
             var hex3 = BitConverter.ToString(hash3, 0, hash3.Length).Replace("-", "").ToLower();
-            Thread.Sleep(2000);
-            localSaves.ArchiveSaveData("test_folder1", tmpFile4.FilePath);
+            await Task.Delay(2000);
+            await localSaves.ArchiveSaveData("test_folder1", tmpFile4.FilePath);
             using var stream4 = File.OpenRead(tmpFile4.FilePath);
             var hash4 = sha256.ComputeHash(stream4);
             var hex4 = BitConverter.ToString(hash4, 0, hash4.Length).Replace("-", "").ToLower();

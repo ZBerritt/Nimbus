@@ -337,7 +337,7 @@ namespace SaveDataSync
                 if (confirm == DialogResult.Yes)
                 {
                     engine.LocalSaves.RemoveSave(name);
-                    engine.SaveAllData();
+                    await engine.SaveAllData();
                     await ReloadUI();
                 }
             };
