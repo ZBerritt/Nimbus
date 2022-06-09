@@ -82,7 +82,7 @@ namespace SaveDataSync
 
         // Returns all files successfully exported
         // TODO: Refactor
-        public string[] ExportSaves(string[] saves, ProgressBarControl progress)
+        public async Task<string[]> ExportSaves(string[] saves, ProgressBarControl progress)
         {
             var success = new List<string>();
             foreach (string save in saves)
@@ -119,8 +119,8 @@ namespace SaveDataSync
                 try
                 {
                     using var tmpFile = new FileUtils.TemporaryFile();
-                    LocalSaves.ArchiveSaveData(save, tmpFile.FilePath);
-                    Server.UploadSaveData(save, tmpFile.FilePath);
+                    await LocalSaves.ArchiveSaveData(save, tmpFile.FilePath);
+                    await Server.UploadSaveData(save, tmpFile.FilePath);
                     success.Add(save);
                 }
                 catch (Exception)
@@ -149,7 +149,7 @@ namespace SaveDataSync
         }
 
         // TODO: Refactor
-        public string[] ImportSaves(string[] saves, ProgressBarControl progress)
+        public async Task<string[]> ImportSaves(string[] saves, ProgressBarControl progress)
         {
             var success = new List<string>();
             foreach (string save in saves)
@@ -192,8 +192,8 @@ namespace SaveDataSync
                 try
                 {
                     using var tmpFile = new FileUtils.TemporaryFile();
-                    Server.GetSaveData(save, tmpFile.FilePath);
-                    LocalSaves.ExtractSaveData(save, tmpFile.FilePath);
+                    await Server.GetSaveData(save, tmpFile.FilePath);
+                    await LocalSaves.ExtractSaveData(save, tmpFile.FilePath);
                     success.Add(save);
                 }
                 catch (Exception)
@@ -223,7 +223,7 @@ namespace SaveDataSync
         public async Task<string> GetLocalHash(string save)
         {
             using var tmpFile = new FileUtils.TemporaryFile();
-            LocalSaves.ArchiveSaveData(save, tmpFile.FilePath);
+            await LocalSaves.ArchiveSaveData(save, tmpFile.FilePath);
             var saveHash = Server.GetLocalSaveHash(tmpFile.FilePath);
             return await saveHash;
         }

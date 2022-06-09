@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 // TODO: Handle large files
@@ -64,7 +65,7 @@ namespace SaveDataSync
         }
 
         // TODO: Store original permissions/date and put them back when extracting
-        public void ArchiveSaveData(string name, string destinationFile)
+        public async Task ArchiveSaveData(string name, string destinationFile)
         {
             string location = GetSavePath(name);
 
@@ -91,7 +92,7 @@ namespace SaveDataSync
                     var fcount = fileStream.Read(buffer, 0, buffer.Length);
                     while (fcount > 0)
                     {
-                        zipOutputStream.Write(buffer, 0, fcount);
+                        await zipOutputStream.WriteAsync(buffer.AsMemory(0, fcount));
                         fcount = fileStream.Read(buffer, 0, buffer.Length);
                     }
                 }
@@ -109,12 +110,12 @@ namespace SaveDataSync
             var count = stream.Read(buffer, 0, buffer.Length);
             while (count > 0)
             {
-                zipOutputStream.Write(buffer, 0, count);
+                await zipOutputStream.WriteAsync(buffer.AsMemory(0, count));
                 count = stream.Read(buffer, 0, buffer.Length);
             }
         }
 
-        public void ExtractSaveData(string name, string source)
+        public async Task ExtractSaveData(string name, string source)
         {
             if (!File.Exists(source)) throw new Exception("Source folder does not exist.");
             var destination = GetSavePath(name);
