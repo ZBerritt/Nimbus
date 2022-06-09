@@ -4,6 +4,7 @@ using SaveDataSync.Servers;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SaveDataSync
 {
@@ -87,14 +88,14 @@ namespace SaveDataSync
             };
         }
 
-        public void SaveServerData(IServer server)
+        public async Task SaveServerData(IServer server)
         {
             if (server is null) return;
             var json = new JObject();
             var serverDataJson = server.Serialize();
             var serverName = server.Name;
             json.Add("name", serverName);
-            json.Add("data", serverDataJson);
+            json.Add("data", await serverDataJson);
             var result = json.ToString();
 
             // Protect sensitive data from other users

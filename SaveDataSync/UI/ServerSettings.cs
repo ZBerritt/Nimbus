@@ -30,14 +30,14 @@ namespace SaveDataSync.UI
             }
         }
 
-        private void saveButton_Click(object sender, EventArgs e)
+        private async void saveButton_Click(object sender, EventArgs e)
         {
             try
             {
                 switch (settingsTabs.SelectedTab.AccessibleName) // Active tab settings will be saved
                 {
                     case "dropbox":
-                        var serverOnline = _dropboxServer.ServerOnline();
+                        var serverOnline = await _dropboxServer.ServerOnline();
                         if (!serverOnline) throw new Exception("Server cannot be found or is not online!");
                         engine.Server = _dropboxServer;
                         break;

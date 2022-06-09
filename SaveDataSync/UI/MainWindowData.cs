@@ -12,43 +12,20 @@ namespace SaveDataSync.UI
     /// <summary>
     /// Represents the data for the main window UI.
     /// </summary>
-    internal class MainWindowData
+    internal static class MainWindowData
     {
-        // Server Status
-        public string ServerType { get; set; } = "None";
-
-        public string ServerStatus { get; set; } = "N/A";
-
-        public Color ServerColor
+        public static async Task<ServerStatus> GetServerStatus(SaveDataSyncEngine engine)
         {
-            get
-            {
-                return ServerStatus switch
-                {
-                    "Online" => Color.Green,
-                    "Offline" => Color.DarkGoldenrod,
-                    "Error" => Color.Red,
-                    _ => Color.Black,
-                };
-            }
-        }
-
-        public string ServerHost { get; set; } = "N/A";
-
-        // Save list
-
-        public List<ListViewItem> saveList = new();
-
-        public MainWindowData(SaveDataSyncEngine engine)
-        {
-            /* Check server status */
             var server = engine.Server;
-            var serverOnline = false;
+            string ServerType = "N/A";
+            string ServerHost = "N/A";
+            string ServerStatus = "None";
+            /* Check server status */
             if (server is not null)
             {
                 ServerType = server.Name;
                 ServerHost = server.Host;
-                serverOnline = server.ServerOnline();
+                var serverOnline = await server.ServerOnline();
                 try
                 {
                     ServerStatus = serverOnline ? "Online" : "Offline";
@@ -59,8 +36,17 @@ namespace SaveDataSync.UI
                 }
             }
 
+            return new ServerStatus(ServerStatus, ServerHost, ServerType);
+        }
+
+        // TODO: Somehow someway someplace figure out how to get the sync status of each individually and seperate
+        public static async Task<List<ListViewItem>> GetLocalServerList(SaveDataSyncEngine engine)
+        {
             /* Get a list of the data for the table */
             var saves = engine.LocalSaves.Saves;
+            var server = engine.Server;
+            var serverOnline = server is not null && await server.ServerOnline();
+            var saveList = new List<ListViewItem>();
             foreach (var save in saves)
             {
                 var saveItem = new ListViewItem(save.Key)
@@ -79,8 +65,8 @@ namespace SaveDataSync.UI
                 var statusItem = new ListViewItem.ListViewSubItem(saveItem, "");
                 if (serverOnline && (File.Exists(save.Value) || Directory.Exists(save.Value)))
                 {
-                    var localHash = engine.GetLocalHash(save.Key);
-                    var remoteHash = engine.GetRemoteHash(save.Key);
+                    var localHash = await engine.GetLocalHash(save.Key);
+                    var remoteHash = await engine.GetRemoteHash(save.Key);
                     if (remoteHash is null)
                     {
                         statusItem.Text = "Not Uploaded";
@@ -118,10 +104,18 @@ namespace SaveDataSync.UI
                 saveList.Add(saveItem);
             }
 
+            return saveList;
+        }
+
+        public static async Task<List<ListViewItem>> GetRemoteServerList(SaveDataSyncEngine engine)
+        {
             /* Add remote saves to the list */
+            var server = engine.Server;
+            var serverOnline = await server.ServerOnline();
+            var saveList = new List<ListViewItem>();
             if (server is not null && serverOnline)
             {
-                var remoteSaveNames = server.SaveNames();
+                var remoteSaveNames = await server.SaveNames(); // THIS TOO!!!
                 var filtered = remoteSaveNames.Where(c => !engine.LocalSaves.Saves.ContainsKey(c));
                 foreach (var s in filtered)
                 {
@@ -135,13 +129,36 @@ namespace SaveDataSync.UI
                     saveList.Add(remoteSaveItem);
                 }
             }
+
+            return saveList;
+        }
+    }
+
+    public class ServerStatus
+    {
+        public string Status { get; private set; }
+        public string Host { get; private set; }
+        public string Type { get; private set; }
+
+        public Color Color
+        {
+            get
+            {
+                return Status switch
+                {
+                    "Online" => Color.Green,
+                    "Offline" => Color.DarkGoldenrod,
+                    "Error" => Color.Red,
+                    _ => Color.Black,
+                };
+            }
         }
 
-        public static MainWindowData GetMainWindowData(SaveDataSyncEngine engine)
+        internal ServerStatus(string status, string host, string type)
         {
-            MainWindowData data;
-            data = new MainWindowData(engine);
-            return data;
+            Status = status;
+            Host = host;
+            Type = type;
         }
     }
 }
