@@ -210,7 +210,7 @@ namespace SaveDataSync
                 ShowInTaskbar = false
             };
             sfw.ShowDialog();
-            await ReloadUI();
+            if (sfw.ShouldReload) await ReloadUI();
         }
 
         private async void Settings_Click(object sender, EventArgs e)
@@ -221,7 +221,7 @@ namespace SaveDataSync
                 ShowInTaskbar = true
             };
             sw.ShowDialog();
-            await ReloadUI();
+            if (sw.ShouldReload) await ReloadUI();
         }
 
         private async void ServerSettingsBtn_Click(object sender, EventArgs e)
@@ -232,7 +232,7 @@ namespace SaveDataSync
                 ShowInTaskbar = true
             };
             ss.ShowDialog();
-            await ReloadUI();
+            if (ss.ShouldReload) await ReloadUI();
         }
 
         private async void Export_Click(object sender, EventArgs e)
@@ -451,6 +451,11 @@ namespace SaveDataSync
             {
                 await ReloadUI();
             }
+        }
+
+        private async void reloadDataButton_Click(object sender, EventArgs e)
+        {
+            await ReloadUI();
         }
     }
 }
