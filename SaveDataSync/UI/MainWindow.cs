@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SaveDataSync
@@ -23,11 +24,12 @@ namespace SaveDataSync
         }
 
         // Loading Events
-        private void OnLoad(object sender, EventArgs e)
+        private async void OnLoad(object sender, EventArgs e) // Can't use Task here since the program wants to return void
+
         {
             // Set name as debug if the program is in debug mode
 #if DEBUG
-            this.Text = "SaveDataSync - DEBUG";
+            Text = "SaveDataSync - DEBUG";
 #endif
             // Grabs the engine which allows communication with the backend
             engine = SaveDataSyncEngine.Start();
@@ -39,32 +41,38 @@ namespace SaveDataSync
             saveFileList.ListViewItemSorter = new SaveListSorter();
 
             // Loads the save list with the imported data from the engine
-            ReloadUI();
+            await ReloadUI();
         }
 
         //Used to reload all UI data
-        public void ReloadUI()
+        public async Task ReloadUI()
         {
             /* Get main window data asyncronously */
-            var data = MainWindowData.GetMainWindowData(engine);
+            var statusData = await MainWindowData.GetServerStatus(engine);
+            type.Text = statusData.Type;
+            host.Text = statusData.Host;
+            serverStatus.Text = statusData.Status;
+            serverStatus.ForeColor = statusData.Color;
 
-            type.Text = data.ServerType;
-            host.Text = data.ServerHost;
-            serverStatus.Text = data.ServerStatus;
-            serverStatus.ForeColor = data.ServerColor;
+            saveFileList.Items.Clear(); // Clear the items before adding new ones
+            var localSaveData = await MainWindowData.GetLocalServerList(engine);
+            foreach (var item in localSaveData)
+            {
+                saveFileList.Items.Add(item);
+            }
 
-            saveFileList.Items.Clear();
-            foreach (var item in data.saveList)
+            var remoteSaveData = await MainWindowData.GetRemoteServerList(engine);
+            foreach (var item in remoteSaveData)
             {
                 saveFileList.Items.Add(item);
             }
 
             /* Change buttons */
-            UpdateButtons();
+            await UpdateButtons();
         }
 
         // Click Events
-        private void NewSaveFile_Click(object sender, EventArgs e)
+        private async void NewSaveFile_Click(object sender, EventArgs e)
         {
             var sfw = new SaveFileWindow(engine)
             {
@@ -72,10 +80,10 @@ namespace SaveDataSync
                 ShowInTaskbar = false
             };
             sfw.ShowDialog();
-            ReloadUI();
+            await ReloadUI();
         }
 
-        private void Settings_Click(object sender, EventArgs e)
+        private async void Settings_Click(object sender, EventArgs e)
         {
             var sw = new SettingsWindow(engine)
             {
@@ -83,10 +91,10 @@ namespace SaveDataSync
                 ShowInTaskbar = true
             };
             sw.ShowDialog();
-            ReloadUI();
+            await ReloadUI();
         }
 
-        private void ServerSettingsBtn_Click(object sender, EventArgs e)
+        private async void ServerSettingsBtn_Click(object sender, EventArgs e)
         {
             var ss = new ServerSettings(engine)
             {
@@ -94,22 +102,22 @@ namespace SaveDataSync
                 ShowInTaskbar = true
             };
             ss.ShowDialog();
-            ReloadUI();
+            await ReloadUI();
         }
 
-        private void Export_Click(object sender, EventArgs e)
+        private async void Export_Click(object sender, EventArgs e)
         {
-            Export();
+            await Export();
         }
 
-        private void Import_Click(object sender, EventArgs e)
+        private async void Import_Click(object sender, EventArgs e)
         {
-            Import();
+            await Import();
         }
 
-        private void SaveFileList_MouseClick(object sender, MouseEventArgs e)
+        private async void SaveFileList_MouseClick(object sender, MouseEventArgs e)
         {
-            UpdateButtons();
+            await UpdateButtons();
             if (e.Button == MouseButtons.Right)
             {
                 var selectedItem = saveFileList.FocusedItem;
@@ -117,28 +125,30 @@ namespace SaveDataSync
                 {
                     return;
                 }
-                SaveFileContextMenu(selectedItem.Text).Show(saveFileList, new Point(e.X, e.Y));
+                var contextMenu = await SaveFileContextMenu(selectedItem.Text);
+                contextMenu.Show(saveFileList, new Point(e.X, e.Y));
             }
         }
 
-        private ContextMenuStrip SaveFileContextMenu(string name)
+        private async Task<ContextMenuStrip> SaveFileContextMenu(string name)
         {
             var menu = new ContextMenuStrip();
             var selectedSaves = GetSelectedSaves();
             bool singleSelected = selectedSaves.Count == 1;
             bool hasRemote = SelectingRemoteSave();
-            bool serverOnline = engine.Server is not null && engine.Server.ServerOnline();
+            var server = engine.Server;
+            bool serverOnline = server is not null && await server.ServerOnline();
 
 #if DEBUG
             var getHashes = menu.Items.Add("[DEBUG] Get Hashes");
             getHashes.Enabled = !hasRemote && serverOnline && singleSelected;
-            getHashes.Click += (object sender, EventArgs e) =>
+            getHashes.Click += async (object sender, EventArgs e) =>
             {
                 if (SelectingRemoteSave()) return;
                 var selected = GetSelectedSaves();
                 var first = selected[0]; // I don't care I just want the first one
-                var remoteHash = engine.GetRemoteHash(first);
-                var localHash = engine.GetLocalHash(first);
+                var remoteHash = await engine.GetRemoteHash(first);
+                var localHash = await engine.GetLocalHash(first);
                 MessageBox.Show($"Remote Hash: {remoteHash} (Length: {remoteHash.Length})\n" +
                     $"Local Hash: {localHash} (Length: {localHash.Length})",
                            "Debug",
@@ -167,21 +177,21 @@ namespace SaveDataSync
 
             var quickExport = menu.Items.Add("Quick Export");
             quickExport.Enabled = !hasRemote && serverOnline;
-            quickExport.Click += (object sender3, EventArgs e3) =>
+            quickExport.Click += async (object sender3, EventArgs e3) =>
             {
-                Export();
+                await Export();
             };
 
             var quickImport = menu.Items.Add("Quick Import");
             quickImport.Enabled = serverOnline;
-            quickImport.Click += (object sender4, EventArgs e4) =>
+            quickImport.Click += async (object sender4, EventArgs e4) =>
             {
-                Import();
+                await Import();
             };
 
             var removeSave = menu.Items.Add("Remove Local Save");
             removeSave.Enabled = !hasRemote;
-            removeSave.Click += (object sender5, EventArgs e5) =>
+            removeSave.Click += async (object sender5, EventArgs e5) =>
             {
                 var messageBuilder = new StringBuilder();
                 messageBuilder.Append("Are you sure you want to remove the following saves?");
@@ -198,7 +208,7 @@ namespace SaveDataSync
                 {
                     engine.LocalSaves.RemoveSave(name);
                     engine.SaveAllData();
-                    ReloadUI();
+                    await ReloadUI();
                 }
             };
 
@@ -235,15 +245,16 @@ namespace SaveDataSync
             return false;
         }
 
-        private void UpdateButtons()
+        private async Task UpdateButtons()
         {
             var selectingSaves = GetSelectedSaves().Count > 0;
-            var CanExportAndImport = engine.Server != null && engine.Server.ServerOnline() && selectingSaves;
+            var server = engine.Server;
+            var CanExportAndImport = server is not null && await server.ServerOnline() && selectingSaves;
             exportButton.Enabled = !SelectingRemoteSave() && CanExportAndImport; // Don't want to export remote saves
             importButton.Enabled = CanExportAndImport;
         }
 
-        private void Export()
+        private async Task Export()
         {
             {
                 try
@@ -276,12 +287,12 @@ namespace SaveDataSync
                 }
                 finally
                 {
-                    ReloadUI();
+                    await ReloadUI();
                 }
             }
         }
 
-        private void Import()
+        private async Task Import()
         {
             try
             {
@@ -308,7 +319,7 @@ namespace SaveDataSync
             }
             finally
             {
-                ReloadUI();
+                await ReloadUI();
             }
         }
     }
