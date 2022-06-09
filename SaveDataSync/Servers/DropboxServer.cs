@@ -175,7 +175,7 @@ namespace SaveDataSync.Servers
             RefreshToken = refreshToken;
             Expires = expires;
             Uid = uid;
-            DropboxClient = new DropboxClient(accessToken, refreshToken, expires, APP_ID);
+            DropboxClient = new DropboxClient(accessToken, refreshToken, expires, APP_ID); // Weird behavior, doesn't reload when expired. Will be testing later.
         }
     }
 }
