@@ -8,6 +8,7 @@ namespace SaveDataSync.UI
     {
         public SaveDataSyncEngine engine;
         public IServer server;
+        public bool ShouldReload { get; private set; } = false;
 
         private DropboxServer _dropboxServer;
 
@@ -41,6 +42,7 @@ namespace SaveDataSync.UI
                         engine.Server = _dropboxServer;
                         break;
                 }
+                ShouldReload = true;
                 Close();
             }
             catch (Exception ex)

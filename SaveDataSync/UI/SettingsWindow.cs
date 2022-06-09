@@ -7,11 +7,12 @@ namespace SaveDataSync.UI
     {
         private SaveDataSyncEngine engine;
         private Settings settingsCopy;
+        public bool ShouldReload { get; private set; } = false;
 
         public SettingsWindow(SaveDataSyncEngine engine)
         {
             this.engine = engine;
-            this.settingsCopy = engine.Settings.Clone();
+            settingsCopy = engine.Settings.Clone();
             InitializeComponent();
         }
 
@@ -25,6 +26,7 @@ namespace SaveDataSync.UI
             // Get the new settings from the UI here
             engine.Settings = settingsCopy;
             await engine.SaveAllData();
+            ShouldReload = true;
             Close();
         }
     }

@@ -48,6 +48,7 @@
             this.host = new System.Windows.Forms.Label();
             this.serverSettingsBtn = new System.Windows.Forms.Button();
             this.progressLabel = new System.Windows.Forms.Label();
+            this.reloadDataButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // importButton
@@ -246,11 +247,23 @@
             this.progressLabel.TabIndex = 18;
             this.progressLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // reloadDataButton
+            // 
+            this.reloadDataButton.Location = new System.Drawing.Point(638, 234);
+            this.reloadDataButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.reloadDataButton.Name = "reloadDataButton";
+            this.reloadDataButton.Size = new System.Drawing.Size(278, 27);
+            this.reloadDataButton.TabIndex = 19;
+            this.reloadDataButton.Text = "Reload Data";
+            this.reloadDataButton.UseVisualStyleBackColor = true;
+            this.reloadDataButton.Click += new System.EventHandler(this.reloadDataButton_Click);
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1017, 582);
+            this.Controls.Add(this.reloadDataButton);
             this.Controls.Add(this.progressLabel);
             this.Controls.Add(this.serverSettingsBtn);
             this.Controls.Add(this.host);
@@ -298,6 +311,7 @@
         private System.Windows.Forms.Label host;
         private System.Windows.Forms.Button serverSettingsBtn;
         private System.Windows.Forms.Label progressLabel;
+        private System.Windows.Forms.Button reloadDataButton;
     }
 }
 

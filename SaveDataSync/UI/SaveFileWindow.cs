@@ -6,6 +6,7 @@ namespace SaveDataSync
 {
     internal partial class SaveFileWindow : Form
     {
+        public bool ShouldReload { get; private set; } = false;
         private SaveDataSyncEngine engine;
 
         public SaveFileWindow(SaveDataSyncEngine engine)
@@ -66,6 +67,7 @@ namespace SaveDataSync
             try
             {
                 await engine.AddSave(name, location);
+                ShouldReload = true;
                 Close();
             }
             catch (InvalidSaveException ex)
