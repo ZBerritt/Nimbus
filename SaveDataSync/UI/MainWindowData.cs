@@ -116,23 +116,23 @@ namespace SaveDataSync.UI
 
                 // Add to the list
                 saveList.Add(saveItem);
+            }
 
-                /* Add remote saves to the list */
-                if (server is not null && serverOnline)
+            /* Add remote saves to the list */
+            if (server is not null && serverOnline)
+            {
+                var remoteSaveNames = server.SaveNames();
+                var filtered = remoteSaveNames.Where(c => !engine.LocalSaves.Saves.ContainsKey(c));
+                foreach (var s in filtered)
                 {
-                    var remoteSaveNames = server.SaveNames();
-                    var filtered = remoteSaveNames.Where(c => !engine.LocalSaves.Saves.ContainsKey(c));
-                    foreach (var s in filtered)
+                    var remoteSaveItem = new ListViewItem(s)
                     {
-                        var remoteSaveItem = new ListViewItem(s)
-                        {
-                            ForeColor = Color.DarkRed
-                        };
-                        saveItem.SubItems.Add("Remote");
-                        saveItem.SubItems.Add("N/A");
-                        saveItem.SubItems.Add("On Server");
-                        saveList.Add(saveItem);
-                    }
+                        ForeColor = Color.DarkRed
+                    };
+                    remoteSaveItem.SubItems.Add("Remote");
+                    remoteSaveItem.SubItems.Add("N/A");
+                    remoteSaveItem.SubItems.Add("On Server");
+                    saveList.Add(remoteSaveItem);
                 }
             }
         }

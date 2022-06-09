@@ -16,10 +16,10 @@ namespace SaveDataSync
         public string[] SaveNames();
 
         // Gets the specificed save data
-        public byte[] GetSaveData(string name);
+        public void GetSaveData(string name, string destination);
 
         // Uploads local save data
-        public void UploadSaveData(string name, byte[] data);
+        public void UploadSaveData(string name, string source);
 
         // Is the server online?
         public bool ServerOnline();
@@ -31,6 +31,6 @@ namespace SaveDataSync
         public string GetLocalSaveHash(string archiveLocation);
 
         // Server data in JSON format
-        public JObject ToJson();
+        public JObject Serialize();
     }
 }

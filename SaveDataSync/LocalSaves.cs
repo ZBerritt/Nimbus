@@ -63,13 +63,6 @@ namespace SaveDataSync
             return Saves[name];
         }
 
-        public byte[] GetSaveZipData(string name)
-        {
-            using var tmpFile = new FileUtils.TemporaryFile(); // Used for file destination
-            ArchiveSaveData(name, tmpFile.FilePath); // Archives data to destination
-            return File.ReadAllBytes(tmpFile.FilePath);
-        }
-
         // TODO: Store original permissions/date and put them back when extracting
         public void ArchiveSaveData(string name, string destinationFile)
         {
@@ -121,19 +114,17 @@ namespace SaveDataSync
             }
         }
 
-        public void ExtractSaveData(string name, byte[] data)
+        public void ExtractSaveData(string name, string source)
         {
+            if (!File.Exists(source)) throw new Exception("Source folder does not exist.");
             var destination = GetSavePath(name);
 
             // Extract to temporary folder
-            using var tmpFile = new FileUtils.TemporaryFile();
             using var tmpDir = new FileUtils.TemporaryFolder();
-            var tempFile = tmpFile.FilePath;
             var tempDir = tmpDir.FolderPath;
 
-            File.WriteAllBytes(tempFile, data);
             var fastZip = new FastZip();
-            fastZip.ExtractZip(tempFile, tempDir, null);
+            fastZip.ExtractZip(source, tempDir, null);
 
             string[] content = Directory.GetFiles(tempDir, "*.*", SearchOption.TopDirectoryOnly);
             if (content.Length == 0) content = Directory.GetDirectories(tempDir, "*.*", SearchOption.TopDirectoryOnly);
