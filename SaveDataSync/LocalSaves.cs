@@ -135,14 +135,16 @@ namespace SaveDataSync
             FileAttributes attr = File.GetAttributes(saveContent);
             if (attr.HasFlag(FileAttributes.Directory))
             {
-                ExtractFolder(saveContent, destination);
+                await ExtractFolder(saveContent, destination);
                 return;
             }
 
-            File.Copy(saveContent, destination, true);
+            using var inputStream = File.Open(saveContent, FileMode.Open);
+            using var outputStream = File.OpenWrite(destination);
+            await inputStream.CopyToAsync(outputStream);
         }
 
-        private static void ExtractFolder(string source, string destination)
+        private static async Task ExtractFolder(string source, string destination)
         {
             foreach (string dir in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
             {
@@ -151,7 +153,9 @@ namespace SaveDataSync
 
             foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
             {
-                File.Copy(file, file.Replace(source, destination), true); // Add all files
+                using var inputStream = File.Open(file, FileMode.Open);
+                using var outputStream = File.OpenWrite(file.Replace(source, destination));
+                await inputStream.CopyToAsync(outputStream);
             }
         }
 

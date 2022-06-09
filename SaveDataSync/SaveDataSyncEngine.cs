@@ -18,6 +18,7 @@ namespace SaveDataSync
         private IServer _server;
         private Settings _settings;
 
+        // TODO: This stuff doesn't use await. No clue how to fix...
         public LocalSaves LocalSaves
         {
             get => _localsaves;
@@ -64,7 +65,7 @@ namespace SaveDataSync
             return Instance;
         }
 
-        public void AddSave(string name, string location)
+        public async Task AddSave(string name, string location)
         {
             try
             {
@@ -76,7 +77,7 @@ namespace SaveDataSync
             }
             finally
             {
-                SaveAllData();
+                await SaveAllData();
             }
         }
 
@@ -233,9 +234,9 @@ namespace SaveDataSync
             return await Server.GetRemoteSaveHash(save);
         }
 
-        public void SaveAllData()
+        public async Task SaveAllData()
         {
-            DataManager.SaveAll(_localsaves, _server, _settings);
+            await DataManager.SaveAll(_localsaves, _server, _settings);
         }
     }
 }

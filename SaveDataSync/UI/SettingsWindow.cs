@@ -20,11 +20,11 @@ namespace SaveDataSync.UI
             Close();
         }
 
-        private void saveBtn_Click(object sender, EventArgs e)
+        private async void saveBtn_Click(object sender, EventArgs e)
         {
             // Get the new settings from the UI here
             engine.Settings = settingsCopy;
-            engine.SaveAllData();
+            await engine.SaveAllData();
             Close();
         }
     }

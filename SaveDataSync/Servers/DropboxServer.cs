@@ -99,7 +99,7 @@ namespace SaveDataSync.Servers
             var fileName = $"/{name}.zip";
             var response = await DropboxClient.Files.DownloadAsync(new DownloadArg(fileName)); // This will actually download the file
             var responseStream = await response.GetContentAsStreamAsync();
-            responseStream.CopyTo(destinationStream);
+            await responseStream.CopyToAsync(destinationStream);
         }
 
         public async Task UploadSaveData(string name, string source)
@@ -139,25 +139,24 @@ namespace SaveDataSync.Servers
             }
         }
 
-        // TODO: Implement asynchronously
-        public Task<string> GetLocalSaveHash(string archiveLocation)
+        public async Task<string> GetLocalSaveHash(string archiveLocation)
         {
-            if (!File.Exists(archiveLocation)) return Task.FromResult(string.Empty);
+            if (!File.Exists(archiveLocation)) return string.Empty;
             using var fileStream = File.Open(archiveLocation, FileMode.Open, FileAccess.Read, FileShare.Read);
 
             var buffer = new byte[4096];
             var hasher = new DropboxContentHasher();
 
-            var n = fileStream.Read(buffer, 0, buffer.Length);
+            var n = await fileStream.ReadAsync(buffer);
             while (n > 0)
             {
                 hasher.TransformBlock(buffer, 0, n, buffer, 0);
-                n = fileStream.Read(buffer, 0, buffer.Length);
+                n = await fileStream.ReadAsync(buffer);
             }
 
             hasher.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
             var hex = DropboxContentHasher.ToHex(hasher.Hash);
-            return Task.FromResult(hex);
+            return hex;
         }
 
         public Task<JObject> Serialize()

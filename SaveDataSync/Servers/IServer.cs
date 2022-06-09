@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 
 namespace SaveDataSync
 {
-    // TODO: handle import/export errors properly
     public interface IServer
 
     {
