@@ -106,7 +106,7 @@ namespace SaveDataSync.Servers
         {
             if (!File.Exists(source)) throw new Exception("Source file does not exist. Cannot upload.");
             var fileName = $"/{name}.zip";
-            using var sourceStream = File.OpenRead(source);
+            using var sourceStream = File.Open(source, FileMode.Open, FileAccess.Read, FileShare.Read);
             await DropboxClient.Files.UploadAsync(new UploadArg(fileName,
                 mode: WriteMode.Overwrite.Instance, autorename: false, mute: false, strictConflict: false), sourceStream);
         }
@@ -143,7 +143,7 @@ namespace SaveDataSync.Servers
         public Task<string> GetLocalSaveHash(string archiveLocation)
         {
             if (!File.Exists(archiveLocation)) return Task.FromResult(string.Empty);
-            using var fileStream = File.Open(archiveLocation, FileMode.Open);
+            using var fileStream = File.Open(archiveLocation, FileMode.Open, FileAccess.Read, FileShare.Read);
 
             var buffer = new byte[4096];
             var hasher = new DropboxContentHasher();
