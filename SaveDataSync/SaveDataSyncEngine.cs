@@ -3,6 +3,7 @@ using SaveDataSync.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SaveDataSync
@@ -17,6 +18,7 @@ namespace SaveDataSync
         private IServer _server;
         private Settings _settings;
 
+        // TODO: This stuff doesn't use await. No clue how to fix...
         public LocalSaves LocalSaves
         {
             get => _localsaves;
@@ -63,7 +65,7 @@ namespace SaveDataSync
             return Instance;
         }
 
-        public void AddSave(string name, string location)
+        public async Task AddSave(string name, string location)
         {
             try
             {
@@ -75,13 +77,13 @@ namespace SaveDataSync
             }
             finally
             {
-                SaveAllData();
+                await SaveAllData();
             }
         }
 
         // Returns all files successfully exported
         // TODO: Refactor
-        public string[] ExportSaves(string[] saves, ProgressBarControl progress)
+        public async Task<string[]> ExportSaves(string[] saves, ProgressBarControl progress)
         {
             var success = new List<string>();
             foreach (string save in saves)
@@ -118,8 +120,8 @@ namespace SaveDataSync
                 try
                 {
                     using var tmpFile = new FileUtils.TemporaryFile();
-                    LocalSaves.ArchiveSaveData(save, tmpFile.FilePath);
-                    Server.UploadSaveData(save, tmpFile.FilePath);
+                    await LocalSaves.ArchiveSaveData(save, tmpFile.FilePath);
+                    await Server.UploadSaveData(save, tmpFile.FilePath);
                     success.Add(save);
                 }
                 catch (Exception)
@@ -148,7 +150,7 @@ namespace SaveDataSync
         }
 
         // TODO: Refactor
-        public string[] ImportSaves(string[] saves, ProgressBarControl progress)
+        public async Task<string[]> ImportSaves(string[] saves, ProgressBarControl progress)
         {
             var success = new List<string>();
             foreach (string save in saves)
@@ -191,8 +193,8 @@ namespace SaveDataSync
                 try
                 {
                     using var tmpFile = new FileUtils.TemporaryFile();
-                    Server.GetSaveData(save, tmpFile.FilePath);
-                    LocalSaves.ExtractSaveData(save, tmpFile.FilePath);
+                    await Server.GetSaveData(save, tmpFile.FilePath);
+                    await LocalSaves.ExtractSaveData(save, tmpFile.FilePath);
                     success.Add(save);
                 }
                 catch (Exception)
@@ -219,22 +221,22 @@ namespace SaveDataSync
             return success.ToArray();
         }
 
-        public string GetLocalHash(string save)
+        public async Task<string> GetLocalHash(string save)
         {
             using var tmpFile = new FileUtils.TemporaryFile();
-            LocalSaves.ArchiveSaveData(save, tmpFile.FilePath);
+            await LocalSaves.ArchiveSaveData(save, tmpFile.FilePath);
             var saveHash = Server.GetLocalSaveHash(tmpFile.FilePath);
-            return saveHash;
+            return await saveHash;
         }
 
-        public string GetRemoteHash(string save)
+        public async Task<string> GetRemoteHash(string save)
         {
-            return Server.GetRemoteSaveHash(save);
+            return await Server.GetRemoteSaveHash(save);
         }
 
-        public void SaveAllData()
+        public async Task SaveAllData()
         {
-            DataManager.SaveAll(_localsaves, _server, _settings);
+            await DataManager.SaveAll(_localsaves, _server, _settings);
         }
     }
 }

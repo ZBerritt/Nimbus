@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 // TODO: Handle large files
@@ -64,13 +65,14 @@ namespace SaveDataSync
         }
 
         // TODO: Store original permissions/date and put them back when extracting
-        public void ArchiveSaveData(string name, string destinationFile)
+        public async Task ArchiveSaveData(string name, string destinationFile)
         {
             string location = GetSavePath(name);
 
             // This entire mess basically just zips the file into what we need. We need to do it manually isntead of using fastzip
 
-            using var zipOutputStream = new ZipOutputStream(File.Open(destinationFile, FileMode.Open));
+            using var outputStream = File.OpenWrite(destinationFile);
+            using var zipOutputStream = new ZipOutputStream(outputStream);
             byte[] buffer = new byte[4096];
 
             FileAttributes attr = File.GetAttributes(location);
@@ -79,7 +81,7 @@ namespace SaveDataSync
                 string[] files = FileUtils.GetFileList(location); // Recursively get all files
                 foreach (string file in files)
                 {
-                    using var fileStream = new FileStream(file, FileMode.Open);
+                    using var fileStream = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read);
                     string entryName = Path.Combine(name, file[location.Length..]);
                     var fileEntry = new ZipEntry(entryName)
                     {
@@ -91,14 +93,14 @@ namespace SaveDataSync
                     var fcount = fileStream.Read(buffer, 0, buffer.Length);
                     while (fcount > 0)
                     {
-                        zipOutputStream.Write(buffer, 0, fcount);
+                        await zipOutputStream.WriteAsync(buffer.AsMemory(0, fcount));
                         fcount = fileStream.Read(buffer, 0, buffer.Length);
                     }
                 }
                 return;
             }
 
-            using var stream = new FileStream(location, FileMode.Open);
+            using var stream = File.Open(location, FileMode.Open, FileAccess.Read, FileShare.Read);
             var entry = new ZipEntry(Path.GetFileName(location))
             {
                 DateTime = File.GetCreationTime(location), // Date time uses creation time
@@ -109,12 +111,12 @@ namespace SaveDataSync
             var count = stream.Read(buffer, 0, buffer.Length);
             while (count > 0)
             {
-                zipOutputStream.Write(buffer, 0, count);
+                await zipOutputStream.WriteAsync(buffer.AsMemory(0, count));
                 count = stream.Read(buffer, 0, buffer.Length);
             }
         }
 
-        public void ExtractSaveData(string name, string source)
+        public async Task ExtractSaveData(string name, string source)
         {
             if (!File.Exists(source)) throw new Exception("Source folder does not exist.");
             var destination = GetSavePath(name);
@@ -133,14 +135,16 @@ namespace SaveDataSync
             FileAttributes attr = File.GetAttributes(saveContent);
             if (attr.HasFlag(FileAttributes.Directory))
             {
-                ExtractFolder(saveContent, destination);
+                await ExtractFolder(saveContent, destination);
                 return;
             }
 
-            File.Copy(saveContent, destination, true);
+            using var inputStream = File.Open(saveContent, FileMode.Open);
+            using var outputStream = File.OpenWrite(destination);
+            await inputStream.CopyToAsync(outputStream);
         }
 
-        private static void ExtractFolder(string source, string destination)
+        private static async Task ExtractFolder(string source, string destination)
         {
             foreach (string dir in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
             {
@@ -149,7 +153,9 @@ namespace SaveDataSync
 
             foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
             {
-                File.Copy(file, file.Replace(source, destination), true); // Add all files
+                using var inputStream = File.Open(file, FileMode.Open);
+                using var outputStream = File.OpenWrite(file.Replace(source, destination));
+                await inputStream.CopyToAsync(outputStream);
             }
         }
 

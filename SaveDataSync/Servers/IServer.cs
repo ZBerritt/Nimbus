@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 
 namespace SaveDataSync
 {
-    // TODO: handle import/export errors properly
     public interface IServer
 
     {
@@ -13,24 +13,24 @@ namespace SaveDataSync
         public string Host { get; }
 
         // An array of all saves on the server
-        public string[] SaveNames();
+        public Task<string[]> SaveNames();
 
         // Gets the specificed save data
-        public void GetSaveData(string name, string destination);
+        public Task GetSaveData(string name, string destination);
 
         // Uploads local save data
-        public void UploadSaveData(string name, string source);
+        public Task UploadSaveData(string name, string source);
 
         // Is the server online?
-        public bool ServerOnline();
+        public Task<bool> ServerOnline();
 
         // Get remote save hash
-        public string GetRemoteSaveHash(string name);
+        public Task<string> GetRemoteSaveHash(string name);
 
         // Get local save has to compare (different servers may have different methods)
-        public string GetLocalSaveHash(string archiveLocation);
+        public Task<string> GetLocalSaveHash(string archiveLocation);
 
         // Server data in JSON format
-        public JObject Serialize();
+        public Task<JObject> Serialize();
     }
 }

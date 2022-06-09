@@ -24,14 +24,14 @@ namespace SaveDataSync.Tests
         }
 
         [TestMethod("Local Saves - Save/Load")]
-        public void DataManagementTests_LocalSaveListTests()
+        public async Task DataManagementTests_LocalSaveListTests()
         {
             var saves = new LocalSaves();
             var testFile = Path.GetTempFileName();
             saves.AddSave("test", testFile);
 
             // Save to data directory
-            dataManager.SaveLocalSaves(saves);
+            await dataManager.SaveLocalSaves(saves);
 
             // Load from directory
             var saves2 = dataManager.GetLocalSaves();
@@ -39,12 +39,12 @@ namespace SaveDataSync.Tests
         }
 
         [TestMethod("Servers - Save/Load")]
-        public void DataManagementTests_ServerTests()
+        public async Task DataManagementTests_ServerTests()
         {
             var server = new DropboxServer("random data", "doesn't matter", DateTime.Now, "we're not testing server functionlity");
 
             // Save to data directory
-            dataManager.SaveServerData(server);
+            await dataManager.SaveServerData(server);
 
             // Load from directory
             var server2 = dataManager.GetServerData();
@@ -52,12 +52,12 @@ namespace SaveDataSync.Tests
         }
 
         [TestMethod("Settings - Save/Load")]
-        public void DataManagementTests_Settings()
+        public async Task DataManagementTests_Settings()
         {
             var settings = new Settings();
 
             // Save to data directory
-            dataManager.SaveSettings(settings);
+            await dataManager.SaveSettings(settings);
 
             // Load from directory
             Settings settings2 = dataManager.GetSettings();
