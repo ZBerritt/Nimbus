@@ -3,7 +3,6 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>C:\Users\zberr\Desktop\SaveDataSync\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -38,9 +37,6 @@
   <PropertyGroup>
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
-  <ItemGroup>
-    <None Remove="oauth.html" />
-  </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Security" />
   </ItemGroup>
