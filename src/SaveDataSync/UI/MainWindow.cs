@@ -17,6 +17,7 @@ namespace SaveDataSync
     public partial class MainWindow : Form
     {
         private SaveDataSyncEngine engine;
+        private Task ReloadTask;
 
         public MainWindow()
         {
@@ -45,8 +46,16 @@ namespace SaveDataSync
         }
 
         // Used to reload all UI data
-        // TODO: Fix ability to stack reload tasks by spamming reload.
+        // TODO: Possibly create a cancellation token to reset the reload
         public async Task ReloadUI()
+        {
+            if (ReloadTask is not null && !ReloadTask.IsCompleted)
+                return;
+            ReloadTask = _reloadUI();
+            await ReloadTask;
+        }
+
+        public async Task _reloadUI()
         {
             /* Setup */
             saveFileList.Items.Clear();
