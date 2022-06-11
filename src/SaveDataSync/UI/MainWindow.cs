@@ -60,15 +60,15 @@ namespace SaveDataSync
             /* Setup */
             saveFileList.Items.Clear();
 
+            /* Change buttons */
+            await UpdateButtons();
+
             /* Get main window data asyncronously */
             var serverOnline = engine.Server is not null && await engine.Server.ServerOnline();
             var statusDataTask = SetServerStatus(serverOnline);
             var localSaveDataTask = SetLocalServerList(serverOnline);
             var remoteSaveDataTask = SetRemoteServerList(serverOnline);
             await Task.WhenAll(statusDataTask, localSaveDataTask, remoteSaveDataTask);
-
-            /* Change buttons */
-            await UpdateButtons();
         }
 
         public Task SetServerStatus(bool serverOnline)
