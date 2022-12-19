@@ -11,7 +11,7 @@ namespace SaveDataSync
         private DataManager DataManager { get; set; }
 
         private LocalSaves _localsaves;
-        private IServer _server;
+        private Server _server;
         private Settings _settings;
 
         // TODO: This stuff doesn't use await. No clue how to fix...
@@ -25,7 +25,7 @@ namespace SaveDataSync
             }
         }
 
-        public IServer Server
+        public Server Server
         {
             get => _server;
             set

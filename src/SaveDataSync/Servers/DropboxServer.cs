@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace SaveDataSync.Servers
 {
-    public class DropboxServer : IServer
+    public class DropboxServer : Server
     {
         private static readonly string APP_ID = "i136jjbqxg4aaci";
         private static readonly string LoopbackHost = "http://127.0.0.1:12356/";
@@ -25,9 +25,9 @@ namespace SaveDataSync.Servers
 
         private DropboxClient DropboxClient { get; }
 
-        public string Name => "Dropbox";
+        public override string Name => "Dropbox";
 
-        public string Host => "dropbox.com";
+        public override string Host => "dropbox.com";
 
         public static async Task<DropboxServer> Build()
         {
@@ -76,7 +76,7 @@ namespace SaveDataSync.Servers
             return new DropboxServer(accessToken, refreshToken, expires, uid);
         }
 
-        public async Task<string[]> SaveNames()
+        public override async Task<string[]> SaveNames()
         {
             try
             {
@@ -93,7 +93,7 @@ namespace SaveDataSync.Servers
             }
         }
 
-        public async Task GetSaveData(string name, string destination)
+        public override async Task GetSaveData(string name, string destination)
         {
             if (!File.Exists(destination)) throw new Exception("Destination file does not exist. Cannot retrieve data.");
             using var destinationStream = File.OpenWrite(destination);
@@ -103,7 +103,7 @@ namespace SaveDataSync.Servers
             await responseStream.CopyToAsync(destinationStream);
         }
 
-        public async Task UploadSaveData(string name, string source)
+        public override async Task UploadSaveData(string name, string source)
         {
             if (!File.Exists(source)) throw new Exception("Source file does not exist. Cannot upload.");
             var fileName = $"/{name}.zip";
@@ -112,7 +112,7 @@ namespace SaveDataSync.Servers
                 mode: WriteMode.Overwrite.Instance, autorename: false, mute: false, strictConflict: false), sourceStream);
         }
 
-        public async Task<bool> ServerOnline()
+        public override async Task<bool> ServerOnline()
         {
             try
             {
@@ -125,7 +125,7 @@ namespace SaveDataSync.Servers
             }
         }
 
-        public async Task<string> GetRemoteSaveHash(string name)
+        public override async Task<string> GetRemoteSaveHash(string name)
         {
             try
             {
@@ -140,7 +140,7 @@ namespace SaveDataSync.Servers
             }
         }
 
-        public async Task<string> GetLocalSaveHash(string archiveLocation)
+        public override async Task<string> GetLocalSaveHash(string archiveLocation)
         {
             if (!File.Exists(archiveLocation)) return string.Empty;
             using var fileStream = File.Open(archiveLocation, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -160,7 +160,7 @@ namespace SaveDataSync.Servers
             return hex;
         }
 
-        public Task<JObject> Serialize()
+        public override Task<JObject> Serialize()
         {
             return Task.FromResult(new JObject
             {

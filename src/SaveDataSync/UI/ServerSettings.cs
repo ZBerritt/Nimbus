@@ -7,7 +7,7 @@ namespace SaveDataSync.UI
     internal partial class ServerSettings : Form
     {
         public SaveDataSyncEngine engine;
-        public IServer server;
+        public Server server;
         public bool ShouldReload { get; private set; } = false;
 
         private DropboxServer _dropboxServer;

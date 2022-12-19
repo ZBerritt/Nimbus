@@ -10,9 +10,9 @@ namespace SaveDataSync
 {
     public class SaveManager
     {
-        private IServer _server;
+        private Server _server;
         private LocalSaves _saves;
-        public SaveManager(IServer server, LocalSaves saves)
+        public SaveManager(Server server, LocalSaves saves)
         {
             _server = server;
             _saves = saves;

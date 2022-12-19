@@ -41,7 +41,7 @@ namespace SaveDataSync
                 Directory.CreateDirectory(location);
         }
 
-        public async Task SaveAll(LocalSaves localSaves, IServer server, Settings settings)
+        public async Task SaveAll(LocalSaves localSaves, Server server, Settings settings)
         {
             await SaveLocalSaves(localSaves);
             await SaveServerData(server);
@@ -66,7 +66,7 @@ namespace SaveDataSync
 
         /* Server */
 
-        public IServer GetServerData()
+        public Server GetServerData()
         {
             if (!File.Exists(ServerFile))
                 return null;
@@ -89,7 +89,7 @@ namespace SaveDataSync
             };
         }
 
-        public async Task SaveServerData(IServer server)
+        public async Task SaveServerData(Server server)
         {
             if (server is null) return;
             var json = new JObject();
