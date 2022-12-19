@@ -12,7 +12,9 @@ namespace SaveDataSync.UI
         public SettingsWindow(SaveDataSyncEngine engine)
         {
             this.engine = engine;
-            settingsCopy = engine.Settings.Clone();
+            // TODO: Copy settings to clone
+            Settings currentSettings = engine.Settings;
+            settingsCopy = currentSettings.Clone(); // Clone all data to new instance
             InitializeComponent();
         }
 

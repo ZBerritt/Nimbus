@@ -3,20 +3,45 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace SaveDataSync
+namespace SaveDataSync.Utils
 {
     public class FileUtils
     {
+
+        /// <sumary>
+        /// Normalizes a path string by:
+        ///  - Getting the full path
+        ///  - Using back slashes
+        ///  - Adding a back slash to the end of any directories
+        /// </sumary>
         public static string Normalize(string path)
         {
-            return NotAFile(path)
-                ? Path.GetFullPath(path.Replace('/', '\\').WithEnding("\\")) : Path.GetFullPath(path.Replace('/', '\\'));
+            string fullPath = Path.GetFullPath(path.Replace('/', '\\'));
+            if (!NotAFile(fullPath))
+            {
+                return fullPath;
+            }
+
+            if (!fullPath.EndsWith("\\"))
+            {
+                return fullPath + "\\";
+            }
+
+            return fullPath;
+
         }
 
-        // Returns true if the path leads to anything but a file (dir or nothing)
+        // Returns true if either a directory or file exists
+        public static bool PathExists(string path)
+        {
+            return File.Exists(path) || Directory.Exists(path);
+        }
+
+        // Returns true if the path leads to anything but a file (directory or doesn't exist)
         public static bool NotAFile(string path)
         {
-            return !File.Exists(path) && !Directory.Exists(path) || ((File.GetAttributes(path) & FileAttributes.Directory)) == FileAttributes.Directory;
+            return !PathExists(path)
+                || (File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory;
         }
 
         public sealed class TemporaryFile : IDisposable
@@ -87,7 +112,7 @@ namespace SaveDataSync
 
         public static string[] GetFileList(string directory)
         {
-            List<string> files = new List<string>();
+            var files = new List<string>();
             foreach (string f in Directory.GetFiles(directory))
             {
                 files.Add(f);
@@ -114,9 +139,10 @@ namespace SaveDataSync
             return string.Format("{0:0.##} {1}", size, sizes[order]);
         }
 
+        // Gets the size of a file or recursive directory
         public static long GetSize(string location)
         {
-            if (!File.Exists(location) && !Directory.Exists(location)) return 0;
+            if (!PathExists(location)) return 0;
             return File.GetAttributes(location).HasFlag(FileAttributes.Directory)
                         ? GetFileList(location).Sum(fi => new FileInfo(fi).Length)
                         : new FileInfo(location).Length;

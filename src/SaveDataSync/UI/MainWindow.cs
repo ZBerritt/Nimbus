@@ -1,10 +1,10 @@
 ﻿using SaveDataSync.UI;
+using SaveDataSync.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -30,7 +30,7 @@ namespace SaveDataSync
         {
             // Set name as debug if the program is in debug mode
 #if DEBUG
-            Text = "SaveDataSync - DEBUG";
+            Text = "SaveDataSync (DEBUG)";
 #endif
             // Grabs the engine which allows communication with the backend
             engine = SaveDataSyncEngine.Start();
@@ -57,158 +57,26 @@ namespace SaveDataSync
 
         public async Task _reloadUI()
         {
-            /* Setup */
+            // Remove all save list items to re-add later
             saveFileList.Items.Clear();
 
-            /* Change buttons */
+            // Change buttons - prevents invalid export/import errors
             await UpdateButtons();
 
             /* Get main window data asyncronously */
-            var serverOnline = engine.Server is not null && await engine.Server.ServerOnline();
-            var statusDataTask = SetServerStatus(serverOnline);
-            var localSaveDataTask = SetLocalServerList(serverOnline);
-            var remoteSaveDataTask = SetRemoteServerList(serverOnline);
-            await Task.WhenAll(statusDataTask, localSaveDataTask, remoteSaveDataTask);
+            var tasks = new MainWindowTasks(this, engine);
+            await tasks.CheckServerStatus();
+            await Task.WhenAll(tasks.SetServerStatus(),
+                tasks.SetLocalServerList(), tasks.SetRemoteServerList());
         }
 
-        public Task SetServerStatus(bool serverOnline)
-        {
-            var server = engine.Server;
-            string ServerType = "N/A";
-            string ServerHost = "N/A";
-            string ServerStatus = "None";
-            /* Check server status */
-            if (server is not null)
-            {
-                ServerType = server.Name;
-                ServerHost = server.Host;
-                try
-                {
-                    ServerStatus = serverOnline ? "Online" : "Offline";
-                }
-                catch (Exception)
-                {
-                    ServerStatus = "Error";
-                }
-            }
 
-            var StatusColor = ServerStatus switch
-            {
-                "Online" => Color.Green,
-                "Offline" => Color.DarkGoldenrod,
-                "Error" => Color.Red,
-                _ => Color.Black,
-            };
 
-            type.Text = ServerType;
-            host.Text = ServerHost;
-            serverStatus.Text = ServerStatus;
-            serverStatus.ForeColor = StatusColor;
-            return Task.CompletedTask;
-        }
+        public Label GetServerType() { return type; }
+        public Label GetServerHost() { return host; }
+        public Label GetServerStatus() { return serverStatus; }
 
-        public async Task SetLocalServerList(bool serverOnline)
-        {
-            /* Get a list of the data for the table */
-            var saves = engine.LocalSaves.Saves;
-            foreach (var save in saves)
-            {
-                var saveItem = new ListViewItem(save.Key)
-                {
-                    UseItemStyleForSubItems = false
-                };
-
-                // Get location
-                saveItem.SubItems.Add(save.Value);
-
-                // Get file size
-                var fileSize = File.Exists(save.Value) || Directory.Exists(save.Value)
-                    ? FileUtils.ReadableFileSize(FileUtils.GetSize(save.Value))
-                    : "N/A";
-                saveItem.SubItems.Add(fileSize);
-
-                // Get file sync status
-                var statusItem = new ListViewItem.ListViewSubItem(saveItem, "Checking...");
-                saveItem.SubItems.Add(statusItem);
-
-                // Add to the list
-                saveFileList.Items.Add(saveItem);
-            }
-
-            await SetLocalSaveStatuses(serverOnline);
-        }
-
-        public async Task SetRemoteServerList(bool serverOnline)
-        {
-            /* Add remote saves to the list */
-            var server = engine.Server;
-            var saveList = new List<ListViewItem>();
-            if (serverOnline)
-            {
-                var remoteSaveNames = await server.SaveNames();
-                var filtered = remoteSaveNames.Where(c => !engine.LocalSaves.Saves.ContainsKey(c));
-                foreach (var s in filtered)
-                {
-                    var remoteSaveItem = new ListViewItem(s)
-                    {
-                        ForeColor = Color.DarkRed
-                    };
-                    remoteSaveItem.SubItems.Add("Remote");
-                    remoteSaveItem.SubItems.Add("N/A");
-                    remoteSaveItem.SubItems.Add("On Server");
-                    saveFileList.Items.Add(remoteSaveItem);
-                }
-            }
-        }
-
-        public async Task SetLocalSaveStatuses(bool serverOnline)
-        {
-            foreach (ListViewItem item in saveFileList.Items)
-            {
-                var saveName = item.SubItems[0].Text;
-
-                var foundSave = engine.LocalSaves.Saves.TryGetValue(saveName, out string location);
-                if (!foundSave) return; // Ignore if its a remote save
-
-                var statusItem = item.SubItems[^1];
-
-                if (serverOnline && (File.Exists(location) || Directory.Exists(location)))
-                {
-                    var localHash = await engine.GetLocalHash(saveName);
-                    var remoteHash = await engine.GetRemoteHash(saveName);
-                    if (remoteHash is null)
-                    {
-                        statusItem.Text = "Not Uploaded";
-                        statusItem.ForeColor = Color.Gray;
-                    }
-                    else if (remoteHash == localHash)
-                    {
-                        statusItem.Text = "Synced";
-                        statusItem.ForeColor = Color.Green;
-                    }
-                    else
-                    {
-                        statusItem.Text = "Not Synced";
-                        statusItem.ForeColor = Color.DarkRed;
-                    }
-                }
-                else if (!File.Exists(location) && !Directory.Exists(location))
-                {
-                    statusItem.Text = "No Local Save";
-                    statusItem.ForeColor = Color.Gray;
-                }
-                else if (engine.Server is not null)
-                {
-                    statusItem.Text = "Offline";
-                    statusItem.ForeColor = Color.DarkGoldenrod;
-                }
-                else
-                {
-                    statusItem.Text = "No Server";
-                    statusItem.ForeColor = Color.Black;
-                }
-            }
-        }
+        public ListView GetSaveFileList() { return saveFileList; }
 
         // Click Events
         private async void NewSaveFile_Click(object sender, EventArgs e)
@@ -288,11 +156,8 @@ namespace SaveDataSync
                 var first = selected[0]; // I don't care I just want the first one
                 var remoteHash = await engine.GetRemoteHash(first);
                 var localHash = await engine.GetLocalHash(first);
-                MessageBox.Show($"Remote Hash: {remoteHash} (Length: {remoteHash.Length})\n" +
-                    $"Local Hash: {localHash} (Length: {localHash.Length})",
-                           "Debug",
-                           MessageBoxButtons.OK,
-                           MessageBoxIcon.Information);
+                PopupDialog.InfoPopup($"Remote Hash: {remoteHash} (Length: {remoteHash.Length})\n" +
+                    $"Local Hash: {localHash} (Length: {localHash.Length})");
             };
 
 #endif
@@ -306,7 +171,7 @@ namespace SaveDataSync
                     string savePath = engine.LocalSaves.GetSavePath(name);
                     if (!File.Exists(savePath) && !Directory.Exists(savePath))
                     {
-                        MessageBox.Show("Save location cannot be found!", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        PopupDialog.WarningPopup("Save location cannot be found!");
                         return;
                     }
                     Process.Start("explorer.exe", $"/select, \"{savePath}\"");
@@ -339,10 +204,7 @@ namespace SaveDataSync
                     messageBuilder.Append($"\n• {save}");
                 };
 
-                var confirm = MessageBox.Show(messageBuilder.ToString(),
-                    "Confirm",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
+                var confirm = PopupDialog.QuestionPrompt(messageBuilder.ToString(), "Confirm");
                 if (confirm == DialogResult.Yes)
                 {
                     engine.LocalSaves.RemoveSave(name);
@@ -357,7 +219,7 @@ namespace SaveDataSync
         private void Label2_Click(object sender, EventArgs e)
         {
             var url = "http://" + host.Text;
-            Utils.OpenUrl(url);
+            OtherUtils.OpenUrl(url);
         }
 
         private List<string> GetSelectedSaves()
@@ -400,7 +262,7 @@ namespace SaveDataSync
                 {
                     if (SelectingRemoteSave())
                     {
-                        MessageBox.Show("Cannot export remote saves. Aborting!", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        PopupDialog.ErrorPopup("Cannot export remote saves. Aborting!");
                         return;
                     }
                     List<string> savesToExport = GetSelectedSaves();
@@ -414,15 +276,12 @@ namespace SaveDataSync
                         {
                             successMessage.Append($"\n• {name}");
                         }
-                        MessageBox.Show(successMessage.ToString(),
-                        "Success!",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
+                        PopupDialog.InfoPopup(successMessage.ToString());
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("An erorr has occured: " + ex.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    PopupDialog.ErrorPopup("An erorr has occured: " + ex.Message);
                 }
                 finally
                 {
@@ -446,15 +305,12 @@ namespace SaveDataSync
                     {
                         successMessage.Append($"\n• {name}");
                     }
-                    MessageBox.Show(successMessage.ToString(),
-                    "Success!",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                    PopupDialog.InfoPopup(successMessage.ToString());
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("An erorr has occured: " + ex.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                PopupDialog.ErrorPopup("An erorr has occured: " + ex.Message);
             }
             finally
             {
@@ -462,7 +318,7 @@ namespace SaveDataSync
             }
         }
 
-        private async void reloadDataButton_Click(object sender, EventArgs e)
+        private async void ReloadDataButton_Click(object sender, EventArgs e)
         {
             await ReloadUI();
         }

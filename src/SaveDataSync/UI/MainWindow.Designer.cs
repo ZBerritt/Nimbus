@@ -256,7 +256,7 @@
             this.reloadDataButton.TabIndex = 19;
             this.reloadDataButton.Text = "Reload Data";
             this.reloadDataButton.UseVisualStyleBackColor = true;
-            this.reloadDataButton.Click += new System.EventHandler(this.reloadDataButton_Click);
+            this.reloadDataButton.Click += new System.EventHandler(this.ReloadDataButton_Click);
             // 
             // MainWindow
             // 

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Windows.Forms;
 
 namespace SaveDataSync.UI
@@ -15,7 +14,7 @@ namespace SaveDataSync.UI
             {
                 if (item2.SubItems[1].Text == "Remote")
                 {
-                    return String.Compare(item1.Text, item2.Text);
+                    return string.Compare(item1.Text, item2.Text);
                 }
                 return 1;
             }
@@ -23,7 +22,7 @@ namespace SaveDataSync.UI
             {
                 return -1;
             }
-            return String.Compare(item1.Text, item2.Text);
+            return string.Compare(item1.Text, item2.Text);
         }
     }
 }

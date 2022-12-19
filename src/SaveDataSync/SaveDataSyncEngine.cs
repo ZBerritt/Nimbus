@@ -1,9 +1,6 @@
 ﻿using SaveDataSync.UI;
-using System;
-using System.Collections.Generic;
-using System.IO;
+using SaveDataSync.Utils;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace SaveDataSync
 {
@@ -64,160 +61,25 @@ namespace SaveDataSync
             return Instance;
         }
 
+        public SaveManager GetSaveManager()
+        {
+            return new SaveManager(_server, _localsaves);
+        }
+
         public async Task AddSave(string name, string location)
         {
-            try
-            {
-                LocalSaves.AddSave(name, location);
-            }
-            catch (InvalidSaveException)
-            {
-                throw;
-            }
-            finally
-            {
-                await SaveAllData();
-            }
+            GetSaveManager().AddSave(name, location);
+            await SaveAllData();
         }
 
-        // Returns all files successfully exported
-        // TODO: Refactor
         public async Task<string[]> ExportSaves(string[] saves, ProgressBarControl progress)
         {
-            var success = new List<string>();
-            foreach (string save in saves)
-            {
-                progress.Increment($"Exporting {save}");
-
-                // Remote saves should NEVER be called in this but it'll check anyways
-                if (!LocalSaves.Saves.ContainsKey(save))
-                {
-                    throw new Exception("Remote files cannot be exported");
-                }
-
-                var saveLocation = LocalSaves.GetSavePath(save);
-                if (!Directory.Exists(saveLocation) && !File.Exists(saveLocation))
-                {
-                    if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
-                    {
-                        MessageBox.Show("Save file/folder does not exist for " + save + ".",
-                            "Warning",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning);
-                        return success.ToArray();
-                    }
-                    else
-                    {
-                        var response = MessageBox.Show("Save file/folder does not exist for " + save + ". Would you like to continue exporting other files?",
-                                "Warning",
-                                MessageBoxButtons.YesNo,
-                                MessageBoxIcon.Warning);
-                        if (response == DialogResult.No) return success.ToArray(); // Abort on pressing no
-                        continue;
-                    }
-                }
-                try
-                {
-                    using var tmpFile = new FileUtils.TemporaryFile();
-                    await LocalSaves.ArchiveSaveData(save, tmpFile.FilePath);
-                    await Server.UploadSaveData(save, tmpFile.FilePath);
-                    success.Add(save);
-                }
-                catch (Exception)
-                {
-                    if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
-                    {
-                        MessageBox.Show("Could not export save data for " + save + ".",
-                            "Warning",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning);
-                        return success.ToArray();
-                    }
-                    else
-                    {
-                        var response = MessageBox.Show("Could not export save data for " + save + ". Would you like to continue exporting other files?",
-                            "Warning",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Warning);
-                        if (response == DialogResult.No) return success.ToArray(); // Abort on pressing no
-                        continue;
-                    }
-                }
-            }
-
-            return success.ToArray();
+            return await GetSaveManager().ExportSaves(saves, progress);
         }
 
-        // TODO: Refactor
         public async Task<string[]> ImportSaves(string[] saves, ProgressBarControl progress)
         {
-            var success = new List<string>();
-            foreach (string save in saves)
-            {
-                progress.Increment($"Importing {save}");
-
-                // If save is remote, prompt for a location
-                if (!LocalSaves.Saves.ContainsKey(save))
-                {
-                    var prompt = new SaveFileWindow(Instance)
-                    {
-                        ShowIcon = true
-                    };
-                    string location = SaveFileWindow.ImportWindow(prompt, save);
-                    if (location == "") throw new Exception("Import aborted by user!");
-                }
-                var saveLocation = LocalSaves.GetSavePath(save);
-
-                if (!Directory.Exists(saveLocation) && !File.Exists(saveLocation))
-                {
-                    if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
-                    {
-                        MessageBox.Show("Save file/folder does not exist for " + save + ".",
-                            "Warning",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning);
-                        return success.ToArray();
-                    }
-                    else
-                    {
-                        var response = MessageBox.Show("Save file/folder does not exist for " + save + ". Would you like to continue importing other files?",
-                                "Warning",
-                                MessageBoxButtons.YesNo,
-                                MessageBoxIcon.Warning);
-                        if (response == DialogResult.No) return success.ToArray(); // Abort on pressing no
-                        continue;
-                    }
-                }
-
-                try
-                {
-                    using var tmpFile = new FileUtils.TemporaryFile();
-                    await Server.GetSaveData(save, tmpFile.FilePath);
-                    await LocalSaves.ExtractSaveData(save, tmpFile.FilePath);
-                    success.Add(save);
-                }
-                catch (Exception)
-                {
-                    if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
-                    {
-                        MessageBox.Show("Could not retrieve remote save data for " + save + ".",
-                            "Warning",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning);
-                        return success.ToArray();
-                    }
-                    else
-                    {
-                        var response = MessageBox.Show("Could not retrieve remote save data for " + save + ". Would you like to continue importing other files?",
-                            "Warning",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Warning);
-                        if (response == DialogResult.No) return success.ToArray(); // Abort on pressing no
-                        continue;
-                    }
-                }
-            }
-            return success.ToArray();
+            return await GetSaveManager().ImportSaves(saves, progress);
         }
 
         public async Task<string> GetLocalHash(string save)

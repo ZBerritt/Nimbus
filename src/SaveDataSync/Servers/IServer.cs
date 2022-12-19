@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace SaveDataSync
 {
+    /// <summary>
+    /// Represents a remote data server used for importing and exporting saves
+    /// </summary>
     public interface IServer
 
     {

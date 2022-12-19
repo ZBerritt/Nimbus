@@ -1,6 +1,7 @@
 ﻿using Dropbox.Api;
 using Dropbox.Api.Files;
 using Newtonsoft.Json.Linq;
+using SaveDataSync.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,8 +13,8 @@ namespace SaveDataSync.Servers
 {
     public class DropboxServer : IServer
     {
-        private static string APP_ID = "i136jjbqxg4aaci";
-        private static string LoopbackHost = "http://127.0.0.1:12356/";
+        private static readonly string APP_ID = "i136jjbqxg4aaci";
+        private static readonly string LoopbackHost = "http://127.0.0.1:12356/";
         private static readonly Uri RedirectUri = new(LoopbackHost + "authorize");
         private static readonly Uri JSRedirectUri = new(LoopbackHost + "token");
 
@@ -43,11 +44,11 @@ namespace SaveDataSync.Servers
 
                 http.Start();
 
-                Utils.OpenUrl(authorizeUri.ToString());
+                OtherUtils.OpenUrl(authorizeUri.ToString());
 
-                await Utils.HandleOAuth2Redirect(http, RedirectUri);
+                await DropboxUtils.HandleOAuth2Redirect(http, RedirectUri);
 
-                var redirectUri = await Utils.HandleJSCodeRequest(http, JSRedirectUri);
+                var redirectUri = await DropboxUtils.HandleJSCodeRequest(http, JSRedirectUri);
                 var tokenResult = await OAuthFlow.ProcessCodeFlowAsync(redirectUri, APP_ID, RedirectUri.ToString(), state);
                 var accessToken = tokenResult.AccessToken;
                 var refreshToken = tokenResult.RefreshToken;

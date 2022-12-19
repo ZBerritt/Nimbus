@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SaveDataSync", "src\SaveDat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SaveDataSync.Tests", "tests\SaveDataSync.Tests\SaveDataSync.Tests.csproj", "{91D22556-17CE-4A65-97DD-BE726C4443C2}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SaveDataSync.Setup", "src\SaveDataSync.Setup\SaveDataSync.Setup.vdproj", "{9C3A7B36-20F9-41A4-AE3B-0F3A349DD6AE}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
