@@ -132,12 +132,12 @@ namespace SaveDataSync
                 {
                     if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
                     {
-                        PopupDialog.WarningPopup("Could not retrieve remote save data for " + save + ".");
+                        PopupDialog.ErrorPopup("Could not retrieve remote save data for " + save + ".");
                         return success.ToArray();
                     }
                     else
                     {
-                        var response = PopupDialog.WarningPrompt("Could not retrieve remote save data for "
+                        var response = PopupDialog.ErrorPrompt("Could not retrieve remote save data for "
                             + save + ". Would you like to continue importing other files?");
                         if (response == DialogResult.No) return success.ToArray(); // Abort on pressing no
                         continue;

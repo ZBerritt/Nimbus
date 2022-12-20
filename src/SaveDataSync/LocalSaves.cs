@@ -147,15 +147,26 @@ namespace SaveDataSync
 
         private static async Task ExtractFolder(string source, string destination)
         {
+            // Normalize directories first
+            source = FileUtils.Normalize(source);
+            destination = FileUtils.Normalize(destination);
             foreach (string dir in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
             {
-                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir.Replace(source, destination)); // Add all dirs
+                var newDir = dir.Replace(source, destination);
+                if (!Directory.Exists(newDir)) Directory.CreateDirectory(newDir); // Add all dirs
             }
 
             foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
             {
+                var newFile  = file.Replace(source, destination);
                 using var inputStream = File.Open(file, FileMode.Open);
-                using var outputStream = File.OpenWrite(file.Replace(source, destination));
+                if (!File.Exists(newFile)) {
+                    using var createStream = File.Create(newFile);
+                    await inputStream.CopyToAsync(createStream);
+                    continue;
+                } 
+
+                using var outputStream = File.OpenWrite(newFile);
                 await inputStream.CopyToAsync(outputStream);
             }
         }
