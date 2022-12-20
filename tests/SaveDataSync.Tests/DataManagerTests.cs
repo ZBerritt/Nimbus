@@ -1,4 +1,6 @@
-﻿namespace SaveDataSync.Tests
+﻿using Newtonsoft.Json.Linq;
+
+namespace SaveDataSync.Tests
 {
     [TestClass]
     public class DataManagerTests
@@ -35,8 +37,15 @@
         [TestMethod("Servers - Save/Load")]
         public async Task DataManagementTests_ServerTests()
         {
-            var server = new DropboxServer("random data", "doesn't matter", DateTime.Now, "we're not testing server functionlity");
-
+            var testObject = new JObject
+            {
+                { "accessToken", "test" },
+                { "refreshToken", "test" },
+                { "expires", DateTime.Now },
+                { "uid", "test" }
+            };
+            var server = new DropboxServer();
+            await server.Deserialize(testObject);
             // Save to data directory
             await dataManager.SaveServerData(server);
 
