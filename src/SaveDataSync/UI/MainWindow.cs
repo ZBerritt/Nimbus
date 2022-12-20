@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -18,6 +19,7 @@ namespace SaveDataSync
     {
         private SaveDataSyncEngine engine;
         private Task ReloadTask;
+        private CancellationTokenSource reloadCancelTokenSource;
 
         public MainWindow()
         {
@@ -46,16 +48,18 @@ namespace SaveDataSync
         }
 
         // Used to reload all UI data
-        // TODO: Possibly create a cancellation token to reset the reload
         public async Task ReloadUI()
         {
             if (ReloadTask is not null && !ReloadTask.IsCompleted)
-                return;
-            ReloadTask = _reloadUI();
+            {
+                reloadCancelTokenSource.Cancel();
+            }
+            reloadCancelTokenSource = new CancellationTokenSource();
+            ReloadTask = ReloadUITask(reloadCancelTokenSource.Token);
             await ReloadTask;
         }
 
-        public async Task _reloadUI()
+        public async Task ReloadUITask(CancellationToken cancelToken)
         {
             // Remove all save list items to re-add later
             saveFileList.Items.Clear();
@@ -64,10 +68,14 @@ namespace SaveDataSync
             await UpdateButtons();
 
             /* Get main window data asyncronously */
-            var tasks = new MainWindowTasks(this, engine);
-            await tasks.CheckServerStatus();
-            await Task.WhenAll(tasks.SetServerStatus(),
-                tasks.SetLocalServerList(), tasks.SetRemoteServerList());
+            try
+            {
+                var tasks = new MainWindowTasks(this, engine, cancelToken);
+                await tasks.CheckServerStatus();
+                await Task.WhenAll(tasks.SetServerStatus(),
+                    tasks.SetLocalServerList(), tasks.SetRemoteServerList());
+            }
+            catch (OperationCanceledException) { } // Safely ignore operation cancellations 
         }
 
 
