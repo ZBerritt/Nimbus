@@ -48,6 +48,7 @@ namespace SaveDataSync
         }
 
         // Used to reload all UI data
+        // Most likely prone to errors regarding cancellation, keep watch
         public async Task ReloadUI()
         {
             if (ReloadTask is not null && !ReloadTask.IsCompleted)
