@@ -129,7 +129,7 @@ namespace SaveDataSync.Servers
                 mode: WriteMode.Overwrite.Instance, autorename: false, mute: false, strictConflict: false), sourceStream);
         }
 
-        public override async Task<bool> ServerOnline()
+        public override async Task<bool> GetOnlineStatus()
         {
             try
             {

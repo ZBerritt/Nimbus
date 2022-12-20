@@ -37,7 +37,7 @@ namespace SaveDataSync.UI
                 switch (settingsTabs.SelectedTab.AccessibleName) // Active tab settings will be saved
                 {
                     case "dropbox":
-                        var serverOnline = await _dropboxServer.ServerOnline();
+                        var serverOnline = await _dropboxServer.GetOnlineStatus();
                         if (!serverOnline) throw new Exception("Server cannot be found or is not online!");
                         engine.Server = _dropboxServer;
                         break;

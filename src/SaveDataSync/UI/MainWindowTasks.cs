@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -15,12 +14,10 @@ namespace SaveDataSync.UI
         private bool _serverOnline;
         private readonly SaveDataSyncEngine _engine;
         private readonly MainWindow _window;
-        private readonly CancellationToken _cancelToken;
-        public MainWindowTasks(MainWindow window, SaveDataSyncEngine engine, CancellationToken cancelToken)
+        public MainWindowTasks(MainWindow window, SaveDataSyncEngine engine)
         {
             _window = window;
             _engine = engine;
-            _cancelToken = cancelToken;
         }
 
         /**
@@ -29,8 +26,7 @@ namespace SaveDataSync.UI
          */
         public async Task CheckServerStatus()
         {
-            _cancelToken.ThrowIfCancellationRequested();
-            _serverOnline = _engine.Server is not null && await _engine.Server.ServerOnline();
+            _serverOnline = _engine.Server is not null && await _engine.Server.GetOnlineStatus();
         }
 
         public Task SetServerStatus()
@@ -53,7 +49,6 @@ namespace SaveDataSync.UI
                     ServerStatus = "Error";
                 }
             }
-            _cancelToken.ThrowIfCancellationRequested();
 
             var StatusColor = ServerStatus switch
             {
@@ -62,7 +57,6 @@ namespace SaveDataSync.UI
                 "Error" => Color.Red,
                 _ => Color.Black,
             };
-            _cancelToken.ThrowIfCancellationRequested();
 
             // Assign values to main window
             _window.GetServerType().Text = ServerType;
@@ -80,7 +74,6 @@ namespace SaveDataSync.UI
             var saves = _engine.LocalSaves.Saves;
             foreach (var save in saves)
             {
-                _cancelToken.ThrowIfCancellationRequested();
                 var saveItem = new ListViewItem(save.Key)
                 {
                     UseItemStyleForSubItems = false
@@ -110,7 +103,6 @@ namespace SaveDataSync.UI
         {
             foreach (ListViewItem item in _window.GetSaveFileList().Items)
             {
-                _cancelToken.ThrowIfCancellationRequested();
                 var saveName = item.SubItems[0].Text;
 
                 var foundSave = _engine.LocalSaves.Saves.TryGetValue(saveName, out string location);
@@ -167,7 +159,6 @@ namespace SaveDataSync.UI
                 var filtered = remoteSaveNames.Where(c => !_engine.LocalSaves.Saves.ContainsKey(c));
                 foreach (var s in filtered)
                 {
-                    _cancelToken.ThrowIfCancellationRequested();
                     var remoteSaveItem = new ListViewItem(s)
                     {
                         ForeColor = Color.DarkRed

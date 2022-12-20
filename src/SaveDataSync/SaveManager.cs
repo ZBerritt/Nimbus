@@ -8,16 +8,24 @@ using System.Windows.Forms;
 
 namespace SaveDataSync
 {
+    /// <summary>
+    /// Manages operations between the saves and the server
+    /// </summary>
     public class SaveManager
     {
-        private Server _server;
-        private LocalSaves _saves;
+        private readonly Server _server;
+        private readonly LocalSaves _saves;
         public SaveManager(Server server, LocalSaves saves)
         {
             _server = server;
             _saves = saves;
         }
 
+        /// <summary>
+        /// Adds a save to the save list
+        /// </summary>
+        /// <param name="name">The name of the game save</param>
+        /// <param name="location">The file/folder location</param>
         public void AddSave(string name, string location)
         {
             try
@@ -30,6 +38,12 @@ namespace SaveDataSync
             }
         }
 
+        /// <summary>
+        /// Exports selected save data to cloud server
+        /// </summary>
+        /// <param name="saves">The list of saves to export</param>
+        /// <param name="progress">Control for the main window progress bar</param>
+        /// <returns>An asynchronous task resulting in a list of the successfully exported saves</returns>
         public async Task<string[]> ExportSaves(string[] saves, ProgressBarControl progress)
         {
             var success = new List<string>();
@@ -40,7 +54,7 @@ namespace SaveDataSync
                 // Remote saves should NEVER be called in this but it'll check anyways
                 if (!_saves.Saves.ContainsKey(save))
                 {
-                    throw new Exception("Remote files cannot be exported");
+                    throw new Exception("Remote files cannot be exported"); // TODO: should NOT throw errors
                 }
 
                 var saveLocation = _saves.GetSavePath(save);
@@ -85,6 +99,13 @@ namespace SaveDataSync
 
             return success.ToArray();
         }
+
+        /// <summary>
+        /// Imports selected save data from cloud server
+        /// </summary>
+        /// <param name="saves">The list of saves to impoty</param>
+        /// <param name="progress">Control for the main window progress bar</param>
+        /// <returns>An asynchronous task resulting in a list of the successfully import saves</returns>
         public async Task<string[]> ImportSaves(string[] saves, ProgressBarControl progress)
         {
 

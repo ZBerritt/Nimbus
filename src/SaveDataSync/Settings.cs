@@ -2,6 +2,9 @@
 
 namespace SaveDataSync
 {
+    /// <summary>
+    /// Represents all application settings
+    /// </summary>
     public class Settings
     {
         public Settings()
@@ -12,12 +15,20 @@ namespace SaveDataSync
         {
         }
 
+        /// <summary>
+        /// Clones the settings class, used for modification
+        /// </summary>
+        /// <returns>A new instance of identical settings</returns>
         public Settings Clone()
         {
             return MemberwiseClone() as Settings;
         }
 
-        public JObject ToJSON()
+        /// <summary>
+        /// Serializes the settings to JSON format
+        /// </summary>
+        /// <returns>A JSON object representation of the settings</returns>
+        public JObject Serialize()
         {
             var json = new JObject();
             return json;

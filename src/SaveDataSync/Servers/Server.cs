@@ -10,41 +10,85 @@ namespace SaveDataSync
     public abstract class Server
 
     {
-        // The name/type of host
+        /// <summary>
+        /// The display name of the server
+        /// </summary>
         public abstract string Name { get; }
 
-        // The server being hosted on (may vary if selfhosted)
+        /// <summary>
+        /// The base host URI of the server for display purposes
+        /// </summary>
         public abstract string Host { get; }
 
-        // An array of all saves on the server
+        /// <summary>
+        /// Gets a list of all remote save files
+        /// </summary>
+        /// <returns>An asynchronous task resulting in the list of remote save names</returns>
         public abstract Task<string[]> SaveNames();
 
-        // Gets the specificed save data
+        /// <summary>
+        /// Gets the remote save data from the server
+        /// </summary>
+        /// <param name="name">The name of the save</param>
+        /// <param name="destination">The destination to store the save data</param>
+        /// <returns>Task representing asynchronous operation</returns>
         public abstract Task GetSaveData(string name, string destination);
 
-        // Uploads local save data
+        /// <summary>
+        /// Uploads save data from local storage to remote server
+        /// </summary>
+        /// <param name="name">The name of the save</param>
+        /// <param name="source">The source directory of the data to upload</param>
+        /// <returns>Task representing asynchronous operation</returns>
         public abstract Task UploadSaveData(string name, string source);
 
-        // Is the server online?
-        public abstract Task<bool> ServerOnline();
+        /// <summary>
+        /// Checks the server status to determine if the server is online
+        /// </summary>
+        /// <returns>An asynchronous task resulting in a boolean that represents if the server is online</returns>
+        public abstract Task<bool> GetOnlineStatus();
 
-        // Get remote save hash
+        /// <summary>
+        /// Gets the save hash from the remote server
+        /// </summary>
+        /// <param name="name">The name of the save</param>
+        /// <returns>An asynchronous task resulting in the save hash of the remote save</returns>
         public abstract Task<string> GetRemoteSaveHash(string name);
 
-        // Get local save has to compare (different servers may have different methods)
+        /// <summary>
+        /// Gets the local representation of the save hash 
+        /// Different servers may implement their remote hashes differently, this function must be identical
+        /// </summary>
+        /// <param name="archiveLocation">Location of the ZIP archive to hash</param>
+        /// <returns>An asynchronous task resulting in the save hash of the local file</returns>
         public abstract Task<string> GetLocalSaveHash(string archiveLocation);
 
-        // Server data in JSON format
+        /// <summary>
+        /// Serializes the server data to JSON
+        /// </summary>
+        /// <returns>A JSON object representing the server data</returns>
         public abstract Task<JObject> Serialize();
 
-        // JSON to server data
+        /// <summary>
+        /// Deserializes the server from a JSON object
+        /// </summary>
+        /// <param name="json">The JSON object to deserialize</param>
+        /// <returns>Task representing asynchronous operation</returns>
         public abstract Task Deserialize(JObject json);
 
-        // Builds a new instance of the server and stores its data
+        /// <summary>
+        /// Builds a new server object from an empty instance
+        /// </summary>
+        /// <returns>Task representing asynchronous operation</returns>
         public abstract Task Build();
 
         /* Static methods */
-        // Gets an empty class given the server type
+
+        /// <summary>
+        /// Gets an empty server object given the server type
+        /// </summary>
+        /// <param name="type">The server type (Server.Name)</param>
+        /// <returns>An empty Server object of the specified type</returns>
         public static Server GetServerFromType(string type)
         {
             return type switch

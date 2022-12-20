@@ -153,7 +153,7 @@ namespace SaveDataSync
             bool singleSelected = selectedSaves.Count == 1;
             bool hasRemote = SelectingRemoteSave();
             var server = engine.Server;
-            bool serverOnline = server is not null && await server.ServerOnline();
+            bool serverOnline = server is not null && await server.GetOnlineStatus();
 
 #if DEBUG
             var getHashes = menu.Items.Add("[DEBUG] Get Hashes");
@@ -259,7 +259,7 @@ namespace SaveDataSync
         {
             var selectingSaves = GetSelectedSaves().Count > 0;
             var server = engine.Server;
-            var CanExportAndImport = server is not null && await server.ServerOnline() && selectingSaves;
+            var CanExportAndImport = server is not null && await server.GetOnlineStatus() && selectingSaves;
             exportButton.Enabled = !SelectingRemoteSave() && CanExportAndImport; // Don't want to export remote saves
             importButton.Enabled = CanExportAndImport;
         }
