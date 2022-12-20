@@ -43,6 +43,7 @@ namespace SaveDataSync
         // Builds a new instance of the server and stores its data
         public abstract Task Build();
 
+        /* Static methods */
         // Gets an empty class given the server type
         public static Server GetServerFromType(string type)
         {
