@@ -64,7 +64,7 @@ namespace SaveDataSync.Tests
 
             // Load from directory
             Settings settings2 = dataManager.GetSettings();
-            Assert.AreEqual(settings.ToJSON().ToString(), settings2.ToJSON().ToString());
+            Assert.AreEqual(settings.Serialize().ToString(), settings2.Serialize().ToString());
         }
 
         [ClassCleanup]

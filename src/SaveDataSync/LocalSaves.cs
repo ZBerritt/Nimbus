@@ -158,13 +158,14 @@ namespace SaveDataSync
 
             foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
             {
-                var newFile  = file.Replace(source, destination);
+                var newFile = file.Replace(source, destination);
                 using var inputStream = File.Open(file, FileMode.Open);
-                if (!File.Exists(newFile)) {
+                if (!File.Exists(newFile))
+                {
                     using var createStream = File.Create(newFile);
                     await inputStream.CopyToAsync(createStream);
                     continue;
-                } 
+                }
 
                 using var outputStream = File.OpenWrite(newFile);
                 await inputStream.CopyToAsync(outputStream);

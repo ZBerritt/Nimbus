@@ -1,5 +1,4 @@
 ﻿using SaveDataSync.Utils;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -39,21 +38,13 @@ namespace SaveDataSync.UI
             string ServerType = "N/A";
             string ServerHost = "N/A";
             string ServerStatus = "None";
-            /* Check server status */
+            // Check server status
             if (server is not null)
             {
                 ServerType = server.Name;
                 ServerHost = server.Host;
-                try
-                {
-                    ServerStatus = _serverOnline ? "Online" : "Offline";
-                }
-                catch (Exception)
-                {
-                    ServerStatus = "Error";
-                }
+                ServerStatus = _serverOnline ? "Online" : "Offline";
             }
-            _cancelToken.ThrowIfCancellationRequested();
 
             var StatusColor = ServerStatus switch
             {
@@ -122,6 +113,7 @@ namespace SaveDataSync.UI
                 {
                     var localHash = await _engine.GetLocalHash(saveName);
                     var remoteHash = await _engine.GetRemoteHash(saveName);
+                    _cancelToken.ThrowIfCancellationRequested(); // Cancel before modifying the UI in any way
                     if (remoteHash is null)
                     {
                         statusItem.Text = "Not Uploaded";

@@ -95,7 +95,7 @@ namespace SaveDataSync
             {
                 "Dropbox" => new DropboxServer(),
                 _ => null,
-            } ;
+            };
         }
     }
 }
