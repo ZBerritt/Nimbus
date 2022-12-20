@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using SaveDataSync.Servers;
 using System.Threading.Tasks;
 
 namespace SaveDataSync
@@ -35,5 +36,21 @@ namespace SaveDataSync
 
         // Server data in JSON format
         public abstract Task<JObject> Serialize();
+
+        // JSON to server data
+        public abstract Task Deserialize(JObject json);
+
+        // Builds a new instance of the server and stores its data
+        public abstract Task Build();
+
+        // Gets an empty class given the server type
+        public static Server GetServerFromType(string type)
+        {
+            return type switch
+            {
+                "Dropbox" => new DropboxServer(),
+                _ => null,
+            } ;
+        }
     }
 }

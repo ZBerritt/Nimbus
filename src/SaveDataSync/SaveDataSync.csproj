@@ -38,17 +38,14 @@
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System.Security" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Assets\oauth.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SaveDataSync.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Dropbox.Api" Version="6.30.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="SharpZipLib" Version="1.3.3" />
+    <PackageReference Include="Dropbox.Api" Version="6.36.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="SharpZipLib" Version="1.4.1" />
   </ItemGroup>
 </Project>

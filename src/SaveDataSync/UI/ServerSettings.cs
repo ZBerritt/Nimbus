@@ -58,7 +58,8 @@ namespace SaveDataSync.UI
 
         private async void loginWithDropboxButton_Click(object sender, EventArgs e)
         {
-            var dropboxServer = await DropboxServer.Build();
+            var dropboxServer = new DropboxServer();
+            await dropboxServer.Build();
             _dropboxServer = dropboxServer;
             DropboxReloadUI();
         }

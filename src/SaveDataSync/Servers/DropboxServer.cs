@@ -1,4 +1,5 @@
 ﻿using Dropbox.Api;
+using Dropbox.Api.Check;
 using Dropbox.Api.Files;
 using Newtonsoft.Json.Linq;
 using SaveDataSync.Utils;
@@ -8,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using static Dropbox.Api.TeamLog.TrustedTeamsRequestAction;
 
 namespace SaveDataSync.Servers
 {
@@ -19,17 +21,22 @@ namespace SaveDataSync.Servers
         private static readonly Uri JSRedirectUri = new(LoopbackHost + "token");
 
         private string AccessToken { get; set; }
-        private string RefreshToken { get; }
+        private string RefreshToken { get; set; }
         private DateTime Expires { get; set; }
-        public string Uid { get; }
+        public string Uid { get; set; }
 
-        private DropboxClient DropboxClient { get; }
+        private DropboxClient DropboxClient { get; set; }
 
         public override string Name => "Dropbox";
 
         public override string Host => "dropbox.com";
 
-        public static async Task<DropboxServer> Build()
+        // All server instances need an empty constructor
+        public DropboxServer()
+        {
+        }
+
+        public override async Task Build()
         {
             var http = new HttpListener();
             try
@@ -55,25 +62,36 @@ namespace SaveDataSync.Servers
                 var expires = tokenResult.ExpiresAt;
                 if (expires is null) throw new Exception("No expire time found. This is probably my fault :(");
                 var uid = tokenResult.Uid;
-                http.Stop();
 
-                return new DropboxServer(accessToken, refreshToken, (DateTime)expires, uid);
+                SetValues(accessToken, refreshToken, (DateTime)expires, uid);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
+            }
+            finally
+            {
                 http.Stop();
-                return null;
             }
         }
 
-        public static DropboxServer Build(JObject json)
+        public override Task Deserialize(JObject json)
         {
             var accessToken = json.GetValue("accessToken").ToObject<string>();
             var refreshToken = json.GetValue("refreshToken").ToObject<string>();
             var expires = json.GetValue("expires").ToObject<DateTime>();
             var uid = json.GetValue("uid").ToObject<string>();
-            return new DropboxServer(accessToken, refreshToken, expires, uid);
+            SetValues(accessToken, refreshToken, expires, uid);
+            return Task.CompletedTask;
+        }
+
+        private void SetValues(string accessToken, string refreshToken, DateTime expires, string uid)
+        {
+            AccessToken = accessToken;
+            RefreshToken = refreshToken;
+            Expires = expires;
+            Uid = uid;
+            DropboxClient = new DropboxClient(AccessToken, RefreshToken, Expires, APP_ID);
         }
 
         public override async Task<string[]> SaveNames()
@@ -116,7 +134,7 @@ namespace SaveDataSync.Servers
         {
             try
             {
-                var account = await DropboxClient.Check.UserAsync(); // This REALLY likes to hang...
+                EchoResult account = await DropboxClient.Check.UserAsync(); // This REALLY likes to hang...
                 return account is not null;
             }
             catch (Exception)
@@ -169,15 +187,6 @@ namespace SaveDataSync.Servers
                 { "expires", Expires },
                 { "uid", Uid }
             });
-        }
-
-        public DropboxServer(string accessToken, string refreshToken, DateTime expires, string uid)
-        {
-            AccessToken = accessToken;
-            RefreshToken = refreshToken;
-            Expires = expires;
-            Uid = uid;
-            DropboxClient = new DropboxClient(accessToken, refreshToken, expires, APP_ID); // Weird behavior, doesn't reload when expired. Will be testing later.
         }
     }
 }

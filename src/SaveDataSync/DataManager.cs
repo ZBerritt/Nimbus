@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using SaveDataSync.Servers;
 using SaveDataSync.Utils;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -65,7 +66,7 @@ namespace SaveDataSync
         }
 
         /* Server */
-
+        [SupportedOSPlatform("windows")]
         public Server GetServerData()
         {
             if (!File.Exists(ServerFile))
@@ -81,14 +82,12 @@ namespace SaveDataSync
             string serverName = (string)deserializedJson.GetValue("name");
             JObject serverData = (JObject)deserializedJson.GetValue("data");
 
-            // The only hardcoded instance where abstract server data cannot work. Methods to be implemented manually
-            return serverName switch
-            {
-                "Dropbox" => DropboxServer.Build(serverData),
-                _ => null,
-            };
+            var server = Server.GetServerFromType(serverName);
+            server.Deserialize(serverData);
+            return server;
         }
 
+        [SupportedOSPlatform("windows")]
         public async Task SaveServerData(Server server)
         {
             if (server is null) return;
