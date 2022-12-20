@@ -120,7 +120,7 @@ namespace SaveDataSync
 
         public async Task SaveSettings(Settings settings)
         {
-            var json = settings.ToJSON();
+            var json = settings.Serialize();
             await File.WriteAllTextAsync(SettingsFile, json.ToString());
         }
     }
