@@ -1,4 +1,5 @@
 ﻿using Dropbox.Api.Users;
+using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
 using System;
 using System.Collections.Generic;
@@ -172,31 +173,20 @@ namespace SaveDataSync.Utils
             }
         }
 
-        public static async Task ExtractFolder(string source, string destination)
+        public static async Task Extract(string destination, ZipInputStream zipInputStream, ZipEntry zipEntry)
         {
-            // Normalize directories first
-            source = Normalize(source);
-            destination = Normalize(destination);
-            foreach (string dir in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
+           // Handle as directory
+            if (zipEntry.IsDirectory && !Directory.Exists(destination))
             {
-                var newDir = dir.Replace(source, destination);
-                if (!Directory.Exists(newDir)) Directory.CreateDirectory(newDir); // Add all dirs
+                Directory.CreateDirectory(destination);
+                return;
             }
 
-            foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
-            {
-                var newFile = file.Replace(source, destination);
-                using var inputStream = File.Open(file, FileMode.Open);
-                if (!File.Exists(newFile))
-                {
-                    using var createStream = File.Create(newFile);
-                    await inputStream.CopyToAsync(createStream);
-                    continue;
-                }
+            var buffer = new byte[4096];
 
-                using var outputStream = File.OpenWrite(newFile);
-                await inputStream.CopyToAsync(outputStream);
-            }
+            using var fileStream = File.Open(destination, FileMode.OpenOrCreate, FileAccess.Write);
+            await Task.Run(() => StreamUtils.Copy(zipInputStream, fileStream, buffer));
+
         }
     }
 }

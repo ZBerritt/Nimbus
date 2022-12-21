@@ -144,27 +144,22 @@ namespace SaveDataSync
             if (!HasSave(name)) return;
             var destination = GetSave(name).Location;
 
-            // Extract to temporary folder
-            using var tmpDir = new FileUtils.TemporaryFolder();
-            var tempDir = tmpDir.FolderPath;
+            using var fileInputStream = File.OpenRead(source);
+            using var zipInputStream = new ZipInputStream(fileInputStream);
 
-            var fastZip = new FastZip();
-            fastZip.ExtractZip(source, tempDir, null);
-
-            string[] content = Directory.GetFiles(tempDir, "*.*", SearchOption.TopDirectoryOnly);
-            if (content.Length == 0) content = Directory.GetDirectories(tempDir, "*.*", SearchOption.TopDirectoryOnly);
-            var saveContent = content[0]; // There should be only one output (file or folder)
-
-            FileAttributes attr = File.GetAttributes(saveContent);
-            if (attr.HasFlag(FileAttributes.Directory))
+            while (zipInputStream.GetNextEntry() is ZipEntry zipEntry)
             {
-                await FileUtils.ExtractFolder(saveContent, destination);
-                return;
-            }
+                if (destination.EndsWith("\\")) // Temporary fix for splitting files and folders. May not work...
+                {
+                    var entryFileName = zipEntry.Name[(name.Length + 1)..];
+                    var entryDestination = Path.Combine(destination, entryFileName);
+                    await FileUtils.Extract(entryDestination, zipInputStream, zipEntry);
+                    continue;
+                }
 
-            using var inputStream = File.Open(saveContent, FileMode.Open);
-            using var outputStream = File.OpenWrite(destination);
-            await inputStream.CopyToAsync(outputStream);
+                // File -> single entry -> file IS the destination
+                await FileUtils.Extract(destination, zipInputStream, zipEntry);
+            }
         }
 
         /// <summary>
