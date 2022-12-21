@@ -65,7 +65,6 @@ namespace SaveDataSync
         }
 
         /* Server */
-        [SupportedOSPlatform("windows")]
         public Server GetServerData()
         {
             if (!File.Exists(ServerFile))
@@ -86,7 +85,6 @@ namespace SaveDataSync
             return server;
         }
 
-        [SupportedOSPlatform("windows")]
         public async Task SaveServerData(Server server)
         {
             if (server is null) return;

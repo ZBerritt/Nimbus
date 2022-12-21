@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Runtime.Versioning;
 using System.Windows.Forms;
 
 namespace SaveDataSync.UI
 {
+    [SupportedOSPlatform("windows7.0")]
     internal partial class SettingsWindow : Form
     {
         private SaveDataSyncEngine engine;
@@ -26,7 +28,7 @@ namespace SaveDataSync.UI
         private async void saveBtn_Click(object sender, EventArgs e)
         {
             // Get the new settings from the UI here
-            engine.Settings = settingsCopy;
+            await engine.SetSettings(settingsCopy);
             await engine.SaveAllData();
             ShouldReload = true;
             Close();

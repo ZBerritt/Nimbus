@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace SaveDataSync
     /// <summary>
     /// Represents the main GUI window used in the app
     /// </summary>
+    [SupportedOSPlatform("windows7.0")]
     public partial class MainWindow : Form
     {
         private SaveDataSyncEngine engine;
@@ -35,7 +37,7 @@ namespace SaveDataSync
             Text = "SaveDataSync (DEBUG)";
 #endif
             // Grabs the engine which allows communication with the backend
-            engine = SaveDataSyncEngine.Start();
+            engine = await SaveDataSyncEngine.Start();
 
             // Auto sizes the last column of the save list
             saveFileList.Columns[^1].Width = -2;
