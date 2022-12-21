@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SaveDataSync.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -12,10 +13,10 @@ using System.Windows.Forms;
 // TODO: Handle large files
 namespace SaveDataSync
 {
-    public class LocalSaveList
+    public class LocalSaveList : IEnumerable<Save>
     {
         private static readonly int MAX_FILE_SIZE = 1024 * 1024 * 128; // 128 mb
-        public Dictionary<string, Save> Saves { get; } = new Dictionary<string, Save>();
+        Dictionary<string, Save> Saves { get; } = new Dictionary<string, Save>();
 
         public void AddSave(string name, string location)
         {
@@ -55,6 +56,14 @@ namespace SaveDataSync
             Saves[name] = new Save(name, location); // Always add the save using the normalized path to avoid errors
         }
 
+        public Save GetSave(string name)
+        {
+            return Saves[name];
+        }
+        public bool HasSave(string name)
+        {
+            return Saves.ContainsKey(name);
+        }
         public void RemoveSave(string name)
         {
             if (!Saves.ContainsKey(name)) throw new Exception("Game list does not contain the save " + name);
@@ -201,6 +210,16 @@ namespace SaveDataSync
             }
 
             return list;
+        }
+
+        public IEnumerator<Save> GetEnumerator()
+        {
+            return Saves.Values.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }
