@@ -78,11 +78,12 @@ namespace SaveDataSync.UI
                 };
 
                 // Get location
-                saveItem.SubItems.Add(save.Value);
+                var location = save.Value.Location;
+                saveItem.SubItems.Add(location);
 
                 // Get file size
-                var fileSize = File.Exists(save.Value) || Directory.Exists(save.Value)
-                    ? FileUtils.ReadableFileSize(FileUtils.GetSize(save.Value))
+                var fileSize = File.Exists(location) || Directory.Exists(location)
+                    ? FileUtils.ReadableFileSize(FileUtils.GetSize(location))
                     : "N/A";
                 saveItem.SubItems.Add(fileSize);
 
@@ -104,8 +105,9 @@ namespace SaveDataSync.UI
                 _cancelToken.ThrowIfCancellationRequested();
                 var saveName = item.SubItems[0].Text;
 
-                var foundSave = _engine.LocalSaves.Saves.TryGetValue(saveName, out string location);
+                var foundSave = _engine.LocalSaves.Saves.TryGetValue(saveName, out Save save);
                 if (!foundSave) return; // Ignore if its a remote save
+                var location = save.Location;
 
                 var statusItem = item.SubItems[^1];
 

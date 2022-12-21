@@ -14,8 +14,8 @@ namespace SaveDataSync
     public class SaveManager
     {
         private readonly Server _server;
-        private readonly LocalSaves _saves;
-        public SaveManager(Server server, LocalSaves saves)
+        private readonly LocalSaveList _saves;
+        public SaveManager(Server server, LocalSaveList saves)
         {
             _server = server;
             _saves = saves;
@@ -57,7 +57,7 @@ namespace SaveDataSync
                     throw new Exception("Remote files cannot be exported"); // TODO: should NOT throw errors
                 }
 
-                var saveLocation = _saves.GetSavePath(save);
+                var saveLocation = _saves.GetSaveLocation(save);
                 if (!Directory.Exists(saveLocation) && !File.Exists(saveLocation))
                 {
                     if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
@@ -124,7 +124,7 @@ namespace SaveDataSync
                     string location = SaveFileWindow.ImportWindow(prompt, save);
                     if (location == "") throw new Exception("Import aborted by user!");
                 }
-                var saveLocation = _saves.GetSavePath(save);
+                var saveLocation = _saves.GetSaveLocation(save);
 
                 if (!Directory.Exists(saveLocation) && !File.Exists(saveLocation))
                 {

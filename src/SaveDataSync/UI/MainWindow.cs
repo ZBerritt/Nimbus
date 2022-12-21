@@ -177,7 +177,7 @@ namespace SaveDataSync
             {
                 try
                 {
-                    string savePath = engine.LocalSaves.GetSavePath(name);
+                    string savePath = engine.LocalSaves.GetSaveLocation(name);
                     if (!File.Exists(savePath) && !Directory.Exists(savePath))
                     {
                         PopupDialog.WarningPopup("Save location cannot be found!");

@@ -1,4 +1,5 @@
-﻿using ICSharpCode.SharpZipLib.Zip;
+﻿using Dropbox.Api.Users;
+using ICSharpCode.SharpZipLib.Zip;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SaveDataSync.Utils;
@@ -11,10 +12,10 @@ using System.Windows.Forms;
 // TODO: Handle large files
 namespace SaveDataSync
 {
-    public class LocalSaves
+    public class LocalSaveList
     {
         private static readonly int MAX_FILE_SIZE = 1024 * 1024 * 128; // 128 mb
-        public Dictionary<string, string> Saves { get; } = new Dictionary<string, string>();
+        public Dictionary<string, Save> Saves { get; } = new Dictionary<string, Save>();
 
         public void AddSave(string name, string location)
         {
@@ -33,8 +34,9 @@ namespace SaveDataSync
             if (Saves.ContainsKey(name))
                 throw new InvalidSaveException("Save game with name " + name + " already exists.");
 
-            foreach (var loc in Saves.Values)
+            foreach (var save in Saves.Values)
             {
+                var loc = save.Location;
                 var locNormalizedPath = FileUtils.Normalize(loc);
 
                 // Same path exists
@@ -50,7 +52,7 @@ namespace SaveDataSync
             if (FileUtils.GetSize(normalizedPath) > MAX_FILE_SIZE)
                 throw new SaveTooLargeException();
 
-            Saves[name] = normalizedPath; // Always add the save using the normalized path to avoid errors
+            Saves[name] = new Save(name, location); // Always add the save using the normalized path to avoid errors
         }
 
         public void RemoveSave(string name)
@@ -59,16 +61,16 @@ namespace SaveDataSync
             Saves.Remove(name);
         }
 
-        public string GetSavePath(string name)
+        public string GetSaveLocation(string name)
         {
             if (!Saves.ContainsKey(name)) throw new Exception("Save file with the name " + name + " does not exist.");
-            return Saves[name];
+            return Saves[name].Location;
         }
 
         // TODO: Store original permissions/date and put them back when extracting
         public async Task ArchiveSaveData(string name, string destinationFile)
         {
-            string location = GetSavePath(name);
+            string location = GetSaveLocation(name);
 
             // This entire mess basically just zips the file into what we need. We need to do it manually isntead of using fastzip
 
@@ -120,7 +122,7 @@ namespace SaveDataSync
         public async Task ExtractSaveData(string name, string source)
         {
             if (!File.Exists(source)) throw new Exception("Source folder does not exist.");
-            var destination = GetSavePath(name);
+            var destination = GetSaveLocation(name);
 
             // Extract to temporary folder
             using var tmpDir = new FileUtils.TemporaryFolder();
@@ -174,34 +176,18 @@ namespace SaveDataSync
 
         public string Serialize()
         {
-            var json = new JObject();
-            var saves = new JArray();
-            foreach (var pair in Saves)
-            {
-                var saveObject = new JObject
-                {
-                    { "name", pair.Key },
-                    { "location", pair.Value }
-                };
-                saves.Add(saveObject);
-            }
-            json.Add("saves", saves);
-            return json.ToString();
+            return JsonConvert.SerializeObject(Saves.Values).ToString();
         }
 
-        public static LocalSaves Deserialize(string json)
+        public static LocalSaveList Deserialize(string json)
         {
-            var deserializedJson = JsonConvert.DeserializeObject<JObject>(json);
-            var list = new LocalSaves();
-            var saves = deserializedJson.GetValue("saves") as JArray;
-            foreach (JObject save in saves)
+            var deserializedJson = JsonConvert.DeserializeObject<List<Save>>(json);
+            var list = new LocalSaveList();
+            foreach (var save in deserializedJson)
             {
-                string name = save.GetValue("name").ToString();
-                string location = save.GetValue("location").ToString();
-
                 try
                 {
-                    list.AddSave(name, location);
+                    list.AddSave(save.Name, save.Location);
                 }
                 catch (SaveTooLargeException ex)
                 {

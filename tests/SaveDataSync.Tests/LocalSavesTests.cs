@@ -6,7 +6,7 @@ namespace SaveDataSync.Tests
     [TestClass]
     public class LocalSavesTests
     {
-        private static readonly LocalSaves localSaves = new LocalSaves();
+        private static readonly LocalSaveList localSaves = new LocalSaveList();
         private static readonly string testPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
         [ClassInitialize]
@@ -48,8 +48,8 @@ namespace SaveDataSync.Tests
             Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("test_folder1", testPath));
 
             // Dupe folder
-            Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("test_file3", localSaves.GetSavePath("test_file1")));
-            Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("test_folder3", localSaves.GetSavePath("test_folder1")));
+            Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("test_file3", localSaves.GetSaveLocation("test_file1")));
+            Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("test_folder3", localSaves.GetSaveLocation("test_folder1")));
 
             // Contains current folder
             Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("temp_directory", Path.GetTempPath()));
@@ -73,7 +73,7 @@ namespace SaveDataSync.Tests
             Assert.ThrowsException<Exception>(() => localSaves.RemoveSave("testing"));
 
             // Get save path of a file that doesn't exist
-            Assert.ThrowsException<Exception>(() => localSaves.GetSavePath("testing"));
+            Assert.ThrowsException<Exception>(() => localSaves.GetSaveLocation("testing"));
 
             // Get zip data of a file that doesn't exist
             await Assert.ThrowsExceptionAsync<Exception>(async () => await localSaves.ArchiveSaveData("testing", "random_location"));
@@ -83,7 +83,7 @@ namespace SaveDataSync.Tests
         public void LocalSaves_JsonTest()
         {
             var json = localSaves.Serialize();
-            var fromJson = LocalSaves.Deserialize(json);
+            var fromJson = LocalSaveList.Deserialize(json);
             var json2 = fromJson.Serialize();
             Assert.AreEqual(json, json2);
         }

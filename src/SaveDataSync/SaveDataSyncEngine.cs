@@ -13,12 +13,12 @@ namespace SaveDataSync
 
         private DataManager DataManager { get; set; }
 
-        private LocalSaves _localsaves;
+        private LocalSaveList _localsaves;
         private Server _server;
         private Settings _settings;
 
         // TODO: This stuff doesn't use await. No clue how to fix...
-        public LocalSaves LocalSaves
+        public LocalSaveList LocalSaves
         {
             get => _localsaves;
             set
