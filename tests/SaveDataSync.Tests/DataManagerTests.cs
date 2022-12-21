@@ -31,7 +31,8 @@ namespace SaveDataSync.Tests
 
             // Load from directory
             var saves2 = dataManager.GetLocalSaves();
-            Assert.AreEqual(saves.GetSaveLocation("test"), saves2.GetSaveLocation("test"));
+            Assert.AreEqual(saves.GetSave("test").Location, saves2.GetSave("test").Location);
+            Assert.AreEqual(saves.GetSave("test").Name, saves2.GetSave("test").Name);
         }
 
         [TestMethod("Servers - Save/Load")]

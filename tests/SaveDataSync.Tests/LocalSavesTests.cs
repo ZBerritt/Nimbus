@@ -48,8 +48,8 @@ namespace SaveDataSync.Tests
             Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("test_folder1", testPath));
 
             // Dupe folder
-            Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("test_file3", localSaves.GetSaveLocation("test_file1")));
-            Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("test_folder3", localSaves.GetSaveLocation("test_folder1")));
+            Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("test_file3", localSaves.GetSave("test_file1").Location));
+            Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("test_folder3", localSaves.GetSave("test_folder1").Location));
 
             // Contains current folder
             Assert.ThrowsException<InvalidSaveException>(() => localSaves.AddSave("temp_directory", Path.GetTempPath()));
@@ -65,15 +65,11 @@ namespace SaveDataSync.Tests
         public async Task LocalSaves_SaveManagementTests()
         {
             localSaves.AddSave("testing", testPath);
-            var saves = localSaves.Saves;
-            Assert.AreEqual(saves["testing"], FileUtils.Normalize(testPath));
+            Assert.AreEqual(localSaves.GetSave("testing").Location, FileUtils.Normalize(testPath));
             localSaves.RemoveSave("testing");
 
-            // Delete a file that doesn't exist
-            Assert.ThrowsException<Exception>(() => localSaves.RemoveSave("testing"));
-
             // Get save path of a file that doesn't exist
-            Assert.ThrowsException<Exception>(() => localSaves.GetSaveLocation("testing"));
+            Assert.IsNull(localSaves.GetSave("testing"));
 
             // Get zip data of a file that doesn't exist
             await Assert.ThrowsExceptionAsync<Exception>(async () => await localSaves.ArchiveSaveData("testing", "random_location"));
@@ -125,9 +121,9 @@ namespace SaveDataSync.Tests
         [ClassCleanup]
         public static void Cleanup()
         {
-            var saveLocations = localSaves.Saves.Values.ToList();
-            foreach (var location in saveLocations)
+            foreach (var save in localSaves)
             {
+                var location = save.Location;
                 FileAttributes attr = File.GetAttributes(location);
                 bool isDirectory = attr.HasFlag(FileAttributes.Directory);
                 if (isDirectory)

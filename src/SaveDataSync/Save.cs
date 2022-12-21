@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SaveDataSync.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace SaveDataSync
         public Save(string name, string location)
         {
             Name = name;
-            Location = location;
+            Location = FileUtils.Normalize(location);
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace SaveDataSync.Utils
 {
-    public class FileUtils
+    public static class FileUtils
     {
 
         /// <sumary>
@@ -147,5 +147,8 @@ namespace SaveDataSync.Utils
                         ? GetFileList(location).Sum(fi => new FileInfo(fi).Length)
                         : new FileInfo(location).Length;
         }
+
+
+        
     }
 }

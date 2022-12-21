@@ -175,17 +175,14 @@ namespace SaveDataSync
             goToLocation.Enabled = !hasRemote && singleSelected;
             goToLocation.Click += (object sender2, EventArgs e2) =>
             {
-                try
+                if (!engine.LocalSaves.HasSave(name)) return;
+                string saveLocation = engine.LocalSaves.GetSave(name).Location;
+                if (!FileUtils.PathExists(saveLocation))
                 {
-                    string savePath = engine.LocalSaves.GetSaveLocation(name);
-                    if (!File.Exists(savePath) && !Directory.Exists(savePath))
-                    {
-                        PopupDialog.WarningPopup("Save location cannot be found!");
-                        return;
-                    }
-                    Process.Start("explorer.exe", $"/select, \"{savePath}\"");
+                    PopupDialog.WarningPopup("Save location cannot be found!");
+                    return;
                 }
-                catch (Exception) { }
+                Process.Start("explorer.exe", $"/select, \"{saveLocation}\"");
             };
 
             var quickExport = menu.Items.Add("Quick Export");

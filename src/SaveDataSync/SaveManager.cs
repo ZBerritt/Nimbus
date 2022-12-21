@@ -47,28 +47,29 @@ namespace SaveDataSync
         public async Task<string[]> ExportSaves(string[] saves, ProgressBarControl progress)
         {
             var success = new List<string>();
-            foreach (string save in saves)
+            foreach (string saveName in saves)
             {
-                progress.Increment($"Exporting {save}");
+                progress.Increment($"Exporting {saveName}");
 
                 // Remote saves should NEVER be called in this but it'll check anyways
-                if (!_saves.Saves.ContainsKey(save))
+                if (!_saves.HasSave(saveName))
                 {
                     throw new Exception("Remote files cannot be exported"); // TODO: should NOT throw errors
                 }
 
-                var saveLocation = _saves.GetSaveLocation(save);
+                if (!_saves.HasSave(saveName)) continue;
+                var saveLocation = _saves.GetSave(saveName).Location;
                 if (!Directory.Exists(saveLocation) && !File.Exists(saveLocation))
                 {
-                    if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
+                    if (Array.IndexOf(saves, saveName) == saves.Length - 1) // Change message dialog on last
                     {
-                        PopupDialog.WarningPopup("Save file/folder does not exist for " + save + ".");
+                        PopupDialog.WarningPopup("Save file/folder does not exist for " + saveName + ".");
                         return success.ToArray();
                     }
                     else
                     {
                         var response = PopupDialog.WarningPrompt("Save file/folder does not exist for "
-                            + save + ". Would you like to continue exporting other files?");
+                            + saveName + ". Would you like to continue exporting other files?");
                         if (response == DialogResult.No) return success.ToArray(); // Abort on pressing no
                         continue;
                     }
@@ -76,21 +77,21 @@ namespace SaveDataSync
                 try
                 {
                     using var tmpFile = new FileUtils.TemporaryFile();
-                    await _saves.ArchiveSaveData(save, tmpFile.FilePath);
-                    await _server.UploadSaveData(save, tmpFile.FilePath);
-                    success.Add(save);
+                    await _saves.ArchiveSaveData(saveName, tmpFile.FilePath);
+                    await _server.UploadSaveData(saveName, tmpFile.FilePath);
+                    success.Add(saveName);
                 }
                 catch (Exception)
                 {
-                    if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
+                    if (Array.IndexOf(saves, saveName) == saves.Length - 1) // Change message dialog on last
                     {
-                        PopupDialog.WarningPopup("Could not export save data for " + save + ".");
+                        PopupDialog.WarningPopup("Could not export save data for " + saveName + ".");
                         return success.ToArray();
                     }
                     else
                     {
                         var response = PopupDialog.WarningPrompt("Could not export save data for "
-                            + save + ". Would you like to continue exporting other files?");
+                            + saveName + ". Would you like to continue exporting other files?");
                         if (response == DialogResult.No) return success.ToArray(); // Abort on pressing no
                         continue;
                     }
@@ -110,33 +111,34 @@ namespace SaveDataSync
         {
 
             var success = new List<string>();
-            foreach (string save in saves)
+            foreach (string saveName in saves)
             {
-                progress.Increment($"Importing {save}");
+                progress.Increment($"Importing {saveName}");
 
                 // If save is remote, prompt for a location
-                if (!_saves.Saves.ContainsKey(save))
+                if (!_saves.HasSave(saveName))
                 {
                     var prompt = new SaveFileWindow(SaveDataSyncEngine.Instance)
                     {
                         ShowIcon = true
                     };
-                    string location = SaveFileWindow.ImportWindow(prompt, save);
+                    string location = SaveFileWindow.ImportWindow(prompt, saveName);
                     if (location == "") throw new Exception("Import aborted by user!");
                 }
-                var saveLocation = _saves.GetSaveLocation(save);
+                if (!_saves.HasSave(saveName)) continue;
+                var saveLocation = _saves.GetSave(saveName).Location;
 
                 if (!Directory.Exists(saveLocation) && !File.Exists(saveLocation))
                 {
-                    if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
+                    if (Array.IndexOf(saves, saveName) == saves.Length - 1) // Change message dialog on last
                     {
-                        PopupDialog.WarningPopup("Save file/folder does not exist for " + save + ".");
+                        PopupDialog.WarningPopup("Save file/folder does not exist for " + saveName + ".");
                         return success.ToArray();
                     }
                     else
                     {
                         var response = PopupDialog.WarningPrompt("Save file/folder does not exist for "
-                            + save + ". Would you like to continue importing other files?");
+                            + saveName + ". Would you like to continue importing other files?");
                         if (response == DialogResult.No) return success.ToArray(); // Abort on pressing no
                         continue;
                     }
@@ -145,21 +147,21 @@ namespace SaveDataSync
                 try
                 {
                     using var tmpFile = new FileUtils.TemporaryFile();
-                    await _server.GetSaveData(save, tmpFile.FilePath);
-                    await _saves.ExtractSaveData(save, tmpFile.FilePath);
-                    success.Add(save);
+                    await _server.GetSaveData(saveName, tmpFile.FilePath);
+                    await _saves.ExtractSaveData(saveName, tmpFile.FilePath);
+                    success.Add(saveName);
                 }
                 catch (Exception)
                 {
-                    if (Array.IndexOf(saves, save) == saves.Length - 1) // Change message dialog on last
+                    if (Array.IndexOf(saves, saveName) == saves.Length - 1) // Change message dialog on last
                     {
-                        PopupDialog.ErrorPopup("Could not retrieve remote save data for " + save + ".");
+                        PopupDialog.ErrorPopup("Could not retrieve remote save data for " + saveName + ".");
                         return success.ToArray();
                     }
                     else
                     {
                         var response = PopupDialog.ErrorPrompt("Could not retrieve remote save data for "
-                            + save + ". Would you like to continue importing other files?");
+                            + saveName + ". Would you like to continue importing other files?");
                         if (response == DialogResult.No) return success.ToArray(); // Abort on pressing no
                         continue;
                     }
