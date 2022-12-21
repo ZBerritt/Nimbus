@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Dropbox.Api.Users;
+using ICSharpCode.SharpZipLib.Zip;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SaveDataSync.Utils
 {
@@ -149,6 +152,51 @@ namespace SaveDataSync.Utils
         }
 
 
-        
+        public static async Task AddToArchive(string sourceFile, string entryName, ZipOutputStream stream)
+        {
+            byte[] buffer = new byte[4096];
+            using var fileStream = File.Open(sourceFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+            
+            var fileEntry = new ZipEntry(entryName)
+            {
+                DateTime = File.GetCreationTime(sourceFile), // Date time uses creation time
+                Size = fileStream.Length
+            };
+            await stream.PutNextEntryAsync(fileEntry);
+
+            var fcount = await fileStream.ReadAsync(buffer);
+            while (fcount > 0)
+            {
+                await stream.WriteAsync(buffer.AsMemory(0, fcount));
+                fcount = await fileStream.ReadAsync(buffer);
+            }
+        }
+
+        public static async Task ExtractFolder(string source, string destination)
+        {
+            // Normalize directories first
+            source = Normalize(source);
+            destination = Normalize(destination);
+            foreach (string dir in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
+            {
+                var newDir = dir.Replace(source, destination);
+                if (!Directory.Exists(newDir)) Directory.CreateDirectory(newDir); // Add all dirs
+            }
+
+            foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
+            {
+                var newFile = file.Replace(source, destination);
+                using var inputStream = File.Open(file, FileMode.Open);
+                if (!File.Exists(newFile))
+                {
+                    using var createStream = File.Create(newFile);
+                    await inputStream.CopyToAsync(createStream);
+                    continue;
+                }
+
+                using var outputStream = File.OpenWrite(newFile);
+                await inputStream.CopyToAsync(outputStream);
+            }
+        }
     }
 }

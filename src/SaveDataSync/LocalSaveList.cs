@@ -97,6 +97,13 @@ namespace SaveDataSync
         }
 
         // TODO: Store original permissions/date and put them back when extracting
+        /// <summary>
+        /// Archies a given save data to zip format
+        /// </summary>
+        /// <param name="name">The name of the save to arcive</param>
+        /// <param name="destinationFile">The file to write the data to</param>
+        /// <returns>Task representing asynchronous operation</returns>
+        /// <exception cref="Exception">Throws if archive cannot be created</exception>
         public async Task ArchiveSaveData(string name, string destinationFile)
         {
             if (!HasSave(name)) throw new Exception("Cannot archive save data: save does not exist");
@@ -106,7 +113,6 @@ namespace SaveDataSync
 
             using var outputStream = File.OpenWrite(destinationFile);
             using var zipOutputStream = new ZipOutputStream(outputStream);
-            byte[] buffer = new byte[4096];
 
             FileAttributes attr = File.GetAttributes(location);
             if (attr.HasFlag(FileAttributes.Directory))
@@ -114,41 +120,24 @@ namespace SaveDataSync
                 string[] files = FileUtils.GetFileList(location); // Recursively get all files
                 foreach (string file in files)
                 {
-                    using var fileStream = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    string entryName = Path.Combine(name, file[location.Length..]);
-                    var fileEntry = new ZipEntry(entryName)
-                    {
-                        DateTime = File.GetCreationTime(file), // Date time uses creation time
-                        Size = fileStream.Length
-                    };
-                    zipOutputStream.PutNextEntry(fileEntry);
-
-                    var fcount = fileStream.Read(buffer, 0, buffer.Length);
-                    while (fcount > 0)
-                    {
-                        await zipOutputStream.WriteAsync(buffer.AsMemory(0, fcount));
-                        fcount = fileStream.Read(buffer, 0, buffer.Length);
-                    }
+                    string fileEntryName = Path.Combine(name, file[location.Length..]);
+                    await FileUtils.AddToArchive(file, fileEntryName, zipOutputStream); // Adds all entries to archive
                 }
                 return;
             }
 
-            using var stream = File.Open(location, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var entry = new ZipEntry(Path.GetFileName(location))
-            {
-                DateTime = File.GetCreationTime(location), // Date time uses creation time
-                Size = stream.Length
-            };
-            zipOutputStream.PutNextEntry(entry);
-
-            var count = stream.Read(buffer, 0, buffer.Length);
-            while (count > 0)
-            {
-                await zipOutputStream.WriteAsync(buffer.AsMemory(0, count));
-                count = stream.Read(buffer, 0, buffer.Length);
-            }
+            // Single file - create archive of one entry
+            string entryName = Path.GetFileName(location);
+            await FileUtils.AddToArchive(location, entryName, zipOutputStream);
         }
 
+        /// <summary>
+        /// Extracts save data from zip file and writes to save location
+        /// </summary>
+        /// <param name="name">The name of the save</param>
+        /// <param name="source">The location of the source zip file</param>
+        /// <returns>Task representing asynchronous operation</returns>
+        /// <exception cref="Exception">Throws if archive cannot be extracted</exception>
         public async Task ExtractSaveData(string name, string source)
         {
             if (!File.Exists(source)) throw new Exception("Source file does not exist.");
@@ -169,40 +158,13 @@ namespace SaveDataSync
             FileAttributes attr = File.GetAttributes(saveContent);
             if (attr.HasFlag(FileAttributes.Directory))
             {
-                await ExtractFolder(saveContent, destination);
+                await FileUtils.ExtractFolder(saveContent, destination);
                 return;
             }
 
             using var inputStream = File.Open(saveContent, FileMode.Open);
             using var outputStream = File.OpenWrite(destination);
             await inputStream.CopyToAsync(outputStream);
-        }
-
-        private static async Task ExtractFolder(string source, string destination)
-        {
-            // Normalize directories first
-            source = FileUtils.Normalize(source);
-            destination = FileUtils.Normalize(destination);
-            foreach (string dir in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
-            {
-                var newDir = dir.Replace(source, destination);
-                if (!Directory.Exists(newDir)) Directory.CreateDirectory(newDir); // Add all dirs
-            }
-
-            foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
-            {
-                var newFile = file.Replace(source, destination);
-                using var inputStream = File.Open(file, FileMode.Open);
-                if (!File.Exists(newFile))
-                {
-                    using var createStream = File.Create(newFile);
-                    await inputStream.CopyToAsync(createStream);
-                    continue;
-                }
-
-                using var outputStream = File.OpenWrite(newFile);
-                await inputStream.CopyToAsync(outputStream);
-            }
         }
 
         /// <summary>
