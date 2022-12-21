@@ -1,9 +1,11 @@
 ﻿using SaveDataSync.Servers;
 using System;
+using System.Runtime.Versioning;
 using System.Windows.Forms;
 
 namespace SaveDataSync.UI
 {
+    [SupportedOSPlatform("windows7.0")]
     internal partial class ServerSettings : Form
     {
         public SaveDataSyncEngine engine;
@@ -39,7 +41,7 @@ namespace SaveDataSync.UI
                     case "dropbox":
                         var serverOnline = await _dropboxServer.GetOnlineStatus();
                         if (!serverOnline) throw new Exception("Server cannot be found or is not online!");
-                        engine.Server = _dropboxServer;
+                        await engine.SetServer(_dropboxServer);
                         break;
                 }
                 ShouldReload = true;

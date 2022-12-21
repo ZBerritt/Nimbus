@@ -22,7 +22,7 @@ namespace SaveDataSync.Tests
         [TestMethod("Local Saves - Save/Load")]
         public async Task DataManagementTests_LocalSaveListTests()
         {
-            var saves = new LocalSaves();
+            var saves = new LocalSaveList();
             var testFile = Path.GetTempFileName();
             saves.AddSave("test", testFile);
 
@@ -31,7 +31,8 @@ namespace SaveDataSync.Tests
 
             // Load from directory
             var saves2 = dataManager.GetLocalSaves();
-            Assert.AreEqual(saves.GetSavePath("test"), saves2.GetSavePath("test"));
+            Assert.AreEqual(saves.GetSave("test").Location, saves2.GetSave("test").Location);
+            Assert.AreEqual(saves.GetSave("test").Name, saves2.GetSave("test").Name);
         }
 
         [TestMethod("Servers - Save/Load")]

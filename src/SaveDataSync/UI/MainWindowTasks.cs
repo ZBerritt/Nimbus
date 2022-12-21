@@ -68,21 +68,21 @@ namespace SaveDataSync.UI
         public async Task SetLocalServerList()
         {
             /* Get a list of the data for the table */
-            var saves = _engine.LocalSaves.Saves;
-            foreach (var save in saves)
+            foreach (var save in _engine.LocalSaves)
             {
                 _cancelToken.ThrowIfCancellationRequested();
-                var saveItem = new ListViewItem(save.Key)
+                var saveItem = new ListViewItem(save.Name)
                 {
                     UseItemStyleForSubItems = false
                 };
 
                 // Get location
-                saveItem.SubItems.Add(save.Value);
+                var location = save.Location;
+                saveItem.SubItems.Add(location);
 
                 // Get file size
-                var fileSize = File.Exists(save.Value) || Directory.Exists(save.Value)
-                    ? FileUtils.ReadableFileSize(FileUtils.GetSize(save.Value))
+                var fileSize = File.Exists(location) || Directory.Exists(location)
+                    ? FileUtils.ReadableFileSize(FileUtils.GetSize(location))
                     : "N/A";
                 saveItem.SubItems.Add(fileSize);
 
@@ -104,8 +104,9 @@ namespace SaveDataSync.UI
                 _cancelToken.ThrowIfCancellationRequested();
                 var saveName = item.SubItems[0].Text;
 
-                var foundSave = _engine.LocalSaves.Saves.TryGetValue(saveName, out string location);
-                if (!foundSave) return; // Ignore if its a remote save
+                var save = _engine.LocalSaves.GetSave(saveName);
+                if (save == null) return; // Ignore if its a remote save
+                var location = save.Location;
 
                 var statusItem = item.SubItems[^1];
 
@@ -156,7 +157,7 @@ namespace SaveDataSync.UI
             if (_serverOnline)
             {
                 var remoteSaveNames = await server.SaveNames();
-                var filtered = remoteSaveNames.Where(c => !_engine.LocalSaves.Saves.ContainsKey(c));
+                var filtered = remoteSaveNames.Where(c => !_engine.LocalSaves.HasSave(c));
                 foreach (var s in filtered)
                 {
                     _cancelToken.ThrowIfCancellationRequested();

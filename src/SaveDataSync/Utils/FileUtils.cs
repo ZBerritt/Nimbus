@@ -1,11 +1,15 @@
-﻿using System;
+﻿using Dropbox.Api.Users;
+using ICSharpCode.SharpZipLib.Core;
+using ICSharpCode.SharpZipLib.Zip;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SaveDataSync.Utils
 {
-    public class FileUtils
+    public static class FileUtils
     {
 
         /// <sumary>
@@ -146,6 +150,43 @@ namespace SaveDataSync.Utils
             return File.GetAttributes(location).HasFlag(FileAttributes.Directory)
                         ? GetFileList(location).Sum(fi => new FileInfo(fi).Length)
                         : new FileInfo(location).Length;
+        }
+
+
+        public static async Task AddToArchive(string sourceFile, string entryName, ZipOutputStream stream)
+        {
+            byte[] buffer = new byte[4096];
+            using var fileStream = File.Open(sourceFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+            
+            var fileEntry = new ZipEntry(entryName)
+            {
+                DateTime = File.GetCreationTime(sourceFile), // Date time uses creation time
+                Size = fileStream.Length
+            };
+            await stream.PutNextEntryAsync(fileEntry);
+
+            var fcount = await fileStream.ReadAsync(buffer);
+            while (fcount > 0)
+            {
+                await stream.WriteAsync(buffer.AsMemory(0, fcount));
+                fcount = await fileStream.ReadAsync(buffer);
+            }
+        }
+
+        public static async Task Extract(string destination, ZipInputStream zipInputStream, ZipEntry zipEntry)
+        {
+           // Handle as directory
+            if (zipEntry.IsDirectory && !Directory.Exists(destination))
+            {
+                Directory.CreateDirectory(destination);
+                return;
+            }
+
+            var buffer = new byte[4096];
+
+            using var fileStream = File.Open(destination, FileMode.OpenOrCreate, FileAccess.Write);
+            await Task.Run(() => StreamUtils.Copy(zipInputStream, fileStream, buffer));
+
         }
     }
 }

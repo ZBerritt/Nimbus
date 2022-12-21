@@ -41,7 +41,7 @@ namespace SaveDataSync
                 Directory.CreateDirectory(location);
         }
 
-        public async Task SaveAll(LocalSaves localSaves, Server server, Settings settings)
+        public async Task SaveAll(LocalSaveList localSaves, Server server, Settings settings)
         {
             await SaveLocalSaves(localSaves);
             await SaveServerData(server);
@@ -50,22 +50,21 @@ namespace SaveDataSync
 
         /* Local Saves */
 
-        public LocalSaves GetLocalSaves()
+        public LocalSaveList GetLocalSaves()
         {
             if (!File.Exists(LocalSavesFile))
-                return new LocalSaves();
+                return new LocalSaveList();
             using var localSaveStream = File.Open(LocalSavesFile, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var sr = new StreamReader(localSaveStream);
-            return LocalSaves.Deserialize(sr.ReadToEnd());
+            return LocalSaveList.Deserialize(sr.ReadToEnd());
         }
 
-        public async Task SaveLocalSaves(LocalSaves localSaves)
+        public async Task SaveLocalSaves(LocalSaveList localSaves)
         {
             await File.WriteAllTextAsync(LocalSavesFile, localSaves.Serialize());
         }
 
         /* Server */
-        [SupportedOSPlatform("windows")]
         public Server GetServerData()
         {
             if (!File.Exists(ServerFile))
@@ -86,7 +85,6 @@ namespace SaveDataSync
             return server;
         }
 
-        [SupportedOSPlatform("windows")]
         public async Task SaveServerData(Server server)
         {
             if (server is null) return;

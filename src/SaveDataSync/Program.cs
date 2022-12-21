@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Runtime.Versioning;
 using System.Windows.Forms;
 
 namespace SaveDataSync
 {
+    [SupportedOSPlatform("windows7.0")]
     internal static class Program
     {
         /// <summary>
