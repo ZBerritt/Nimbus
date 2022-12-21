@@ -2,12 +2,14 @@
 using Newtonsoft.Json.Linq;
 using SaveDataSync.Utils;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace SaveDataSync
 {
+    [SupportedOSPlatform("windows7.0")]
     public class DataManager
     {
         public string Location { get; private set; } = Locations.DataDirectory;
