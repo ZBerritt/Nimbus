@@ -68,7 +68,7 @@ namespace SaveDataSync.UI
         public async Task SetLocalServerList()
         {
             /* Get a list of the data for the table */
-            foreach (var save in _engine.LocalSaves)
+            foreach (var save in _engine.LocalSaveList)
             {
                 _cancelToken.ThrowIfCancellationRequested();
                 var saveItem = new ListViewItem(save.Name)
@@ -104,7 +104,7 @@ namespace SaveDataSync.UI
                 _cancelToken.ThrowIfCancellationRequested();
                 var saveName = item.SubItems[0].Text;
 
-                var save = _engine.LocalSaves.GetSave(saveName);
+                var save = _engine.LocalSaveList.GetSave(saveName);
                 if (save == null) return; // Ignore if its a remote save
                 var location = save.Location;
 
@@ -157,7 +157,7 @@ namespace SaveDataSync.UI
             if (_serverOnline)
             {
                 var remoteSaveNames = await server.SaveNames();
-                var filtered = remoteSaveNames.Where(c => !_engine.LocalSaves.HasSave(c));
+                var filtered = remoteSaveNames.Where(c => !_engine.LocalSaveList.HasSave(c));
                 foreach (var s in filtered)
                 {
                     _cancelToken.ThrowIfCancellationRequested();

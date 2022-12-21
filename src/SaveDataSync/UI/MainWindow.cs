@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
@@ -177,8 +176,8 @@ namespace SaveDataSync
             goToLocation.Enabled = !hasRemote && singleSelected;
             goToLocation.Click += (object sender2, EventArgs e2) =>
             {
-                if (!engine.LocalSaves.HasSave(name)) return;
-                string saveLocation = engine.LocalSaves.GetSave(name).Location;
+                if (!engine.LocalSaveList.HasSave(name)) return;
+                string saveLocation = engine.LocalSaveList.GetSave(name).Location;
                 if (!FileUtils.PathExists(saveLocation))
                 {
                     PopupDialog.WarningPopup("Save location cannot be found!");
@@ -215,7 +214,7 @@ namespace SaveDataSync
                 var confirm = PopupDialog.QuestionPrompt(messageBuilder.ToString(), "Confirm");
                 if (confirm == DialogResult.Yes)
                 {
-                    engine.LocalSaves.RemoveSave(name);
+                    engine.LocalSaveList.RemoveSave(name);
                     await engine.SaveAllData();
                     await ReloadUI();
                 }

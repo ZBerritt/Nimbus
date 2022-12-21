@@ -1,14 +1,11 @@
-﻿using Dropbox.Api.Users;
-using ICSharpCode.SharpZipLib.Zip;
+﻿using ICSharpCode.SharpZipLib.Zip;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using SaveDataSync.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 // TODO: Handle large files
 namespace SaveDataSync

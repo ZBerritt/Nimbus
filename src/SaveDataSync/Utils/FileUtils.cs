@@ -1,5 +1,4 @@
-﻿using Dropbox.Api.Users;
-using ICSharpCode.SharpZipLib.Core;
+﻿using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
 using System;
 using System.Collections.Generic;
@@ -157,7 +156,7 @@ namespace SaveDataSync.Utils
         {
             byte[] buffer = new byte[4096];
             using var fileStream = File.Open(sourceFile, FileMode.Open, FileAccess.Read, FileShare.Read);
-            
+
             var fileEntry = new ZipEntry(entryName)
             {
                 DateTime = File.GetCreationTime(sourceFile), // Date time uses creation time
@@ -175,7 +174,7 @@ namespace SaveDataSync.Utils
 
         public static async Task Extract(string destination, ZipInputStream zipInputStream, ZipEntry zipEntry)
         {
-           // Handle as directory
+            // Handle as directory
             if (zipEntry.IsDirectory && !Directory.Exists(destination))
             {
                 Directory.CreateDirectory(destination);

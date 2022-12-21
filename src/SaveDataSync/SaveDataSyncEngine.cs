@@ -15,14 +15,14 @@ namespace SaveDataSync
 
         private DataManager DataManager { get; set; }
 
-        private LocalSaveList _localsaves;
+        private LocalSaveList _localSaveList;
         private Server _server;
         private Settings _settings;
 
         // TODO: This stuff doesn't use await. No clue how to fix...
-        public LocalSaveList LocalSaves
+        public LocalSaveList LocalSaveList
         {
-            get => _localsaves;
+            get => _localSaveList;
         }
 
         public Server Server
@@ -38,7 +38,7 @@ namespace SaveDataSync
         // Asynchronous setters
         public async Task SetLocalSaveList(LocalSaveList saveList)
         {
-            _localsaves = saveList;
+            _localSaveList = saveList;
             await DataManager.SaveLocalSaves(saveList);
         }
 
@@ -85,7 +85,7 @@ namespace SaveDataSync
         /// <returns>The instance save manager</returns>
         public SaveManager GetSaveManager()
         {
-            return new SaveManager(_server, _localsaves);
+            return new SaveManager(_server, _localSaveList);
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace SaveDataSync
         public async Task<string> GetLocalHash(string save)
         {
             using var tmpFile = new FileUtils.TemporaryFile();
-            await LocalSaves.ArchiveSaveData(save, tmpFile.FilePath);
+            await LocalSaveList.ArchiveSaveData(save, tmpFile.FilePath);
             var saveHash = Server.GetLocalSaveHash(tmpFile.FilePath);
             return await saveHash;
         }
@@ -134,7 +134,7 @@ namespace SaveDataSync
         /// <returns>Task representing asynchronous operation</returns>
         public async Task SaveAllData()
         {
-            await DataManager.SaveAll(_localsaves, _server, _settings);
+            await DataManager.SaveAll(_localSaveList, _server, _settings);
         }
     }
 }
