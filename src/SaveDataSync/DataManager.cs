@@ -14,17 +14,17 @@ namespace SaveDataSync
     {
         public string Location { get; private set; } = Locations.DataDirectory;
 
-        private string LocalSavesFile
+        public string LocalSavesFile
         {
             get => Path.Combine(Location, "local_saves.json");
         }
 
-        private string ServerFile
+        public string ServerFile
         {
             get => Path.Combine(Location, "server_data.dat");
         }
 
-        private string SettingsFile
+        public string SettingsFile
         {
             get => Path.Combine(Location, "settings.json");
         }
