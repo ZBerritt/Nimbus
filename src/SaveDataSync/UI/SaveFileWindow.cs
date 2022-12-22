@@ -1,9 +1,12 @@
-﻿using System;
+﻿using SaveDataSync.Utils;
+using System;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Windows.Forms;
 
 namespace SaveDataSync
 {
+    [SupportedOSPlatform("windows7.0")]
     internal partial class SaveFileWindow : Form
     {
         public bool ShouldReload { get; private set; } = false;
@@ -63,7 +66,17 @@ namespace SaveDataSync
             var name = nameTextBox.Text;
             if (name == null || name.Length == 0) return;
             var location = locationTextBox.Text;
-            if (location == null || (!Directory.Exists(location) && !File.Exists(location))) return;
+            if (location == null || location.Length == 0) return;
+            if (!FileUtils.PathExists(location) && !singleFileCheckBox.Checked) // Make folder if necessary
+            {
+                var response = PopupDialog.WarningPrompt($"Folder {location} does not exist. " +
+                    "Would you like to make it?");
+                if (response == DialogResult.Yes)
+                {
+                    Directory.CreateDirectory(location);
+                }
+            }
+
             try
             {
                 await engine.AddSave(name, location);

@@ -206,15 +206,19 @@ namespace SaveDataSync
             {
                 var messageBuilder = new StringBuilder();
                 messageBuilder.Append("Are you sure you want to remove the following saves?");
-                foreach (var save in selectedSaves)
+                foreach (var saveName in selectedSaves)
                 {
-                    messageBuilder.Append($"\n• {save}");
+                    messageBuilder.Append($"\n• {saveName}");
                 };
 
                 var confirm = PopupDialog.QuestionPrompt(messageBuilder.ToString(), "Confirm");
                 if (confirm == DialogResult.Yes)
                 {
-                    engine.LocalSaveList.RemoveSave(name);
+                    foreach (var save in selectedSaves)
+                    {
+                        engine.LocalSaveList.RemoveSave(save);
+                    }
+                    
                     await engine.SaveAllData();
                     await ReloadUI();
                 }
