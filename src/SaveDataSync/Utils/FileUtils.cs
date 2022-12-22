@@ -78,6 +78,11 @@ namespace SaveDataSync.Utils
                 File.Delete(FilePath);
                 FilePath = null;
             }
+
+            public override string ToString()
+            {
+                return FilePath;
+            }
         }
 
         public sealed class TemporaryFolder : IDisposable
@@ -110,6 +115,11 @@ namespace SaveDataSync.Utils
                 if (FolderPath == null) return;
                 Directory.Delete(FolderPath, true);
                 FolderPath = null;
+            }
+
+            public override string ToString()
+            {
+                return FolderPath;
             }
         }
 
@@ -183,6 +193,10 @@ namespace SaveDataSync.Utils
 
             var buffer = new byte[4096];
 
+            // Create directory just in case
+            Directory.CreateDirectory(Path.GetDirectoryName(destination));
+
+            // Write to file
             using var fileStream = File.Open(destination, FileMode.OpenOrCreate, FileAccess.Write);
             await Task.Run(() => StreamUtils.Copy(zipInputStream, fileStream, buffer));
 
