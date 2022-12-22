@@ -141,7 +141,7 @@ namespace SaveDataSync.Utils
         // Human readable file sizes (10 B, 30 MB, etc)
         public static string ReadableFileSize(long size)
         {
-            string[] sizes = { "B", "kB", "MB", "GB", "TB" };
+            string[] sizes = { "B", "kB", "MB", "GB" };
             int order = 0;
             while (size >= 1024 && order < sizes.Length - 1)
             {
