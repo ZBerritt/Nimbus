@@ -1,6 +1,11 @@
-﻿using SaveDataSync.UI;
+﻿using Newtonsoft.Json.Linq;
+using SaveDataSync.UI;
 using SaveDataSync.Utils;
+using System;
+using System.IO;
 using System.Runtime.Versioning;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SaveDataSync
@@ -11,9 +16,9 @@ namespace SaveDataSync
     [SupportedOSPlatform("windows7.0")]
     public class SaveDataSyncEngine
     {
-        public static SaveDataSyncEngine Instance { get; } = new SaveDataSyncEngine();
+        public static SaveDataSyncEngine Instance { get; private set; }
 
-        private DataManager DataManager { get; set; }
+        public string DataFile { get; init; }
 
         private LocalSaveList _localSaveList;
         private Server _server;
@@ -39,28 +44,33 @@ namespace SaveDataSync
         public async Task SetLocalSaveList(LocalSaveList saveList)
         {
             _localSaveList = saveList;
-            await DataManager.SaveLocalSaves(saveList);
+            await Save();
         }
 
         public async Task SetServer(Server server)
         {
             _server = server;
-            await DataManager.SaveServerData(server);
+            await Save();
         }
 
         public async Task SetSettings(Settings settings)
         {
             _settings = settings;
-            await DataManager.SaveSettings(settings);
+            await Save();
+        }
+
+        private SaveDataSyncEngine(string dataFile) {
+            DataFile = dataFile;
         }
 
         /// <summary>
         /// Starts the instance of the engine using the default data directory
         /// </summary>
         /// <returns>The single instance of SaveDataSyncEngine</returns>
-        public static async Task<SaveDataSyncEngine> Start()
+        public async static Task<SaveDataSyncEngine> Start()
         {
-            return await Start(Locations.DataDirectory);
+            if (Instance != null) return Instance;
+            return await Start(Locations.DataFile);
         }
 
         /// <summary>
@@ -68,13 +78,11 @@ namespace SaveDataSync
         /// </summary>
         /// <param name="dataLocation">The directory to store all app data</param>
         /// <returns>The single instance of SaveDataSyncEngine</returns>
-        public static async Task<SaveDataSyncEngine> Start(string dataLocation)
+        public async static Task<SaveDataSyncEngine> Start(string dataFile)
         {
-            Instance.DataManager = new DataManager(dataLocation);
-
-            await Instance.SetLocalSaveList(Instance.DataManager.GetLocalSaves());
-            await Instance.SetServer(Instance.DataManager.GetServerData());
-            await Instance.SetSettings(Instance.DataManager.GetSettings());
+            if (Instance != null) return Instance;
+            Instance = new SaveDataSyncEngine(dataFile);
+            await Instance.Load();
 
             return Instance;
         }
@@ -97,7 +105,7 @@ namespace SaveDataSync
         public async Task AddSave(string name, string location)
         {
             GetSaveManager().AddSave(name, location);
-            await SaveAllData();
+            await Save();
         }
 
         public async Task<string[]> ExportSaves(string[] saves, ProgressBarControl progress)
@@ -132,9 +140,95 @@ namespace SaveDataSync
         /// Saves settings, local saves, and server data to storage
         /// </summary>
         /// <returns>Task representing asynchronous operation</returns>
-        public async Task SaveAllData()
+        public async Task Save()
         {
-            await DataManager.SaveAll(_localSaveList, _server, _settings);
+            Directory.CreateDirectory(Path.GetDirectoryName(DataFile)); // Creates the directory just in case
+
+            // Serialize the data as JSON
+            var json = new JObject
+            {
+                { "save_list", _localSaveList.Serialize() },
+                { "settings", _settings.Serialize() }
+            };
+            if (_server != null)
+            {
+                json.Add("server", await _server.Serialize());
+            }
+
+            // Encrypt and write data 
+            var jsonAsBytes = Encoding.ASCII.GetBytes(json.ToString());
+            using var fsStream = File.Open(DataFile, FileMode.OpenOrCreate);
+            var encData = ProtectedData.Protect(jsonAsBytes, null, DataProtectionScope.CurrentUser);
+            await fsStream.WriteAsync(encData);
+        }
+
+        /// <summary>
+        /// Loads settings, local saves, and server data to engine
+        /// </summary>
+        /// <returns>Task representing asynchronous operation</returns>
+        public async Task Load()
+        {
+            try
+            {
+                if (!File.Exists(DataFile))
+                {
+                    await Reset();
+                    return;
+                }
+
+                var encBytes = await File.ReadAllBytesAsync(DataFile); // Might change...
+                var rawBytes = ProtectedData.Unprotect(encBytes, null, DataProtectionScope.CurrentUser);
+                var rawString = Encoding.ASCII.GetString(rawBytes);
+                var json = JObject.Parse(rawString);
+                _localSaveList = json.ContainsKey("save_list")
+                    ? LocalSaveList.Deserialize(json.GetValue("save_list").ToObject<string>())
+                    : new LocalSaveList();
+                _settings = json.ContainsKey("settings")
+                    ? Settings.Deseriaize(json.GetValue("settings").ToObject<JObject>().ToString())
+                    : new Settings();
+
+                var hasServer = json.TryGetValue("server", out var serverJson);
+                if (hasServer && serverJson != null)
+                {
+                    var serverJsonObject = serverJson.ToObject<JObject>();
+                    var hasType = serverJsonObject.TryGetValue("type", out var serverType);
+                    if (!hasType) return;
+
+                    var server = Server.GetServerFromType(serverType.ToObject<string>());
+                    if (server == null) return;
+
+                    var hasData = serverJsonObject.TryGetValue("data", out var serverData);
+                    if (hasData)
+                    {
+                        await server.DeserializeData(serverData.ToObject<JObject>());
+                    }
+                    _server = server;
+                }
+            } catch (Exception ex)
+            {
+#if DEBUG
+                var res = PopupDialog.ErrorPrompt("Data is corrupted or out of date. Would you like to reset it?\n" + ex.Message);
+#else
+                var res = PopupDialog.ErrorPrompt("Data is corrupted or out of date. Would you like to reset it?");
+#endif
+                if (res == System.Windows.Forms.DialogResult.Yes)
+                {
+                    await Reset();
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Resets all data to default and saves to storage
+        /// </summary>
+        /// <returns>Task representing asynchronous operation</returns>
+        private async Task Reset()
+        {
+            _localSaveList = new LocalSaveList();
+            _server = null;
+            _settings = new Settings();
+            await Save();
         }
     }
 }

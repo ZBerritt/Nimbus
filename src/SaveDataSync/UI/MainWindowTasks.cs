@@ -41,7 +41,7 @@ namespace SaveDataSync.UI
             // Check server status
             if (server is not null)
             {
-                ServerType = server.Name;
+                ServerType = server.Type;
                 ServerHost = server.Host;
                 ServerStatus = _serverOnline ? "Online" : "Offline";
             }

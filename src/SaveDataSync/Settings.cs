@@ -11,10 +11,6 @@ namespace SaveDataSync
         {
         }
 
-        public Settings(JObject json)
-        {
-        }
-
         /// <summary>
         /// Clones the settings class, used for modification
         /// </summary>
@@ -32,6 +28,16 @@ namespace SaveDataSync
         {
             var json = new JObject();
             return json;
+        }
+
+        /// <summary>
+        /// Deserializes the settins from JSON string
+        /// </summary>
+        /// <param name="json">JSON stirng to deserialize</param>
+        /// <returns>Settings object representing the json</returns>
+        public static Settings Deseriaize(string json)
+        {
+            return new Settings();
         }
     }
 }

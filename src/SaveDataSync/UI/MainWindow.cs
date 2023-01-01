@@ -219,7 +219,7 @@ namespace SaveDataSync
                         engine.LocalSaveList.RemoveSave(save);
                     }
                     
-                    await engine.SaveAllData();
+                    await engine.Save();
                     await ReloadUI();
                 }
             };

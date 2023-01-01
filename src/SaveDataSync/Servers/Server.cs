@@ -13,7 +13,7 @@ namespace SaveDataSync
         /// <summary>
         /// The display name of the server
         /// </summary>
-        public abstract string Name { get; }
+        public abstract string Type { get; }
 
         /// <summary>
         /// The base host URI of the server for display purposes
@@ -67,14 +67,14 @@ namespace SaveDataSync
         /// Serializes the server data to JSON
         /// </summary>
         /// <returns>A JSON object representing the server data</returns>
-        public abstract Task<JObject> Serialize();
+        public abstract Task<JObject> SerializeData();
 
         /// <summary>
         /// Deserializes the server from a JSON object
         /// </summary>
         /// <param name="json">The JSON object to deserialize</param>
         /// <returns>Task representing asynchronous operation</returns>
-        public abstract Task Deserialize(JObject json);
+        public abstract Task DeserializeData(JObject data);
 
         /// <summary>
         /// Builds a new server object from an empty instance
@@ -96,6 +96,18 @@ namespace SaveDataSync
                 "Dropbox" => new DropboxServer(),
                 _ => null,
             };
+        }
+
+        public async Task<JObject> Serialize()
+        {
+            var data = await SerializeData();
+            var json = new JObject
+            {
+                { "type", Type },
+                { "data", data }
+            };
+
+            return json;
         }
     }
 }

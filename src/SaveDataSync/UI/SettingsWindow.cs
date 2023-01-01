@@ -29,7 +29,7 @@ namespace SaveDataSync.UI
         {
             // Get the new settings from the UI here
             await engine.SetSettings(settingsCopy);
-            await engine.SaveAllData();
+            await engine.Save();
             ShouldReload = true;
             Close();
         }
