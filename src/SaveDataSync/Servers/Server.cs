@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SaveDataSync.Servers;
 using System.Threading.Tasks;
 
@@ -98,7 +99,7 @@ namespace SaveDataSync
             };
         }
 
-        public async Task<JObject> Serialize()
+        public async Task<string> Serialize()
         {
             var data = await SerializeData();
             var json = new JObject
@@ -107,7 +108,37 @@ namespace SaveDataSync
                 { "data", data }
             };
 
-            return json;
+            return json.ToString();
+        }
+
+        public static async Task<Server> Deserialize(string input)
+        {
+            JObject serverJson;
+            try
+            {
+                serverJson = JObject.Parse(input);
+            }
+            catch (JsonReaderException)
+            {
+                return null; // Cannot parse server data, return
+            }
+            var hasServerType = serverJson.TryGetValue("type", out var serverType);
+            var hasServerData = serverJson.TryGetValue("data", out var serverData);
+            if (!hasServerData || !hasServerType)
+            {
+                return null; // Invalid server object
+            }
+
+            Server server = GetServerFromType(serverType?.ToString());
+            if (server == null)
+            {
+                return null; // Invalid type
+            }
+
+            var data = serverData.ToObject<JObject>();
+            await server.DeserializeData(data);
+
+            return server;
         }
     }
 }

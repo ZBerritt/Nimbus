@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SaveDataSync.UI;
 using SaveDataSync.Utils;
 using System;
@@ -104,15 +105,11 @@ namespace SaveDataSync
             await Save();
         }
 
-        public async Task<string[]> ExportSaves(string[] saves, ProgressBarControl progress)
-        {
-            return await GetSaveManager().ExportSaves(saves, progress);
-        }
+        public async Task<string[]> ExportSaves(string[] saves, ProgressBarControl progress) => 
+            await GetSaveManager().ExportSaves(saves, progress);
 
-        public async Task<string[]> ImportSaves(string[] saves, ProgressBarControl progress)
-        {
-            return await GetSaveManager().ImportSaves(saves, progress);
-        }
+        public async Task<string[]> ImportSaves(string[] saves, ProgressBarControl progress) => 
+            await GetSaveManager().ImportSaves(saves, progress);
 
         /// <summary>
         /// Gets the local save hash for comparing files
@@ -127,10 +124,7 @@ namespace SaveDataSync
             return await saveHash;
         }
 
-        public async Task<string> GetRemoteHash(string save)
-        {
-            return await Server.GetRemoteSaveHash(save);
-        }
+        public async Task<string> GetRemoteHash(string save) => await Server.GetRemoteSaveHash(save);
 
         /// <summary>
         /// Saves settings, local saves, and server data to storage
@@ -168,56 +162,59 @@ namespace SaveDataSync
         /// <returns>Task representing asynchronous operation</returns>
         public async Task Load()
         {
+            if (!File.Exists(DataFile))
+            {
+                CreateDataFile();
+                Reset();
+                return;
+            }
+
+            var encBytes = await File.ReadAllBytesAsync(DataFile);
+            if (encBytes.Length == 0)
+            {
+                Reset();
+                return;
+            }
+            var rawBytes = ProtectedData.Unprotect(encBytes, null, DataProtectionScope.CurrentUser);
+            var rawString = Encoding.ASCII.GetString(rawBytes);
+            JObject json;
             try
             {
-                if (!File.Exists(DataFile))
-                {
-                    await Reset();
-                    return;
-                }
-
-                var encBytes = await File.ReadAllBytesAsync(DataFile); // Might change...
-                if (encBytes.Length == 0)
-                {
-                    await Reset();
-                    return;
-                }
-                
-                var rawBytes = ProtectedData.Unprotect(encBytes, null, DataProtectionScope.CurrentUser);
-                var rawString = Encoding.ASCII.GetString(rawBytes);
-                var json = JObject.Parse(rawString);
-                _localSaveList = json.ContainsKey("save_list")
-                    ? LocalSaveList.Deserialize(json.GetValue("save_list").ToObject<string>())
-                    : new LocalSaveList();
-                _settings = json.ContainsKey("settings")
-                    ? Settings.Deseriaize(json.GetValue("settings").ToObject<JObject>().ToString())
-                    : new Settings();
-                // Reset if null
-                _localSaveList ??= new LocalSaveList();
-                _settings ??= new Settings();
-
-                var hasServer = json.TryGetValue("server", out var serverJson);
-                if (!hasServer || serverJson == null)
-                {
-                    _server = null; // No server was found
-                    return;
-                }
-                var serverJsonObject = serverJson.ToObject<JObject>();
-                var hasType = serverJsonObject.TryGetValue("type", out var serverType);
-                if (!hasType) return;
-
-                var server = Server.GetServerFromType(serverType.ToObject<string>());
-                if (server == null) return;
-
-                var hasData = serverJsonObject.TryGetValue("data", out var serverData);
-                if (hasData)
-                {
-                    await server.DeserializeData(serverData.ToObject<JObject>());
-                }
-                _server = server;
-            } catch (Exception ex)
+                json = JObject.Parse(rawString);
+            } catch(JsonReaderException)
             {
-                if (OtherUtils.IsTesting()) return;
+                throw new LoadException("Could not parse JSON from data file.");
+            }
+
+            // Reset everything before in case something is being removed
+            Reset();
+
+            // Save List
+            if (json.ContainsKey("save_list"))
+            {
+                var saveListData = json.GetValue("save_list").ToString();
+                var list = LocalSaveList.Deserialize(saveListData);
+                _localSaveList = list;
+            }
+
+            // Settings
+            if (json.ContainsKey("settings"))
+            {
+                var settingsData = json.GetValue("settings").ToString();
+                var settings = Settings.Deseriaize(settingsData);
+                _settings = settings;
+            }
+
+            // Server
+            if (json.ContainsKey("server"))
+            {
+                var serverJsonString = json.GetValue("server").ToString();
+                var server = await Server.Deserialize(serverJsonString);
+                _server = server;
+            }
+
+            /*} catch (LoadException ex)
+            {
 #if DEBUG
                 var res = PopupDialog.ErrorPrompt("Data is corrupted or out of date. Would you like to reset it?\n" + ex.Message);
 #else
@@ -228,19 +225,18 @@ namespace SaveDataSync
                     await Reset();
                     return;
                 }
-            }
+            }*/
         }
 
         /// <summary>
         /// Resets all data to default and saves to storage
         /// </summary>
         /// <returns>Task representing asynchronous operation</returns>
-        private async Task Reset()
+        private void Reset()
         {
             _localSaveList = new LocalSaveList();
             _server = null;
             _settings = new Settings();
-            await Save();
         }
 
         private void CreateDataFile()

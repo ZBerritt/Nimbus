@@ -62,7 +62,6 @@ namespace SaveDataSync.Utils
             public void Dispose()
             {
                 Delete();
-                GC.SuppressFinalize(this);
             }
 
             public string FilePath { get; private set; }
@@ -100,7 +99,6 @@ namespace SaveDataSync.Utils
             public void Dispose()
             {
                 Delete();
-                GC.SuppressFinalize(this);
             }
 
             public string FolderPath { get; private set; }

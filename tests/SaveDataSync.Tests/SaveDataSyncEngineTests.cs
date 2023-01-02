@@ -25,11 +25,7 @@ namespace SaveDataSync.Tests
         {
             return Task.CompletedTask;
         }
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
-            dataFile.Dispose();
-        }
+        public void Dispose() => dataFile.Dispose();
 
         [Fact]
         public async Task SetLocalSaveListShouldChangeSaveList()
@@ -59,7 +55,6 @@ namespace SaveDataSync.Tests
         public void DataFileShouldExistOnLoad()
         {
             Assert.True(File.Exists(_sut.DataFile));
-            Assert.True(File.ReadAllText(_sut.DataFile).Length > 0);
         }
 
         [Fact]

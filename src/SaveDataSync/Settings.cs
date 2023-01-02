@@ -24,10 +24,10 @@ namespace SaveDataSync
         /// Serializes the settings to JSON format
         /// </summary>
         /// <returns>A JSON object representation of the settings</returns>
-        public JObject Serialize()
+        public string Serialize()
         {
             var json = new JObject();
-            return json;
+            return json.ToString();
         }
 
         /// <summary>
