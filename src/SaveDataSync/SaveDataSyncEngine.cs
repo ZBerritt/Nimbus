@@ -23,7 +23,6 @@ namespace SaveDataSync
         private Server _server;
         private Settings _settings;
 
-        // TODO: This stuff doesn't use await. No clue how to fix...
         public LocalSaveList LocalSaveList
         {
             get => _localSaveList;
@@ -63,23 +62,38 @@ namespace SaveDataSync
         }
 
         /// <summary>
-        /// Starts the instance of the engine using the default data directory
+        /// Starts an instance of the engine using the default data directory
         /// </summary>
-        /// <returns>The single instance of SaveDataSyncEngine</returns>
+        /// <returns>The instance of the SaveDataSyncEngine</returns>
         public async static Task<SaveDataSyncEngine> Start()
         {
             return await Start(DefaultLocations.DataFile);
         }
 
         /// <summary>
-        /// Starts the instance of the engine
+        /// Starts an instance of the engine
         /// </summary>
         /// <param name="dataLocation">The directory to store all app data</param>
-        /// <returns>The single instance of SaveDataSyncEngine</returns>
+        /// <returns>The instance of the SaveDataSyncEngine</returns>
         public async static Task<SaveDataSyncEngine> Start(string dataFile)
         {
             var engine = new SaveDataSyncEngine(dataFile);
-            await engine.Load();
+            try
+            {
+                await engine.Load();
+            }
+            catch (LoadException ex)
+            {
+#if DEBUG
+                var res = PopupDialog.ErrorPrompt("Data is corrupted or out of date. Would you like to reset it?\n" + ex.Message);
+#else
+                var res = PopupDialog.ErrorPrompt("Data is corrupted or out of date. Would you like to reset it?");
+#endif
+                if (res == System.Windows.Forms.DialogResult.Yes)
+                {
+                    engine.Reset();
+                }
+            }
 
             return engine;
         }
@@ -212,20 +226,6 @@ namespace SaveDataSync
                 var server = await Server.Deserialize(serverJsonString);
                 _server = server;
             }
-
-            /*} catch (LoadException ex)
-            {
-#if DEBUG
-                var res = PopupDialog.ErrorPrompt("Data is corrupted or out of date. Would you like to reset it?\n" + ex.Message);
-#else
-                var res = PopupDialog.ErrorPrompt("Data is corrupted or out of date. Would you like to reset it?");
-#endif
-                if (res == System.Windows.Forms.DialogResult.Yes)
-                {
-                    await Reset();
-                    return;
-                }
-            }*/
         }
 
         /// <summary>
@@ -242,7 +242,7 @@ namespace SaveDataSync
         private void CreateDataFile()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(DataFile));
-            using var _ = File.Open(DataFile, FileMode.OpenOrCreate);           
+            using var _ = File.Open(DataFile, FileMode.OpenOrCreate);
         }
     }
 }
