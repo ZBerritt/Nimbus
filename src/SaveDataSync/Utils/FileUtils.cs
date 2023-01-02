@@ -51,7 +51,8 @@ namespace SaveDataSync.Utils
         {
             public TemporaryFile() :
               this(Path.GetTempPath())
-            { }
+            {
+            }
 
             public TemporaryFile(string directory)
             {
@@ -69,7 +70,7 @@ namespace SaveDataSync.Utils
             private void Create(string path)
             {
                 FilePath = path;
-                using (File.Create(FilePath)) { };
+                using var _ = File.Create(FilePath);
             }
 
             private void Delete()

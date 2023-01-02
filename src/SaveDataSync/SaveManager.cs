@@ -28,14 +28,7 @@ namespace SaveDataSync
         /// <param name="location">The file/folder location</param>
         public void AddSave(string name, string location)
         {
-            try
-            {
-                _saves.AddSave(name, location);
-            }
-            catch (InvalidSaveException)
-            {
-                throw;
-            }
+            _saves.AddSave(name, location);
         }
 
         /// <summary>
@@ -46,6 +39,7 @@ namespace SaveDataSync
         /// <returns>An asynchronous task resulting in a list of the successfully exported saves</returns>
         public async Task<string[]> ExportSaves(string[] saves, ProgressBarControl progress)
         {
+            if (_server == null) return null;
             var success = new List<string>();
             foreach (string saveName in saves)
             {
@@ -109,7 +103,7 @@ namespace SaveDataSync
         /// <returns>An asynchronous task resulting in a list of the successfully import saves</returns>
         public async Task<string[]> ImportSaves(string[] saves, ProgressBarControl progress)
         {
-
+            if (_server == null) return null;
             var success = new List<string>();
             foreach (string saveName in saves)
             {

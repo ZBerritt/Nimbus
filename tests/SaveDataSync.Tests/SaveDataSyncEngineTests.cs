@@ -8,23 +8,36 @@ using static SaveDataSync.Utils.FileUtils;
 
 namespace SaveDataSync.Tests
 {
-    public class SaveDataSyncEngineTests : IDisposable
+    public class SaveDataSyncEngineTests : IDisposable, IAsyncLifetime
     {
-        private readonly SaveDataSyncEngine _sut;
-        private readonly TemporaryFile dataFile;
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        private SaveDataSyncEngine _sut;
+        private TemporaryFile dataFile;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-        public SaveDataSyncEngineTests() {
+        public async Task InitializeAsync()
+        {
             dataFile = new TemporaryFile();
-            _sut = SaveDataSyncEngine.Start(dataFile.FilePath).Result; // Asynchronous method needs to be called in constructor
+            _sut = await SaveDataSyncEngine.Start(dataFile.FilePath);
         }
 
-        [Fact(Timeout = 5000)]
+        public Task DisposeAsync()
+        {
+            return Task.CompletedTask;
+        }
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+            dataFile.Dispose();
+        }
+
+        [Fact]
         public void IntanceShouldEqualCurrentEngine()
         {
             Assert.Equal(_sut, SaveDataSyncEngine.Instance);
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact]
         public async Task SetLocalSaveListShouldChangeSaveList()
         {
             var list = new LocalSaveList();
@@ -32,7 +45,7 @@ namespace SaveDataSync.Tests
             Assert.Equal(list, _sut.LocalSaveList);
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact]
         public async Task SetSettingsShouldChangeSettings()
         {
             var settings = new Settings();
@@ -40,7 +53,7 @@ namespace SaveDataSync.Tests
             Assert.Equal(settings, _sut.Settings);
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact]
         public async Task SetServerShouldChangeServer()
         {
             var server = new TestServer();
@@ -48,14 +61,14 @@ namespace SaveDataSync.Tests
             Assert.Equal(server, _sut.Server);
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact]
         public void DataFileShouldExistOnLoad()
         {
             Assert.True(File.Exists(_sut.DataFile));
             Assert.True(File.ReadAllText(_sut.DataFile).Length > 0);
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact]
         public async void DataShouldSaveToDataFile()
         {
             // Make changes
@@ -70,26 +83,22 @@ namespace SaveDataSync.Tests
             Assert.NotEqual(oldData, newData);
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact]
         public async void LoadShouldLoadFromFile()
         {
             // Make changes
+            var oldData = File.ReadAllBytes(_sut.DataFile);
             var server = new TestServer();
             await _sut.SetServer(server);
             await _sut.AddSave("testing", "test/test");
 
             // Load older version
+            File.WriteAllBytes(_sut.DataFile, oldData); // Write old data after it has been overritten
             await _sut.Load();
             Assert.Null(_sut.Server);
             Assert.False(_sut.LocalSaveList.HasSave("testing"));
         }
 
         // TODO: Add more tests
-
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
-            dataFile.Dispose();
-        }
     }
 }

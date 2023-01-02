@@ -70,7 +70,7 @@ namespace SaveDataSync
         public async static Task<SaveDataSyncEngine> Start()
         {
             if (Instance != null) return Instance;
-            return await Start(Locations.DataFile);
+            return await Start(DefaultLocations.DataFile);
         }
 
         /// <summary>
@@ -142,14 +142,18 @@ namespace SaveDataSync
         /// <returns>Task representing asynchronous operation</returns>
         public async Task Save()
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(DataFile)); // Creates the directory just in case
+            CreateDataFile();
 
             // Serialize the data as JSON
-            var json = new JObject
+            var json = new JObject();
+            if (_localSaveList != null)
             {
-                { "save_list", _localSaveList.Serialize() },
-                { "settings", _settings.Serialize() }
-            };
+                json.Add("save_list", _localSaveList.Serialize());
+            }
+            if (_settings != null)
+            {
+                json.Add("settings", _settings.Serialize());
+            }
             if (_server != null)
             {
                 json.Add("server", await _server.Serialize());
@@ -177,6 +181,12 @@ namespace SaveDataSync
                 }
 
                 var encBytes = await File.ReadAllBytesAsync(DataFile); // Might change...
+                if (encBytes.Length == 0)
+                {
+                    await Reset();
+                    return;
+                }
+                
                 var rawBytes = ProtectedData.Unprotect(encBytes, null, DataProtectionScope.CurrentUser);
                 var rawString = Encoding.ASCII.GetString(rawBytes);
                 var json = JObject.Parse(rawString);
@@ -186,26 +196,32 @@ namespace SaveDataSync
                 _settings = json.ContainsKey("settings")
                     ? Settings.Deseriaize(json.GetValue("settings").ToObject<JObject>().ToString())
                     : new Settings();
+                // Reset if null
+                _localSaveList ??= new LocalSaveList();
+                _settings ??= new Settings();
 
                 var hasServer = json.TryGetValue("server", out var serverJson);
-                if (hasServer && serverJson != null)
+                if (!hasServer || serverJson == null)
                 {
-                    var serverJsonObject = serverJson.ToObject<JObject>();
-                    var hasType = serverJsonObject.TryGetValue("type", out var serverType);
-                    if (!hasType) return;
-
-                    var server = Server.GetServerFromType(serverType.ToObject<string>());
-                    if (server == null) return;
-
-                    var hasData = serverJsonObject.TryGetValue("data", out var serverData);
-                    if (hasData)
-                    {
-                        await server.DeserializeData(serverData.ToObject<JObject>());
-                    }
-                    _server = server;
+                    _server = null; // No server was found
+                    return;
                 }
+                var serverJsonObject = serverJson.ToObject<JObject>();
+                var hasType = serverJsonObject.TryGetValue("type", out var serverType);
+                if (!hasType) return;
+
+                var server = Server.GetServerFromType(serverType.ToObject<string>());
+                if (server == null) return;
+
+                var hasData = serverJsonObject.TryGetValue("data", out var serverData);
+                if (hasData)
+                {
+                    await server.DeserializeData(serverData.ToObject<JObject>());
+                }
+                _server = server;
             } catch (Exception ex)
             {
+                if (OtherUtils.IsTesting()) return;
 #if DEBUG
                 var res = PopupDialog.ErrorPrompt("Data is corrupted or out of date. Would you like to reset it?\n" + ex.Message);
 #else
@@ -229,6 +245,12 @@ namespace SaveDataSync
             _server = null;
             _settings = new Settings();
             await Save();
+        }
+
+        private void CreateDataFile()
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(DataFile));
+            using var _ = File.Open(DataFile, FileMode.OpenOrCreate);           
         }
     }
 }

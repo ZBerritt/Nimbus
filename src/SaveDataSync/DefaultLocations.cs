@@ -3,7 +3,7 @@ using System.IO;
 
 namespace SaveDataSync
 {
-    internal class Locations
+    internal class DefaultLocations
     {
         public static string Assets = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location).ToString(), "Assets");
 #if DEBUG
