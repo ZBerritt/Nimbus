@@ -32,12 +32,6 @@ namespace SaveDataSync.Tests
         }
 
         [Fact]
-        public void IntanceShouldEqualCurrentEngine()
-        {
-            Assert.Equal(_sut, SaveDataSyncEngine.Instance);
-        }
-
-        [Fact]
         public async Task SetLocalSaveListShouldChangeSaveList()
         {
             var list = new LocalSaveList();

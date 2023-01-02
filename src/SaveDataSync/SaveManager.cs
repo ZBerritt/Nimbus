@@ -13,12 +13,12 @@ namespace SaveDataSync
     /// </summary>
     public class SaveManager
     {
-        private readonly Server _server;
-        private readonly LocalSaveList _saves;
-        public SaveManager(Server server, LocalSaveList saves)
+        private readonly SaveDataSyncEngine _engine;
+        private LocalSaveList Saves => _engine.LocalSaveList;
+        private Server Server => _engine.Server;
+        public SaveManager(SaveDataSyncEngine engine)
         {
-            _server = server;
-            _saves = saves;
+            _engine = engine;
         }
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace SaveDataSync
         /// <param name="location">The file/folder location</param>
         public void AddSave(string name, string location)
         {
-            _saves.AddSave(name, location);
+            Saves.AddSave(name, location);
         }
 
         /// <summary>
@@ -39,20 +39,20 @@ namespace SaveDataSync
         /// <returns>An asynchronous task resulting in a list of the successfully exported saves</returns>
         public async Task<string[]> ExportSaves(string[] saves, ProgressBarControl progress)
         {
-            if (_server == null) return null;
+            if (Server == null) return null;
             var success = new List<string>();
             foreach (string saveName in saves)
             {
                 progress.Increment($"Exporting {saveName}");
 
                 // Remote saves should NEVER be called in this but it'll check anyways
-                if (!_saves.HasSave(saveName))
+                if (!Saves.HasSave(saveName))
                 {
                     throw new Exception("Remote files cannot be exported"); // TODO: should NOT throw errors
                 }
 
-                if (!_saves.HasSave(saveName)) continue;
-                var saveLocation = _saves.GetSave(saveName).Location;
+                if (!Saves.HasSave(saveName)) continue;
+                var saveLocation = Saves.GetSave(saveName).Location;
                 if (!Directory.Exists(saveLocation) && !File.Exists(saveLocation))
                 {
                     if (Array.IndexOf(saves, saveName) == saves.Length - 1) // Change message dialog on last
@@ -71,8 +71,8 @@ namespace SaveDataSync
                 try
                 {
                     using var tmpFile = new FileUtils.TemporaryFile();
-                    await _saves.ArchiveSaveData(saveName, tmpFile.FilePath);
-                    await _server.UploadSaveData(saveName, tmpFile.FilePath);
+                    await Saves.ArchiveSaveData(saveName, tmpFile.FilePath);
+                    await Server.UploadSaveData(saveName, tmpFile.FilePath);
                     success.Add(saveName);
                 }
                 catch (Exception)
@@ -103,24 +103,24 @@ namespace SaveDataSync
         /// <returns>An asynchronous task resulting in a list of the successfully import saves</returns>
         public async Task<string[]> ImportSaves(string[] saves, ProgressBarControl progress)
         {
-            if (_server == null) return null;
+            if (Server == null) return null;
             var success = new List<string>();
             foreach (string saveName in saves)
             {
                 progress.Increment($"Importing {saveName}");
 
                 // If save is remote, prompt for a location
-                if (!_saves.HasSave(saveName))
+                if (!Saves.HasSave(saveName))
                 {
-                    var prompt = new SaveFileWindow(SaveDataSyncEngine.Instance)
+                    var prompt = new SaveFileWindow(_engine)
                     {
                         ShowIcon = true
                     };
                     string location = SaveFileWindow.ImportWindow(prompt, saveName);
                     if (location == "") throw new Exception("Import aborted by user!");
                 }
-                if (!_saves.HasSave(saveName)) continue;
-                var saveLocation = _saves.GetSave(saveName).Location;
+                if (!Saves.HasSave(saveName)) continue;
+                var saveLocation = Saves.GetSave(saveName).Location;
 
                 if (!Directory.Exists(saveLocation) && !File.Exists(saveLocation))
                 {
@@ -141,8 +141,8 @@ namespace SaveDataSync
                 try
                 {
                     using var tmpFile = new FileUtils.TemporaryFile();
-                    await _server.GetSaveData(saveName, tmpFile.FilePath);
-                    await _saves.ExtractSaveData(saveName, tmpFile.FilePath);
+                    await Server.GetSaveData(saveName, tmpFile.FilePath);
+                    await Saves.ExtractSaveData(saveName, tmpFile.FilePath);
                     success.Add(saveName);
                 }
                 catch (Exception)

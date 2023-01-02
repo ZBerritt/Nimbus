@@ -16,8 +16,6 @@ namespace SaveDataSync
     [SupportedOSPlatform("windows7.0")]
     public class SaveDataSyncEngine
     {
-        public static SaveDataSyncEngine Instance { get; private set; }
-
         public string DataFile { get; init; }
 
         private LocalSaveList _localSaveList;
@@ -69,7 +67,6 @@ namespace SaveDataSync
         /// <returns>The single instance of SaveDataSyncEngine</returns>
         public async static Task<SaveDataSyncEngine> Start()
         {
-            if (Instance != null) return Instance;
             return await Start(DefaultLocations.DataFile);
         }
 
@@ -80,11 +77,10 @@ namespace SaveDataSync
         /// <returns>The single instance of SaveDataSyncEngine</returns>
         public async static Task<SaveDataSyncEngine> Start(string dataFile)
         {
-            if (Instance != null) return Instance;
-            Instance = new SaveDataSyncEngine(dataFile);
-            await Instance.Load();
+            var engine = new SaveDataSyncEngine(dataFile);
+            await engine.Load();
 
-            return Instance;
+            return engine;
         }
 
         /// <summary>
@@ -93,7 +89,7 @@ namespace SaveDataSync
         /// <returns>The instance save manager</returns>
         public SaveManager GetSaveManager()
         {
-            return new SaveManager(_server, _localSaveList);
+            return new SaveManager(this);
         }
 
         /// <summary>
