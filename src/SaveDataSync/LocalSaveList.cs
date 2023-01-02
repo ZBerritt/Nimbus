@@ -1,5 +1,6 @@
 ﻿using ICSharpCode.SharpZipLib.Zip;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SaveDataSync.Utils;
 using System;
 using System.Collections;
@@ -165,7 +166,7 @@ namespace SaveDataSync
         /// <returns>The JSON represenation of the save list</returns>
         public string Serialize()
         {
-            return JsonConvert.SerializeObject(Saves.Values).ToString();
+            return JsonConvert.SerializeObject(Saves.Values);
         }
 
         /// <summary>

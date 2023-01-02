@@ -13,7 +13,7 @@ namespace SaveDataSync.Tests
     /// </summary>
     internal class TestServer : Server
     {
-        public override string Name => "TestName";
+        public override string Type => "TestName";
 
         public override string Host => "TestHost";
 
@@ -25,7 +25,7 @@ namespace SaveDataSync.Tests
             return Task.CompletedTask;
         }
 
-        public override Task Deserialize(JObject json)
+        public override Task DeserializeData(JObject json)
         {
             var value = json.GetValue("test_property");
             if (value is not null)
@@ -60,7 +60,7 @@ namespace SaveDataSync.Tests
             return Task.FromResult(Array.Empty<string>());
         }
 
-        public override Task<JObject> Serialize()
+        public override Task<JObject> SerializeData()
         {
             var json = new JObject
             {

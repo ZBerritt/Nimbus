@@ -26,7 +26,7 @@ namespace SaveDataSync.Servers
 
         private DropboxClient DropboxClient { get; set; }
 
-        public override string Name => "Dropbox";
+        public override string Type => "Dropbox";
 
         public override string Host => "dropbox.com";
 
@@ -37,7 +37,7 @@ namespace SaveDataSync.Servers
 
         public override async Task Build()
         {
-            var http = new HttpListener();
+            using var http = new HttpListener();
             try
             {
                 var state = Guid.NewGuid().ToString("N"); // Used for verification
@@ -68,18 +68,14 @@ namespace SaveDataSync.Servers
             {
                 Console.WriteLine(ex);
             }
-            finally
-            {
-                http.Stop();
-            }
         }
 
-        public override Task Deserialize(JObject json)
+        public override Task DeserializeData(JObject data)
         {
-            var accessToken = json.GetValue("accessToken").ToObject<string>();
-            var refreshToken = json.GetValue("refreshToken").ToObject<string>();
-            var expires = json.GetValue("expires").ToObject<DateTime>();
-            var uid = json.GetValue("uid").ToObject<string>();
+            var accessToken = data.GetValue("accessToken").ToObject<string>();
+            var refreshToken = data.GetValue("refreshToken").ToObject<string>();
+            var expires = data.GetValue("expires").ToObject<DateTime>();
+            var uid = data.GetValue("uid").ToObject<string>();
             SetValues(accessToken, refreshToken, expires, uid);
             return Task.CompletedTask;
         }
@@ -177,7 +173,7 @@ namespace SaveDataSync.Servers
             return hex;
         }
 
-        public override Task<JObject> Serialize()
+        public override Task<JObject> SerializeData()
         {
             return Task.FromResult(new JObject
             {

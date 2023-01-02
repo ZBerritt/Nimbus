@@ -51,7 +51,8 @@ namespace SaveDataSync.Utils
         {
             public TemporaryFile() :
               this(Path.GetTempPath())
-            { }
+            {
+            }
 
             public TemporaryFile(string directory)
             {
@@ -61,7 +62,6 @@ namespace SaveDataSync.Utils
             public void Dispose()
             {
                 Delete();
-                GC.SuppressFinalize(this);
             }
 
             public string FilePath { get; private set; }
@@ -69,7 +69,7 @@ namespace SaveDataSync.Utils
             private void Create(string path)
             {
                 FilePath = path;
-                using (File.Create(FilePath)) { };
+                using var _ = File.Create(FilePath);
             }
 
             private void Delete()
@@ -99,7 +99,6 @@ namespace SaveDataSync.Utils
             public void Dispose()
             {
                 Delete();
-                GC.SuppressFinalize(this);
             }
 
             public string FolderPath { get; private set; }

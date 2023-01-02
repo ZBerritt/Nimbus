@@ -8,21 +8,24 @@ using static SaveDataSync.Utils.FileUtils;
 
 namespace SaveDataSync.Tests
 {
-    public class SaveDataSyncEngineTests : IDisposable
+    public class SaveDataSyncEngineTests : IDisposable, IAsyncLifetime
     {
-        private readonly SaveDataSyncEngine _sut;
-        private readonly TemporaryFolder dataFolder;
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        private SaveDataSyncEngine _sut;
+        private TemporaryFile dataFile;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-        public SaveDataSyncEngineTests() {
-            dataFolder = new TemporaryFolder();
-            _sut = SaveDataSyncEngine.Start(dataFolder.FolderPath).Result; // Asynchronous method needs to be called in constructor
-        }
-
-        [Fact]
-        public void IntanceShouldEqualCurrentEngine()
+        public async Task InitializeAsync()
         {
-            Assert.Equal(_sut, SaveDataSyncEngine.Instance);
+            dataFile = new TemporaryFile();
+            _sut = await SaveDataSyncEngine.Start(dataFile.FilePath);
         }
+
+        public Task DisposeAsync()
+        {
+            return Task.CompletedTask;
+        }
+        public void Dispose() => dataFile.Dispose();
 
         [Fact]
         public async Task SetLocalSaveListShouldChangeSaveList()
@@ -49,30 +52,42 @@ namespace SaveDataSync.Tests
         }
 
         [Fact]
-        public void DataFolderShouldBePopulated()
+        public void DataFileShouldExistOnLoad()
         {
-            var folder = dataFolder.FolderPath;
-            var dataManager = new DataManager(folder); // Just used to get file paths
-            Assert.True(File.Exists(dataManager.LocalSavesFile));
-            Assert.True(File.Exists(dataManager.SettingsFile));
-            Assert.False(File.Exists(dataManager.ServerFile)); // No server
+            Assert.True(File.Exists(_sut.DataFile));
         }
 
         [Fact]
-        public async Task ServerFileShouldExistWhenAdded()
+        public async void DataShouldSaveToDataFile()
         {
+            // Make changes
             var server = new TestServer();
             await _sut.SetServer(server);
-            var dataManager = new DataManager(dataFolder.FolderPath);
-            Assert.True(File.Exists(dataManager.ServerFile));
+            await _sut.AddSave("testing", "test/test");
+
+            // Save to file
+            string oldData = File.ReadAllText(_sut.DataFile);
+            await _sut.Save();
+            string newData =  File.ReadAllText(_sut.DataFile);
+            Assert.NotEqual(oldData, newData);
+        }
+
+        [Fact]
+        public async void LoadShouldLoadFromFile()
+        {
+            // Make changes
+            var oldData = File.ReadAllBytes(_sut.DataFile);
+            var server = new TestServer();
+            await _sut.SetServer(server);
+            await _sut.AddSave("testing", "test/test");
+
+            // Load older version
+            File.WriteAllBytes(_sut.DataFile, oldData); // Write old data after it has been overritten
+            await _sut.Load();
+            Assert.Null(_sut.Server);
+            Assert.False(_sut.LocalSaveList.HasSave("testing"));
         }
 
         // TODO: Add more tests
-
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
-            dataFolder.Dispose();
-        }
     }
 }

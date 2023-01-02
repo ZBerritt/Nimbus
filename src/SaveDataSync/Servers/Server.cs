@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SaveDataSync.Servers;
 using System.Threading.Tasks;
 
@@ -13,7 +14,7 @@ namespace SaveDataSync
         /// <summary>
         /// The display name of the server
         /// </summary>
-        public abstract string Name { get; }
+        public abstract string Type { get; }
 
         /// <summary>
         /// The base host URI of the server for display purposes
@@ -67,14 +68,14 @@ namespace SaveDataSync
         /// Serializes the server data to JSON
         /// </summary>
         /// <returns>A JSON object representing the server data</returns>
-        public abstract Task<JObject> Serialize();
+        public abstract Task<JObject> SerializeData();
 
         /// <summary>
         /// Deserializes the server from a JSON object
         /// </summary>
         /// <param name="json">The JSON object to deserialize</param>
         /// <returns>Task representing asynchronous operation</returns>
-        public abstract Task Deserialize(JObject json);
+        public abstract Task DeserializeData(JObject data);
 
         /// <summary>
         /// Builds a new server object from an empty instance
@@ -96,6 +97,48 @@ namespace SaveDataSync
                 "Dropbox" => new DropboxServer(),
                 _ => null,
             };
+        }
+
+        public async Task<string> Serialize()
+        {
+            var data = await SerializeData();
+            var json = new JObject
+            {
+                { "type", Type },
+                { "data", data }
+            };
+
+            return json.ToString();
+        }
+
+        public static async Task<Server> Deserialize(string input)
+        {
+            JObject serverJson;
+            try
+            {
+                serverJson = JObject.Parse(input);
+            }
+            catch (JsonReaderException)
+            {
+                return null; // Cannot parse server data, return
+            }
+            var hasServerType = serverJson.TryGetValue("type", out var serverType);
+            var hasServerData = serverJson.TryGetValue("data", out var serverData);
+            if (!hasServerData || !hasServerType)
+            {
+                return null; // Invalid server object
+            }
+
+            Server server = GetServerFromType(serverType?.ToString());
+            if (server == null)
+            {
+                return null; // Invalid type
+            }
+
+            var data = serverData.ToObject<JObject>();
+            await server.DeserializeData(data);
+
+            return server;
         }
     }
 }
