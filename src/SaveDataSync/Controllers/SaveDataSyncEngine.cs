@@ -1,19 +1,19 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SaveDataSync.Models;
+using SaveDataSync.Models.Servers;
 using SaveDataSync.UI;
 using SaveDataSync.Utils;
 using System.IO;
-using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SaveDataSync
+namespace SaveDataSync.Controllers
 {
     /// <summary>
     /// Singleton class for connecting UI to app logic
     /// </summary>
-    [SupportedOSPlatform("windows7.0")]
     public class SaveDataSyncEngine
     {
         public string DataFile { get; init; }

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace SaveDataSync
+namespace SaveDataSync.Models
 {
     /// <summary>
     /// Represents all application settings

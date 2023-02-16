@@ -1,9 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using SaveDataSync.Servers;
 using System.Threading.Tasks;
 
-namespace SaveDataSync
+namespace SaveDataSync.Models.Servers
 {
     /// <summary>
     /// Represents a remote data server used for importing and exporting saves

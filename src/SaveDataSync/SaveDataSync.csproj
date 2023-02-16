@@ -47,9 +47,6 @@
     <Content Include="Resources\SaveDataSync.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\.editorconfig" Link=".editorconfig" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Dropbox.Api" Version="6.36.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>

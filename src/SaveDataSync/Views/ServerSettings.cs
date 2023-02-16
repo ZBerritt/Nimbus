@@ -1,4 +1,5 @@
-﻿using SaveDataSync.Servers;
+﻿using SaveDataSync.Controllers;
+using SaveDataSync.Models.Servers;
 using System;
 using System.Runtime.Versioning;
 using System.Windows.Forms;

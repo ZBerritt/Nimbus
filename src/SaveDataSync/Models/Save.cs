@@ -1,6 +1,6 @@
 ﻿using SaveDataSync.Utils;
 
-namespace SaveDataSync
+namespace SaveDataSync.Models
 {
     public class Save
     {

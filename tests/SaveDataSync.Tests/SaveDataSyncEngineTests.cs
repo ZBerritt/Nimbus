@@ -1,4 +1,6 @@
-﻿using Xunit;
+﻿using SaveDataSync.Controllers;
+using SaveDataSync.Models;
+using Xunit;
 using static SaveDataSync.Utils.FileUtils;
 
 namespace SaveDataSync.Tests

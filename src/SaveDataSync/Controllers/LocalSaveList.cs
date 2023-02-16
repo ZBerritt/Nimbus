@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SaveDataSync.Models;
 using SaveDataSync.Utils;
 using System;
 using System.Collections;
@@ -8,7 +9,7 @@ using System.IO.Compression;
 using System.Threading.Tasks;
 
 // TODO: Handle large files
-namespace SaveDataSync
+namespace SaveDataSync.Controllers
 {
     /// <summary>
     /// Represents all stored and managed local saves
@@ -52,7 +53,7 @@ namespace SaveDataSync
                     throw new InvalidSaveException("Save game with location " + location + " already exists.");
 
                 // Path contains one another
-                if ((FileUtils.NotAFile(normalizedPath) && locNormalizedPath.Contains(normalizedPath)) || (FileUtils.NotAFile(locNormalizedPath) && normalizedPath.Contains(locNormalizedPath)))
+                if (FileUtils.NotAFile(normalizedPath) && locNormalizedPath.Contains(normalizedPath) || FileUtils.NotAFile(locNormalizedPath) && normalizedPath.Contains(locNormalizedPath))
                     throw new InvalidSaveException("Save locations cannot contain each other.");
             }
 

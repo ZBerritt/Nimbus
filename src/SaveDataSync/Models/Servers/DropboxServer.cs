@@ -10,7 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace SaveDataSync.Servers
+namespace SaveDataSync.Models.Servers
 {
     public class DropboxServer : Server
     {

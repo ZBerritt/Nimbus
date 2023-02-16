@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace SaveDataSync
+namespace SaveDataSync.Utils
 {
     internal class DefaultLocations
     {

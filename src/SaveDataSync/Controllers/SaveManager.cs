@@ -1,4 +1,5 @@
-﻿using SaveDataSync.UI;
+﻿using SaveDataSync.Models.Servers;
+using SaveDataSync.UI;
 using SaveDataSync.Utils;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SaveDataSync
+namespace SaveDataSync.Controllers
 {
     /// <summary>
     /// Manages operations between the saves and the server
