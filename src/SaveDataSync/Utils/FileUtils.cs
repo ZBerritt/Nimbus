@@ -1,8 +1,6 @@
-﻿using ICSharpCode.SharpZipLib.Core;
-using ICSharpCode.SharpZipLib.Zip;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -44,7 +42,13 @@ namespace SaveDataSync.Utils
         public static bool NotAFile(string path)
         {
             return !PathExists(path)
-                || (File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory;
+                || IsDirectory(path);
+        }
+
+        // Returns true if the path leads to a directory 
+        public static bool IsDirectory(string path)
+        {
+            return (File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory;
         }
 
         public sealed class TemporaryFile : IDisposable
@@ -124,17 +128,12 @@ namespace SaveDataSync.Utils
 
         public static string[] GetFileList(string directory)
         {
-            var files = new List<string>();
-            foreach (string f in Directory.GetFiles(directory))
+            if (!IsDirectory(directory))
             {
-                files.Add(f);
-            }
-            foreach (string dir in Directory.GetDirectories(directory))
-            {
-                files.AddRange(GetFileList(dir));
+                return new string[] { directory };
             }
 
-            return files.ToArray();
+            return Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).ToArray();
         }
 
         // Human readable file sizes (10 B, 30 MB, etc)
@@ -160,44 +159,29 @@ namespace SaveDataSync.Utils
                         : new FileInfo(location).Length;
         }
 
-
-        public static async Task AddToArchive(string sourceFile, string entryName, ZipOutputStream stream)
-        {
-            byte[] buffer = new byte[4096];
-            using var fileStream = File.Open(sourceFile, FileMode.Open, FileAccess.Read, FileShare.Read);
-
-            var fileEntry = new ZipEntry(entryName)
-            {
-                DateTime = File.GetCreationTime(sourceFile), // Date time uses creation time
-                Size = fileStream.Length
-            };
-            await stream.PutNextEntryAsync(fileEntry);
-
-            var fcount = await fileStream.ReadAsync(buffer);
-            while (fcount > 0)
-            {
-                await stream.WriteAsync(buffer.AsMemory(0, fcount));
-                fcount = await fileStream.ReadAsync(buffer);
-            }
-        }
-
-        public static async Task Extract(string destination, ZipInputStream zipInputStream, ZipEntry zipEntry)
+        /// <summary>
+        /// Extracts a zip entry to the desired folder
+        /// </summary>
+        /// <param name="destination">The base destination folder</param>
+        /// <param name="zipArchive">The zip archive</param>
+        /// <param name="zipEntry">The zip entry</param>
+        /// <returns>A task for the asynchronous operation</returns>
+        public static async Task ExtractEntry(string destination, ZipArchive zipArchive, ZipArchiveEntry zipEntry)
         {
             // Handle as directory
-            if (zipEntry.IsDirectory && !Directory.Exists(destination))
+            if (zipEntry.FullName.EndsWith("/") && !Directory.Exists(destination))
             {
                 Directory.CreateDirectory(destination);
                 return;
             }
 
-            var buffer = new byte[4096];
-
             // Create directory just in case
             Directory.CreateDirectory(Path.GetDirectoryName(destination));
 
             // Write to file
-            using var fileStream = File.Open(destination, FileMode.OpenOrCreate, FileAccess.Write);
-            await Task.Run(() => StreamUtils.Copy(zipInputStream, fileStream, buffer));
+            using var destinationStream = File.Open(destination, FileMode.OpenOrCreate, FileAccess.Write);
+            await using var entryStream = zipEntry.Open();
+            await entryStream.CopyToAsync(destinationStream);
 
         }
     }

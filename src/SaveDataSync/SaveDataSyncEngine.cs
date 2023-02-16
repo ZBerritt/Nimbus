@@ -2,7 +2,6 @@
 using Newtonsoft.Json.Linq;
 using SaveDataSync.UI;
 using SaveDataSync.Utils;
-using System;
 using System.IO;
 using System.Runtime.Versioning;
 using System.Security.Cryptography;
@@ -57,7 +56,8 @@ namespace SaveDataSync
             await Save();
         }
 
-        private SaveDataSyncEngine(string dataFile) {
+        private SaveDataSyncEngine(string dataFile)
+        {
             DataFile = dataFile;
         }
 
@@ -119,10 +119,10 @@ namespace SaveDataSync
             await Save();
         }
 
-        public async Task<string[]> ExportSaves(string[] saves, ProgressBarControl progress) => 
+        public async Task<string[]> ExportSaves(string[] saves, ProgressBarControl progress) =>
             await GetSaveManager().ExportSaves(saves, progress);
 
-        public async Task<string[]> ImportSaves(string[] saves, ProgressBarControl progress) => 
+        public async Task<string[]> ImportSaves(string[] saves, ProgressBarControl progress) =>
             await GetSaveManager().ImportSaves(saves, progress);
 
         /// <summary>
@@ -195,7 +195,8 @@ namespace SaveDataSync
             try
             {
                 json = JObject.Parse(rawString);
-            } catch(JsonReaderException)
+            }
+            catch (JsonReaderException)
             {
                 throw new LoadException("Could not parse JSON from data file.");
             }

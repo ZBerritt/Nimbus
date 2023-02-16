@@ -218,7 +218,7 @@ namespace SaveDataSync
                     {
                         engine.LocalSaveList.RemoveSave(save);
                     }
-                    
+
                     await engine.Save();
                     await ReloadUI();
                 }
