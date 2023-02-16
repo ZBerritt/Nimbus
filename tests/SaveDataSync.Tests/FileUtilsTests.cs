@@ -1,11 +1,4 @@
-﻿using Dropbox.Api.TeamLog;
-using SaveDataSync.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+﻿using Xunit;
 using static SaveDataSync.Utils.FileUtils;
 
 namespace SaveDataSync.Tests
@@ -14,7 +7,8 @@ namespace SaveDataSync.Tests
     {
         // Root directory used for normalizing
         private static readonly string root = AppContext.BaseDirectory;
-        public FileUtilsTests() {
+        public FileUtilsTests()
+        {
         }
 
         [Theory]
@@ -124,7 +118,8 @@ namespace SaveDataSync.Tests
             Directory.CreateDirectory(Path.Combine(folder.FolderPath, "test_folder2"));
             using (var file0 = File.Create(Path.Combine(folder.FolderPath, "file0")))
             using (var file1 = File.Create(Path.Combine(folder.FolderPath, "test_folder1", "file1")))
-            using (var file2 = File.Create(Path.Combine(folder.FolderPath, "test_folder2", "file2"))) {
+            using (var file2 = File.Create(Path.Combine(folder.FolderPath, "test_folder2", "file2")))
+            {
                 for (int i = 0; i < 10; i++) // All files have 10 bytes written, 30 total
                 {
                     file0.WriteByte(1);

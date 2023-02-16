@@ -170,6 +170,7 @@ namespace SaveDataSync.Tests
             // Archive number 2
             Thread.Sleep(2000); // Sleep in order to force the timestamp to change
             using var archiveFile2 = new FileUtils.TemporaryFile();
+            File.WriteAllText(archiveFile2.FilePath, "test text");
             await _sut.ArchiveSaveData("test_save", archiveFile2.FilePath);
             Assert.True(FileUtils.GetSize(archiveFile2.FilePath) > 0);
 

@@ -1,11 +1,10 @@
-﻿using ICSharpCode.SharpZipLib.Zip;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
 using SaveDataSync.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Threading.Tasks;
 
 // TODO: Handle large files
@@ -107,26 +106,23 @@ namespace SaveDataSync
             if (!HasSave(name)) throw new Exception("Cannot archive save data: save does not exist");
             string location = GetSave(name).Location;
 
-            // This entire mess basically just zips the file into what we need. We need to do it manually isntead of using fastzip
-
-            using var outputStream = File.OpenWrite(destinationFile);
-            using var zipOutputStream = new ZipOutputStream(outputStream);
-
-            FileAttributes attr = File.GetAttributes(location);
-            if (attr.HasFlag(FileAttributes.Directory))
+            await using var archiveStream = new FileStream(destinationFile, FileMode.Create,
+                FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
+            using var archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, true);
+            var pathBase = FileUtils.IsDirectory(location) ? name : "";
+            foreach (var file in FileUtils.GetFileList(location))
             {
-                string[] files = FileUtils.GetFileList(location); // Recursively get all files
-                foreach (string file in files)
-                {
-                    string fileEntryName = Path.Combine(name, file[location.Length..]);
-                    await FileUtils.AddToArchive(file, fileEntryName, zipOutputStream); // Adds all entries to archive
-                }
-                return;
-            }
+                string fileEntryName = Path.Combine(pathBase, Path.GetRelativePath(location, file));
+                var entry = archive.CreateEntry(fileEntryName, CompressionLevel.Optimal);
 
-            // Single file - create archive of one entry
-            string entryName = Path.GetFileName(location);
-            await FileUtils.AddToArchive(location, entryName, zipOutputStream);
+                // Make sure the files write times are equal
+                entry.LastWriteTime = new DateTimeOffset(2022, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+                using var entryStream = entry.Open();
+                await using var fileStream = new FileStream(file, FileMode.Open,
+                    FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
+                await fileStream.CopyToAsync(entryStream);
+            }
         }
 
         /// <summary>
@@ -142,21 +138,22 @@ namespace SaveDataSync
             if (!HasSave(name)) return;
             var destination = GetSave(name).Location;
 
-            using var fileInputStream = File.OpenRead(source);
-            using var zipInputStream = new ZipInputStream(fileInputStream);
+            using var arciveStream = new FileStream(source, FileMode.Open,
+                FileAccess.Read, FileShare.None, bufferSize: 4096, useAsync: true);
+            using var archive = new ZipArchive(arciveStream, ZipArchiveMode.Read);
 
-            while (zipInputStream.GetNextEntry() is ZipEntry zipEntry)
+            foreach (var entry in archive.Entries)
             {
                 if (destination.EndsWith("\\")) // Temporary fix for splitting files and folders. May not work...
                 {
-                    var entryFileName = zipEntry.Name[(name.Length + 1)..];
+                    var entryFileName = entry.FullName[(name.Length + 1)..];
                     var entryDestination = Path.Combine(destination, entryFileName);
-                    await FileUtils.Extract(entryDestination, zipInputStream, zipEntry);
+                    await FileUtils.ExtractEntry(entryDestination, archive, entry);
                     continue;
                 }
 
                 // File -> single entry -> file IS the destination
-                await FileUtils.Extract(destination, zipInputStream, zipEntry);
+                await FileUtils.ExtractEntry(destination, archive, entry);
             }
         }
 

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+﻿using Xunit;
 using static SaveDataSync.Utils.FileUtils;
 
 namespace SaveDataSync.Tests
@@ -68,7 +63,7 @@ namespace SaveDataSync.Tests
             // Save to file
             string oldData = File.ReadAllText(_sut.DataFile);
             await _sut.Save();
-            string newData =  File.ReadAllText(_sut.DataFile);
+            string newData = File.ReadAllText(_sut.DataFile);
             Assert.NotEqual(oldData, newData);
         }
 
