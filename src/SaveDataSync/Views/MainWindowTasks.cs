@@ -54,6 +54,7 @@ namespace SaveDataSync.UI
                 "Error" => Color.Red,
                 _ => Color.Black,
             };
+
             _cancelToken.ThrowIfCancellationRequested();
 
             // Assign values to main window
@@ -111,7 +112,14 @@ namespace SaveDataSync.UI
 
                 var statusItem = item.SubItems[^1];
 
-                if (_serverOnline && (File.Exists(location) || Directory.Exists(location)))
+                if (_engine.Server is null)
+                {
+                    statusItem.Text = "No Server";
+                    statusItem.ForeColor = Color.Black;
+                    return;
+                }
+
+                if (_serverOnline && FileUtils.PathExists(location))
                 {
                     var localHash = await _engine.GetLocalHash(saveName);
                     var remoteHash = await _engine.GetRemoteHash(saveName);
@@ -120,33 +128,30 @@ namespace SaveDataSync.UI
                     {
                         statusItem.Text = "Not Uploaded";
                         statusItem.ForeColor = Color.Gray;
+                        return;
                     }
-                    else if (remoteHash == localHash)
+                    
+                    if (remoteHash == localHash)
                     {
                         statusItem.Text = "Synced";
                         statusItem.ForeColor = Color.Green;
+                        return;
                     }
-                    else
-                    {
                         statusItem.Text = "Not Synced";
                         statusItem.ForeColor = Color.DarkRed;
-                    }
+                    return;
+                    
                 }
-                else if (!File.Exists(location) && !Directory.Exists(location))
+                
+                if (!FileUtils.PathExists(location))
                 {
                     statusItem.Text = "No Local Save";
                     statusItem.ForeColor = Color.Gray;
+                    return;
                 }
-                else if (_engine.Server is not null)
-                {
-                    statusItem.Text = "Offline";
-                    statusItem.ForeColor = Color.DarkGoldenrod;
-                }
-                else
-                {
-                    statusItem.Text = "No Server";
-                    statusItem.ForeColor = Color.Black;
-                }
+
+                statusItem.Text = "Offline";
+                statusItem.ForeColor = Color.DarkGoldenrod;
             }
         }
 
@@ -155,22 +160,24 @@ namespace SaveDataSync.UI
             // Add remote saves to the list
             var server = _engine.Server;
             var saveList = new List<ListViewItem>();
-            if (_serverOnline)
+            if (!_serverOnline)
             {
-                var remoteSaveNames = await server.SaveNames();
-                var filtered = remoteSaveNames.Where(c => !_engine.LocalSaveList.HasSave(c));
-                foreach (var s in filtered)
+                return;
+            }
+            var remoteSaveNames = await server.SaveNames();
+            var filtered = remoteSaveNames.Where(c => !_engine.LocalSaveList.HasSave(c));
+            foreach (var s in filtered)
+            {
+                _cancelToken.ThrowIfCancellationRequested();
+                var remoteSaveItem = new ListViewItem(s)
                 {
-                    _cancelToken.ThrowIfCancellationRequested();
-                    var remoteSaveItem = new ListViewItem(s)
-                    {
-                        ForeColor = Color.DarkRed
-                    };
-                    remoteSaveItem.SubItems.Add("Remote");
-                    remoteSaveItem.SubItems.Add("N/A");
-                    remoteSaveItem.SubItems.Add("On Server");
-                    _window.GetSaveFileList().Items.Add(remoteSaveItem);
-                }
+                    ForeColor = Color.DarkRed
+                };
+                remoteSaveItem.SubItems.Add("Remote");
+                remoteSaveItem.SubItems.Add("N/A");
+                remoteSaveItem.SubItems.Add("On Server");
+                _window.GetSaveFileList().Items.Add(remoteSaveItem);
+
             }
         }
     }

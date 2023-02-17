@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,7 +15,6 @@ namespace SaveDataSync
     /// <summary>
     /// Represents the main GUI window used in the app
     /// </summary>
-    [SupportedOSPlatform("windows7.0")]
     public partial class MainWindow : Form
     {
         private SaveDataSyncEngine engine;

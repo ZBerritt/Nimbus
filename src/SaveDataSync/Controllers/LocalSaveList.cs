@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
-using static Dropbox.Api.Paper.DocSubscriptionLevel;
 
 // TODO: Handle large files
 namespace SaveDataSync.Controllers
@@ -148,7 +147,7 @@ namespace SaveDataSync.Controllers
             using var archive = new ZipArchive(arciveStream, ZipArchiveMode.Read);
 
             // Determine file type
-            var isFolder = archive.Comment != null 
+            var isFolder = archive.Comment != null
                 ? archive.Comment == "folder" // Auto match, works best if the user doesn't do anything stupid
                 : destination.EndsWith("\\"); // Use legacy match, might be less reliable but it works
 

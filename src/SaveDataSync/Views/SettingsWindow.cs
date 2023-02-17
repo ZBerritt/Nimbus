@@ -1,12 +1,10 @@
 ﻿using SaveDataSync.Controllers;
 using SaveDataSync.Models;
 using System;
-using System.Runtime.Versioning;
 using System.Windows.Forms;
 
 namespace SaveDataSync.UI
 {
-    [SupportedOSPlatform("windows7.0")]
     internal partial class SettingsWindow : Form
     {
         private SaveDataSyncEngine engine;
