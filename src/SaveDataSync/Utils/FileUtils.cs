@@ -166,7 +166,7 @@ namespace SaveDataSync.Utils
         /// <param name="zipArchive">The zip archive</param>
         /// <param name="zipEntry">The zip entry</param>
         /// <returns>A task for the asynchronous operation</returns>
-        public static async Task ExtractEntry(string destination, ZipArchive zipArchive, ZipArchiveEntry zipEntry)
+        public static async Task ExtractEntry(string destination, ZipArchiveEntry zipEntry)
         {
             // Handle as directory
             if (zipEntry.FullName.EndsWith("/") && !Directory.Exists(destination))

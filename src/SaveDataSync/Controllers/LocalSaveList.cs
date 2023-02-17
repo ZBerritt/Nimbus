@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
+using static Dropbox.Api.Paper.DocSubscriptionLevel;
 
 // TODO: Handle large files
 namespace SaveDataSync.Controllers
@@ -124,6 +125,9 @@ namespace SaveDataSync.Controllers
                     FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
                 await fileStream.CopyToAsync(entryStream);
             }
+
+            // Add comment declaring archive type
+            archive.Comment = FileUtils.IsDirectory(location) ? "folder" : "file";
         }
 
         /// <summary>
@@ -143,19 +147,31 @@ namespace SaveDataSync.Controllers
                 FileAccess.Read, FileShare.None, bufferSize: 4096, useAsync: true);
             using var archive = new ZipArchive(arciveStream, ZipArchiveMode.Read);
 
-            foreach (var entry in archive.Entries)
+            // Determine file type
+            var isFolder = archive.Comment != null 
+                ? archive.Comment == "folder" // Auto match, works best if the user doesn't do anything stupid
+                : destination.EndsWith("\\"); // Use legacy match, might be less reliable but it works
+
+            // Some error checking in case tampering was done. May be useless but its better to have
+            if (!isFolder && archive.Entries.Count > 1)
             {
-                if (destination.EndsWith("\\")) // Temporary fix for splitting files and folders. May not work...
+                throw new Exception("Trying to extract file archive with multiple entries. " +
+                    "If you're seeing this and didn't tamper with the remote files, something went wrong.");
+            }
+
+            if (isFolder)
+            {
+                foreach (var entry in archive.Entries)
                 {
                     var entryFileName = entry.FullName[(name.Length + 1)..];
                     var entryDestination = Path.Combine(destination, entryFileName);
-                    await FileUtils.ExtractEntry(entryDestination, archive, entry);
-                    continue;
+                    await FileUtils.ExtractEntry(entryDestination, entry);
                 }
 
-                // File -> single entry -> file IS the destination
-                await FileUtils.ExtractEntry(destination, archive, entry);
+                return;
             }
+
+            await FileUtils.ExtractEntry(destination, archive.Entries[0]); // File should have 1 entry
         }
 
         /// <summary>
