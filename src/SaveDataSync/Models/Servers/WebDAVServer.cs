@@ -97,7 +97,12 @@ namespace SaveDataSync.Servers
         public async override Task<string[]> SaveNames()
         {
             var remotePath = GetSavePath();
-            var response = await client.GetAsync(remotePath);
+            var req = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = remotePath
+            };
+            var response = await client.SendAsync(req);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             var names = ParseNamesFromListing(content);
