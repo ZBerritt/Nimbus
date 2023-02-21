@@ -130,19 +130,19 @@ namespace SaveDataSync.UI
                         statusItem.ForeColor = Color.Gray;
                         return;
                     }
-                    
+
                     if (remoteHash == localHash)
                     {
                         statusItem.Text = "Synced";
                         statusItem.ForeColor = Color.Green;
                         return;
                     }
-                        statusItem.Text = "Not Synced";
-                        statusItem.ForeColor = Color.DarkRed;
+                    statusItem.Text = "Not Synced";
+                    statusItem.ForeColor = Color.DarkRed;
                     return;
-                    
+
                 }
-                
+
                 if (!FileUtils.PathExists(location))
                 {
                     statusItem.Text = "No Local Save";

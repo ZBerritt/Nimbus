@@ -58,7 +58,7 @@ namespace SaveDataSync.UI
 
                     case "webdav":
                         try
-                        { 
+                        {
                             var args = new string[] {
                                 webDavUrlInput.Text, webDavUsernameInput.Text, webDavPasswordInput.Text };
                             _webDAVServer = await Server.Create<WebDAVServer>(args) as WebDAVServer;
@@ -70,7 +70,8 @@ namespace SaveDataSync.UI
                             }
 
                             await engine.SetServer(_webDAVServer);
-                        } catch (Exception ee)
+                        }
+                        catch (Exception ee)
                         {
                             PopupDialog.ErrorPopup("The server could not be added." +
                                 " Please validate your inputs before trying again.\n" +

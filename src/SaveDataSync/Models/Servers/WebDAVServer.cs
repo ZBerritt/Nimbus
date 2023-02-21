@@ -1,21 +1,12 @@
-﻿using Dropbox.Api;
-using Dropbox.Api.Users;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using SaveDataSync.Models.Servers;
-using SaveDataSync.Utils;
 using System;
-using System.Buffers.Text;
-using System.CodeDom;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace SaveDataSync.Servers
 {
@@ -49,7 +40,7 @@ namespace SaveDataSync.Servers
             var username = data.GetValue("username").ToObject<string>();
             var password = data.GetValue("password").ToObject<string>();
             var uri = data.GetValue("uri").ToObject<string>();
-            await Build(new string[]{ uri, username, password });
+            await Build(new string[] { uri, username, password });
         }
 
         public override async Task<string> GetLocalSaveHash(string archiveLocation)
@@ -68,30 +59,45 @@ namespace SaveDataSync.Servers
                 RequestUri = GetSavePath()
             };
             var res = await client.SendAsync(req);
-            return res.StatusCode == HttpStatusCode.OK;
+            return res.IsSuccessStatusCode;
         }
 
         public override async Task<string> GetRemoteSaveHash(string name)
         {
             var remotePath = GetSavePath(name);
             using var sha256 = SHA256.Create();
-            var response = await client.GetAsync(remotePath);
-            response.EnsureSuccessStatusCode();
-            using var stream = await response.Content.ReadAsStreamAsync();
-            var hashBytes = await sha256.ComputeHashAsync(stream);
-            return Encoding.UTF8.GetString(hashBytes);
+            try
+            {
+                var response = await client.GetAsync(remotePath);
+                response.EnsureSuccessStatusCode();
+                using var stream = await response.Content.ReadAsStreamAsync();
+                var hashBytes = await sha256.ComputeHashAsync(stream);
+                return Encoding.UTF8.GetString(hashBytes);
+            }
+            catch (HttpRequestException)
+            {
+                return ""; // May need to be null
+            }
         }
 
         public override async Task GetSaveData(string name, string destination)
         {
-            if (!File.Exists(destination)) 
+            if (!File.Exists(destination))
                 throw new Exception("Destination file does not exist. Cannot retrieve data."); // should be abstracted
             var remotePath = GetSavePath(name);
-            var response = await client.GetAsync(remotePath);
-            response.EnsureSuccessStatusCode();
-            using var remoteStream = await response.Content.ReadAsStreamAsync();
-            using var destinationStream = File.OpenWrite(destination);
-            await remoteStream.CopyToAsync(destinationStream);
+            try
+            {
+                var response = await client.GetAsync(remotePath);
+                response.EnsureSuccessStatusCode();
+                using var remoteStream = await response.Content.ReadAsStreamAsync();
+                using var destinationStream = File.OpenWrite(destination);
+                await remoteStream.CopyToAsync(destinationStream);
+            }
+            catch (HttpRequestException)
+            {
+                throw; // May need better error handling
+            }
+
         }
 
         public async override Task<string[]> SaveNames()
@@ -109,7 +115,8 @@ namespace SaveDataSync.Servers
                 var content = await response.Content.ReadAsStringAsync();
                 var names = ParseNamesFromListing(content);
                 return names;
-            } catch (HttpRequestException)
+            }
+            catch (HttpRequestException)
             {
                 return Array.Empty<string>();
             }
@@ -138,7 +145,11 @@ namespace SaveDataSync.Servers
             };
             req.Content.Headers.ContentLength = sourceStream.Length;
             var res = await client.SendAsync(req);
-            
+            if (!res.IsSuccessStatusCode)
+            {
+                throw new Exception("Failed to upload save data to the remote sever");
+            }
+
         }
 
         private async Task Setup()
@@ -146,9 +157,8 @@ namespace SaveDataSync.Servers
             var savePath = GetSavePath();
             var headRequest = new HttpRequestMessage(HttpMethod.Head, savePath);
             var headResponse = await client.SendAsync(headRequest);
-            bool exists = headResponse.IsSuccessStatusCode;
 
-            if (!exists)
+            if (!headResponse.IsSuccessStatusCode)
             {
                 var mkcolRequest = new HttpRequestMessage(new HttpMethod("MKCOL"), savePath);
                 await client.SendAsync(mkcolRequest); // TODO: May need handling
