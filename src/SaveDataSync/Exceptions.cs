@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SaveDataSync.Utils
+namespace SaveDataSync
 {
     public class InvalidSaveException : Exception
     {

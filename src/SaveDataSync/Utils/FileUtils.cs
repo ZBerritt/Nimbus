@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace SaveDataSync.Utils
 {
@@ -157,32 +155,6 @@ namespace SaveDataSync.Utils
             return File.GetAttributes(location).HasFlag(FileAttributes.Directory)
                         ? GetFileList(location).Sum(fi => new FileInfo(fi).Length)
                         : new FileInfo(location).Length;
-        }
-
-        /// <summary>
-        /// Extracts a zip entry to the desired folder
-        /// </summary>
-        /// <param name="destination">The base destination folder</param>
-        /// <param name="zipArchive">The zip archive</param>
-        /// <param name="zipEntry">The zip entry</param>
-        /// <returns>A task for the asynchronous operation</returns>
-        public static async Task ExtractEntry(string destination, ZipArchiveEntry zipEntry)
-        {
-            // Handle as directory
-            if (zipEntry.FullName.EndsWith("/") && !Directory.Exists(destination))
-            {
-                Directory.CreateDirectory(destination);
-                return;
-            }
-
-            // Create directory just in case
-            Directory.CreateDirectory(Path.GetDirectoryName(destination));
-
-            // Write to file
-            using var destinationStream = File.Open(destination, FileMode.OpenOrCreate, FileAccess.Write);
-            await using var entryStream = zipEntry.Open();
-            await entryStream.CopyToAsync(destinationStream);
-
         }
     }
 }

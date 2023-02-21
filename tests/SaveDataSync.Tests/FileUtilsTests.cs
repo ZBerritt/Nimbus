@@ -146,5 +146,33 @@ namespace SaveDataSync.Tests
             long fileSize = GetSize(file.FilePath);
             Assert.Equal(0, fileSize);
         }
+
+        [Fact]
+        public void PathExistsShouldReturnTrueWhenPathIsValid()
+        {
+            using var folder = new TemporaryFolder();
+            Assert.True(PathExists(folder.FolderPath));
+        }
+
+        [Fact]
+        public void PathExistsShouldReturnFalseWhenPathIsInvalid()
+        {
+            Assert.False(PathExists("fhpiwfiwfiuvfwiufwuvfwiuvwfi"));
+        }
+
+        [Fact]
+        public void IsDirectoryShouldReturnTrueWhenDirectory()
+        {
+            using var folder = new TemporaryFolder();
+            Assert.True(IsDirectory(folder.FolderPath));
+        }
+
+        [Fact]
+        public void IsDirectoryShouldReturnFalseWhenNotDirectory()
+        {
+            using var file = new TemporaryFile();
+            Assert.False(IsDirectory(file.FilePath));
+        }
+
     }
 }

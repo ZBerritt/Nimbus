@@ -14,7 +14,7 @@ namespace SaveDataSync.Tests
 
         public string? TestProperty { get; private set; }
 
-        public override Task Build(params string[] args)
+        protected override Task Build(params string[] args)
         {
             TestProperty = "Test";
             return Task.CompletedTask;

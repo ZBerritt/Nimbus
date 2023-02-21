@@ -214,6 +214,32 @@ namespace SaveDataSync.Controllers
             return list;
         }
 
+        /// <summary>
+        /// Extracts a zip entry to the desired folder
+        /// </summary>
+        /// <param name="destination">The base destination folder</param>
+        /// <param name="zipArchive">The zip archive</param>
+        /// <param name="zipEntry">The zip entry</param>
+        /// <returns>A task for the asynchronous operation</returns>
+        private static async Task ExtractEntry(string destination, ZipArchiveEntry zipEntry)
+        {
+            // Handle as directory
+            if (zipEntry.FullName.EndsWith("/") && !Directory.Exists(destination))
+            {
+                Directory.CreateDirectory(destination);
+                return;
+            }
+
+            // Create directory just in case
+            Directory.CreateDirectory(Path.GetDirectoryName(destination));
+
+            // Write to file
+            using var destinationStream = File.Open(destination, FileMode.OpenOrCreate, FileAccess.Write);
+            await using var entryStream = zipEntry.Open();
+            await entryStream.CopyToAsync(destinationStream);
+
+        }
+
         public IEnumerator<Save> GetEnumerator()
         {
             return Saves.Values.GetEnumerator();
