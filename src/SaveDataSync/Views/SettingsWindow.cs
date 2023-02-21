@@ -7,17 +7,29 @@ namespace SaveDataSync.UI
 {
     internal partial class SettingsWindow : Form
     {
-        private SaveDataSyncEngine engine;
+        private readonly SaveDataSyncEngine engine;
         private Settings settingsCopy;
         public bool ShouldReload { get; private set; } = false;
 
         public SettingsWindow(SaveDataSyncEngine engine)
         {
             this.engine = engine;
-            // TODO: Copy settings to clone
             Settings currentSettings = engine.Settings;
             settingsCopy = currentSettings.Clone(); // Clone all data to new instance
+
+            // Initialize
             InitializeComponent();
+
+            // Populate
+            switch (settingsCopy.Theme)
+            {
+                case THEME.LIGHT:
+                    themeSelect.SelectedIndex = 0;
+                    break;
+                case THEME.DARK: 
+                    themeSelect.SelectedIndex = 1; 
+                    break;
+            }
         }
 
         private void closeBtn_Click(object sender, EventArgs e)
@@ -32,6 +44,19 @@ namespace SaveDataSync.UI
             await engine.Save();
             ShouldReload = true;
             Close();
+        }
+
+        private void themeSelect_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (themeSelect.SelectedIndex)
+            {
+                case 0:
+                    settingsCopy.Theme = THEME.LIGHT;
+                    break;
+                case 1:
+                    settingsCopy.Theme = THEME.DARK;
+                    break;
+            }
         }
     }
 }

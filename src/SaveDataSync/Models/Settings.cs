@@ -10,7 +10,7 @@ namespace SaveDataSync.Models
     public class Settings
     {
         [JsonConverter(typeof(StringEnumConverter))]
-        public THEME Theme { get; private set; }
+        public THEME Theme { get; set; }
 
         /// <summary>
         /// Default constructor. Sets all settings to their defaults
