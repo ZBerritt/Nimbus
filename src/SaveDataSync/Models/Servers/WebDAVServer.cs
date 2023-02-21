@@ -1,4 +1,5 @@
 ﻿using Dropbox.Api;
+using Dropbox.Api.Users;
 using Newtonsoft.Json.Linq;
 using SaveDataSync.Models.Servers;
 using SaveDataSync.Utils;
@@ -14,6 +15,7 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace SaveDataSync.Servers
 {
@@ -71,25 +73,20 @@ namespace SaveDataSync.Servers
 
         public override async Task<string> GetRemoteSaveHash(string name)
         {
-            var savePath = Path.Combine(Uri.ToString(), "/SaveDataSync/Saves", name);
+            var remotePath = GetSavePath(name);
             using var sha256 = SHA256.Create();
-            try
-            {
-                using var stream = await client.GetStreamAsync(savePath);
-                var hashBytes = await sha256.ComputeHashAsync(stream);
-                return Encoding.UTF8.GetString(hashBytes);
-
-            } catch (HttpRequestException)
-            {
-                return "";
-            }
+            var response = await client.GetAsync(remotePath);
+            response.EnsureSuccessStatusCode();
+            using var stream = await response.Content.ReadAsStreamAsync();
+            var hashBytes = await sha256.ComputeHashAsync(stream);
+            return Encoding.UTF8.GetString(hashBytes);
         }
 
         public override async Task GetSaveData(string name, string destination)
         {
             if (!File.Exists(destination)) 
                 throw new Exception("Destination file does not exist. Cannot retrieve data."); // should be abstracted
-            var remotePath = $"/SaveDataSync/Saves/{name}";
+            var remotePath = GetSavePath(name);
             var response = await client.GetAsync(remotePath);
             response.EnsureSuccessStatusCode();
             using var remoteStream = await response.Content.ReadAsStreamAsync();
@@ -99,7 +96,7 @@ namespace SaveDataSync.Servers
 
         public async override Task<string[]> SaveNames()
         {
-            var remotePath = "/SaveDataSync/Saves/";
+            var remotePath = GetSavePath();
             var response = await client.GetAsync(remotePath);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
@@ -120,15 +117,41 @@ namespace SaveDataSync.Servers
         public override async Task UploadSaveData(string name, string source)
         {
             if (!File.Exists(source)) throw new Exception("Source file does not exist. Cannot upload.");
-            var savePath = Path.Combine("/SaveDataSync/Saves", name);
+            var savePath = GetSavePath(name);
             using var sourceStream = File.Open(source, FileMode.Open, FileAccess.Read, FileShare.Read);
-            await client.PutFile(savePath, sourceStream);
+            var req = new HttpRequestMessage
+            {
+                Method = HttpMethod.Put,
+                RequestUri = savePath,
+                Content = new StreamContent(sourceStream)
+            };
+            req.Content.Headers.ContentLength = sourceStream.Length;
+            var res = await client.SendAsync(req);
+            
         }
 
         private async Task Setup()
         {
-            await client.Mkcol("/SaveDataSync/");
-            await client.Mkcol("/SaveDataSync/Saves");
+            var savePath = GetSavePath();
+            var headRequest = new HttpRequestMessage(HttpMethod.Head, savePath);
+            var headResponse = await client.SendAsync(headRequest);
+            bool exists = headResponse.IsSuccessStatusCode;
+
+            if (!exists)
+            {
+                var mkcolRequest = new HttpRequestMessage(new HttpMethod("MKCOL"), savePath);
+                await client.SendAsync(mkcolRequest); // May need handling
+            }
+        }
+
+        private Uri GetSavePath()
+        {
+            return new Uri($"{Uri}/SaveDataSync/Saves/");
+        }
+
+        private Uri GetSavePath(string name)
+        {
+            return new Uri($"{Uri}/SaveDataSync/Saves/{name}");
         }
 
         private static string[] ParseNamesFromListing(string listing)
@@ -141,7 +164,7 @@ namespace SaveDataSync.Servers
                 // remove the .zip extension
                 if (names[i].EndsWith(".zip"))
                 {
-                    names[i] = names[i].Substring(0, names[i].Length - 4);
+                    names[i] = names[i][..^4];
                 }
             }
             return names;
