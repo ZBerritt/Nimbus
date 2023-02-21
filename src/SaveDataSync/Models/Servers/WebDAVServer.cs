@@ -22,9 +22,9 @@ namespace SaveDataSync.Servers
     internal class WebDAVServer : Server
     {
         private static HttpClient client;
-        private Uri Uri { get; set; }
-        private string Username { get; set; }
-        private string Password { get; set; }
+        public Uri Uri { get; private set; }
+        public string Username { get; private set; }
+        string Password { get; set; }
 
         public override string Type => "WebDAV";
 
@@ -65,7 +65,7 @@ namespace SaveDataSync.Servers
             var req = new HttpRequestMessage
             {
                 Method = HttpMethod.Head,
-                RequestUri = Uri
+                RequestUri = GetSavePath()
             };
             var res = await client.SendAsync(req);
             return res.StatusCode == HttpStatusCode.OK;
@@ -96,17 +96,23 @@ namespace SaveDataSync.Servers
 
         public async override Task<string[]> SaveNames()
         {
-            var remotePath = GetSavePath();
-            var req = new HttpRequestMessage
+            try
             {
-                Method = HttpMethod.Get,
-                RequestUri = remotePath
-            };
-            var response = await client.SendAsync(req);
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-            var names = ParseNamesFromListing(content);
-            return names;
+                var remotePath = GetSavePath();
+                var req = new HttpRequestMessage
+                {
+                    Method = HttpMethod.Get,
+                    RequestUri = remotePath
+                };
+                var response = await client.SendAsync(req);
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync();
+                var names = ParseNamesFromListing(content);
+                return names;
+            } catch (HttpRequestException)
+            {
+                return Array.Empty<string>();
+            }
         }
 
         public override Task<JObject> SerializeData()
@@ -145,7 +151,7 @@ namespace SaveDataSync.Servers
             if (!exists)
             {
                 var mkcolRequest = new HttpRequestMessage(new HttpMethod("MKCOL"), savePath);
-                await client.SendAsync(mkcolRequest); // May need handling
+                await client.SendAsync(mkcolRequest); // TODO: May need handling
             }
         }
 

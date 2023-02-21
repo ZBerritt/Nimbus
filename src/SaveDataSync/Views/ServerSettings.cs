@@ -1,10 +1,14 @@
 ﻿using SaveDataSync.Controllers;
 using SaveDataSync.Models.Servers;
+using SaveDataSync.Servers;
+using SaveDataSync.Utils;
 using System;
+using System.Runtime.Versioning;
 using System.Windows.Forms;
 
 namespace SaveDataSync.UI
 {
+    [SupportedOSPlatform("windows7.0")]
     internal partial class ServerSettings : Form
     {
         public SaveDataSyncEngine engine;
@@ -12,11 +16,12 @@ namespace SaveDataSync.UI
         public bool ShouldReload { get; private set; } = false;
 
         private DropboxServer _dropboxServer;
+        private WebDAVServer _webDAVServer;
 
         public ServerSettings(SaveDataSyncEngine engine)
         {
             this.engine = engine;
-            this.server = engine.Server;
+            server = engine.Server;
             InitializeComponent();
             if (server is not null)
             {
@@ -26,6 +31,10 @@ namespace SaveDataSync.UI
                     case "Dropbox":
                         _dropboxServer = server as DropboxServer;
                         DropboxReloadUI();
+                        break;
+                    case "WebDAV":
+                        _webDAVServer = server as WebDAVServer;
+                        WebDAVReloadUI();
                         break;
                 }
             }
@@ -39,9 +48,37 @@ namespace SaveDataSync.UI
                 {
                     case "dropbox":
                         var serverOnline = await _dropboxServer.GetOnlineStatus();
-                        if (!serverOnline) throw new Exception("Server cannot be found or is not online!");
+                        if (!serverOnline)
+                        {
+                            PopupDialog.ErrorPopup("Server cannot be found or is not online!");
+                            return;
+                        }
                         await engine.SetServer(_dropboxServer);
                         break;
+
+                    case "webdav":
+                        try
+                        { 
+                            var args = new string[] {
+                                webDavUrlInput.Text, webDavUsernameInput.Text, webDavPasswordInput.Text };
+                            _webDAVServer = await Server.Create<WebDAVServer>(args) as WebDAVServer;
+                            var canConnect = await _webDAVServer.GetOnlineStatus();
+                            if (!canConnect)
+                            {
+                                PopupDialog.ErrorPopup("Cannot connect or authenticate to WebDAV server.");
+                                return;
+                            }
+
+                            await engine.SetServer(_webDAVServer);
+                        } catch (Exception ee)
+                        {
+                            PopupDialog.ErrorPopup("The server could not be added." +
+                                " Please validate your inputs before trying again.\n" +
+                                $"Message: {ee.Message}");
+                            return;
+                        }
+                        break;
+
                 }
                 ShouldReload = true;
                 Close();
@@ -59,8 +96,7 @@ namespace SaveDataSync.UI
 
         private async void loginWithDropboxButton_Click(object sender, EventArgs e)
         {
-            var dropboxServer = new DropboxServer();
-            await dropboxServer.Build();
+            var dropboxServer = await Server.Create<DropboxServer>(Array.Empty<string>()) as DropboxServer;
             _dropboxServer = dropboxServer;
             DropboxReloadUI();
         }
@@ -74,6 +110,15 @@ namespace SaveDataSync.UI
             else
             {
                 dropboxLoginNotice.Text = $"✔️ Logged in as user: {_dropboxServer.Uid}";
+            }
+        }
+
+        private void WebDAVReloadUI()
+        {
+            if (_webDAVServer is not null)
+            {
+                webDavUsernameInput.Text = _webDAVServer.Username.ToString();
+                webDavUrlInput.Text = _webDAVServer.Uri.ToString();
             }
         }
     }
