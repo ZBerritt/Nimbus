@@ -49,5 +49,6 @@
   <ItemGroup>
     <PackageReference Include="Dropbox.Api" Version="6.37.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="WebDav.Client" Version="2.8.0" />
   </ItemGroup>
 </Project>

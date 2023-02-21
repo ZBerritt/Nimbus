@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SaveDataSync.Servers;
+using System;
 using System.Threading.Tasks;
 
 namespace SaveDataSync.Models.Servers
@@ -80,24 +82,53 @@ namespace SaveDataSync.Models.Servers
         /// Builds a new server object from an empty instance
         /// </summary>
         /// <returns>Task representing asynchronous operation</returns>
-        public abstract Task Build();
+        public abstract Task Build(params string[] args);
 
         /* Static methods */
 
         /// <summary>
         /// Gets an empty server object given the server type
         /// </summary>
-        /// <param name="type">The server type (Server.Name)</param>
-        /// <returns>An empty Server object of the specified type</returns>
-        public static Server GetServerFromType(string type)
+        /// <typeparam name="T">The server class needed</typeparam>
+        /// <param name="args">The arguments for the build function</param>
+        /// <returns></returns>
+        public static async Task<Server> Create<T>(params string[] args) where T : Server
         {
-            return type switch
+            var instance = Activator.CreateInstance<T>();
+            await instance.Build(args);
+            return instance;
+        }
+
+        public static Server Create<T>() where T : Server
+        {
+            var instance = Activator.CreateInstance<T>();
+            return instance;
+        }
+
+        public static async Task<Server> CreateFromString(string name, params string[] args)
+        {
+            return name switch
             {
-                "Dropbox" => new DropboxServer(),
-                _ => null,
+                "Dropbox" => await Create<DropboxServer>(args),
+                "WebDAV" => await Create<WebDAVServer>(args),
+                _ => throw new ArgumentException("Invalid server class name"),
             };
         }
 
+        public static Server CreateFromString(string name)
+        {
+            return name switch
+            {
+                "Dropbox" => Create<DropboxServer>(),
+                "WebDAV" => Create<WebDAVServer>(),
+                _ => throw new ArgumentException("Invalid server class name"),
+            };
+        }
+
+        /// <summary>
+        /// Converts serialzed data into the form used to store
+        /// </summary>
+        /// <returns>A task that returns the string representation of the json object</returns>
         public async Task<string> Serialize()
         {
             var data = await SerializeData();
@@ -110,6 +141,11 @@ namespace SaveDataSync.Models.Servers
             return json.ToString();
         }
 
+        /// <summary>
+        /// Converts serialized data 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public static async Task<Server> Deserialize(string input)
         {
             JObject serverJson;
@@ -128,11 +164,7 @@ namespace SaveDataSync.Models.Servers
                 return null; // Invalid server object
             }
 
-            Server server = GetServerFromType(serverType?.ToString());
-            if (server == null)
-            {
-                return null; // Invalid type
-            }
+            Server server = CreateFromString(serverType?.ToString());
 
             var data = serverData.ToObject<JObject>();
             await server.DeserializeData(data);
