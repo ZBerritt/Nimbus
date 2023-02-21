@@ -164,13 +164,13 @@ namespace SaveDataSync.Controllers
                 {
                     var entryFileName = entry.FullName[(name.Length + 1)..];
                     var entryDestination = Path.Combine(destination, entryFileName);
-                    await FileUtils.ExtractEntry(entryDestination, entry);
+                    await ExtractEntry(entryDestination, entry);
                 }
 
                 return;
             }
 
-            await FileUtils.ExtractEntry(destination, archive.Entries[0]); // File should have 1 entry
+            await ExtractEntry(destination, archive.Entries[0]); // File should have 1 entry
         }
 
         /// <summary>
