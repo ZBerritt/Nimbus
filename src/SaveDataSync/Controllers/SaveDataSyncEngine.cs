@@ -12,47 +12,34 @@ using System.Threading.Tasks;
 namespace SaveDataSync.Controllers
 {
     /// <summary>
-    /// Singleton class for connecting UI to app logic
+    /// Class for connecting the UI to the back end
     /// </summary>
     public class SaveDataSyncEngine
     {
         public string DataFile { get; init; }
 
-        private LocalSaveList _localSaveList;
-        private Server _server;
-        private Settings _settings;
+        public LocalSaveList LocalSaveList { get; private set; }
 
-        public LocalSaveList LocalSaveList
-        {
-            get => _localSaveList;
-        }
+        public Server Server { get; private set; }
 
-        public Server Server
-        {
-            get => _server;
-        }
-
-        public Settings Settings
-        {
-            get => _settings;
-        }
+        public Settings Settings { get; private set; }
 
         // Asynchronous setters
         public async Task SetLocalSaveList(LocalSaveList saveList)
         {
-            _localSaveList = saveList;
+            LocalSaveList = saveList;
             await Save();
         }
 
         public async Task SetServer(Server server)
         {
-            _server = server;
+            Server = server;
             await Save();
         }
 
         public async Task SetSettings(Settings settings)
         {
-            _settings = settings;
+            Settings = settings;
             await Save();
         }
 
@@ -150,17 +137,17 @@ namespace SaveDataSync.Controllers
 
             // Serialize the data as JSON
             var json = new JObject();
-            if (_localSaveList != null)
+            if (LocalSaveList != null)
             {
-                json.Add("save_list", _localSaveList.Serialize());
+                json.Add("save_list", LocalSaveList.Serialize());
             }
-            if (_settings != null)
+            if (Settings != null)
             {
-                json.Add("settings", _settings.Serialize());
+                json.Add("settings", Settings.Serialize());
             }
-            if (_server != null)
+            if (Server != null)
             {
-                json.Add("server", await _server.Serialize());
+                json.Add("server", await Server.Serialize());
             }
 
             // Encrypt and write data 
@@ -209,7 +196,7 @@ namespace SaveDataSync.Controllers
             {
                 var saveListData = json.GetValue("save_list").ToString();
                 var list = LocalSaveList.Deserialize(saveListData);
-                _localSaveList = list;
+                LocalSaveList = list;
             }
 
             // Settings
@@ -217,7 +204,7 @@ namespace SaveDataSync.Controllers
             {
                 var settingsData = json.GetValue("settings").ToString();
                 var settings = Settings.Deseriaize(settingsData);
-                _settings = settings;
+                Settings = settings;
             }
 
             // Server
@@ -225,7 +212,7 @@ namespace SaveDataSync.Controllers
             {
                 var serverJsonString = json.GetValue("server").ToString();
                 var server = await Server.Deserialize(serverJsonString);
-                _server = server;
+                Server = server;
             }
         }
 
@@ -235,9 +222,9 @@ namespace SaveDataSync.Controllers
         /// <returns>Task representing asynchronous operation</returns>
         private void Reset()
         {
-            _localSaveList = new LocalSaveList();
-            _server = null;
-            _settings = new Settings();
+            LocalSaveList = new LocalSaveList();
+            Server = null;
+            Settings = new Settings();
         }
 
         private void CreateDataFile()
