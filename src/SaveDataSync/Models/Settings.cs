@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using System.Runtime.Serialization;
 
 namespace SaveDataSync.Models
 {
@@ -7,11 +9,15 @@ namespace SaveDataSync.Models
     /// </summary>
     public class Settings
     {
+        [JsonConverter(typeof(StringEnumConverter))]
+        public THEME Theme { get; private set; }
+
         /// <summary>
         /// Default constructor. Sets all settings to their defaults
         /// </summary>
         public Settings()
         {
+            Theme = THEME.LIGHT;
         }
 
         /// <summary>
@@ -29,8 +35,7 @@ namespace SaveDataSync.Models
         /// <returns>A JSON object representation of the settings</returns>
         public string Serialize()
         {
-            var json = new JObject();
-            // Add properties here
+            var json = JsonConvert.SerializeObject(this);
             return json.ToString();
         }
 
@@ -39,9 +44,20 @@ namespace SaveDataSync.Models
         /// </summary>
         /// <param name="json">JSON stirng to deserialize</param>
         /// <returns>Settings object representing the json</returns>
-        public static Settings Deseriaize(string json)
+        public static Settings Deseriaize(string jsonString)
         {
-            return new Settings();
+            var settings = JsonConvert.DeserializeObject<Settings>(jsonString);
+            return settings;
         }
+    }
+
+
+
+    public enum THEME
+    {
+        [EnumMember(Value = "light")]
+        LIGHT,
+        [EnumMember(Value = "dark")]
+        DARK
     }
 }
