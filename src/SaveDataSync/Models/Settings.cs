@@ -7,6 +7,9 @@ namespace SaveDataSync.Models
     /// </summary>
     public class Settings
     {
+        /// <summary>
+        /// Default constructor. Sets all settings to their defaults
+        /// </summary>
         public Settings()
         {
         }
@@ -27,6 +30,7 @@ namespace SaveDataSync.Models
         public string Serialize()
         {
             var json = new JObject();
+            // Add properties here
             return json.ToString();
         }
 

@@ -21,7 +21,7 @@ namespace SaveDataSync.Servers
 
         public override string Host => Uri.Host;
 
-        public override async Task Build(params string[] args)
+        protected override async Task Build(params string[] args)
         {
             // TODO: Possible validate args in case something horrible goes wrong
             Uri = new Uri(args[0]); // TODO: Auto format URL

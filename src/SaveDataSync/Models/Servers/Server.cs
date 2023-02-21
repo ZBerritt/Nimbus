@@ -79,19 +79,20 @@ namespace SaveDataSync.Models.Servers
         public abstract Task DeserializeData(JObject data);
 
         /// <summary>
-        /// Builds a new server object from an empty instance
+        /// Runs the main build function for an individual server
         /// </summary>
+        /// <param name="args">The respective server type's arguments</param>
         /// <returns>Task representing asynchronous operation</returns>
-        public abstract Task Build(params string[] args);
+        protected abstract Task Build(params string[] args);
 
         /* Static methods */
 
         /// <summary>
-        /// Gets an empty server object given the server type
+        /// Gets a server object given of specified type with arguments
         /// </summary>
         /// <typeparam name="T">The server class needed</typeparam>
         /// <param name="args">The arguments for the build function</param>
-        /// <returns></returns>
+        /// <returns>Task representing asynchronous operation which returns the server instance</returns>
         public static async Task<Server> Create<T>(params string[] args) where T : Server
         {
             var instance = Activator.CreateInstance<T>();
@@ -99,6 +100,11 @@ namespace SaveDataSync.Models.Servers
             return instance;
         }
 
+        /// <summary>
+        /// Gets an empty server object given the server type
+        /// </summary>
+        /// <typeparam name="T">The server class needed</typeparam>
+        /// <returns>Task representing asynchronous operation which returns the server instance</returns>
         public static Server Create<T>() where T : Server
         {
             var instance = Activator.CreateInstance<T>();

@@ -3,12 +3,10 @@ using SaveDataSync.Models.Servers;
 using SaveDataSync.Servers;
 using SaveDataSync.Utils;
 using System;
-using System.Runtime.Versioning;
 using System.Windows.Forms;
 
 namespace SaveDataSync.UI
 {
-    [SupportedOSPlatform("windows7.0")]
     internal partial class ServerSettings : Form
     {
         public SaveDataSyncEngine engine;
