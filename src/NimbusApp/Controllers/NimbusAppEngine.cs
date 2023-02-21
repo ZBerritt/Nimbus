@@ -147,7 +147,7 @@ namespace NimbusApp.Controllers
             }
             if (Server != null)
             {
-                json.Add("server", await Server.Serialize());
+                json.Add("server", Server.Serialize());
             }
 
             // Encrypt and write data 
@@ -211,7 +211,7 @@ namespace NimbusApp.Controllers
             if (json.ContainsKey("server"))
             {
                 var serverJsonString = json.GetValue("server").ToString();
-                var server = await Server.Deserialize(serverJsonString);
+                var server = Server.Deserialize(serverJsonString);
                 Server = server;
             }
         }

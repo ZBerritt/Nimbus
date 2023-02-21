@@ -58,6 +58,5 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Dropbox.Api" Version="6.37.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
 </Project>

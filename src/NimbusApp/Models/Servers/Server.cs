@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using NimbusApp.Servers;
+﻿using NimbusApp.Servers;
 using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace NimbusApp.Models.Servers
@@ -9,6 +9,10 @@ namespace NimbusApp.Models.Servers
     /// <summary>
     /// Represents a remote data server used for importing and exporting saves
     /// </summary>
+    [JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization)]
+    [JsonDerivedType(typeof(DropboxServer), "dropbox")]
+    [JsonDerivedType(typeof(WebDAVServer), "webdav")]
+    [JsonDerivedType(typeof(TestServer), "test")]
     public abstract class Server
 
     {
@@ -64,19 +68,6 @@ namespace NimbusApp.Models.Servers
         /// <param name="archiveLocation">Location of the ZIP archive to hash</param>
         /// <returns>An asynchronous task resulting in the save hash of the local file</returns>
         public abstract Task<string> GetLocalSaveHash(string archiveLocation);
-
-        /// <summary>
-        /// Serializes the server data to JSON
-        /// </summary>
-        /// <returns>A JSON object representing the server data</returns>
-        public abstract Task<JObject> SerializeData();
-
-        /// <summary>
-        /// Deserializes the server from a JSON object
-        /// </summary>
-        /// <param name="json">The JSON object to deserialize</param>
-        /// <returns>Task representing asynchronous operation</returns>
-        public abstract Task DeserializeData(JObject data);
 
         /// <summary>
         /// Runs the main build function for an individual server
@@ -135,16 +126,9 @@ namespace NimbusApp.Models.Servers
         /// Converts serialzed data into the form used to store
         /// </summary>
         /// <returns>A task that returns the string representation of the json object</returns>
-        public async Task<string> Serialize()
+        public string Serialize()
         {
-            var data = await SerializeData();
-            var json = new JObject
-            {
-                { "type", Type },
-                { "data", data }
-            };
-
-            return json.ToString();
+            return JsonSerializer.Serialize(this);
         }
 
         /// <summary>
@@ -152,30 +136,9 @@ namespace NimbusApp.Models.Servers
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static async Task<Server> Deserialize(string input)
+        public static Server Deserialize(string input)
         {
-            JObject serverJson;
-            try
-            {
-                serverJson = JObject.Parse(input);
-            }
-            catch (JsonReaderException)
-            {
-                return null; // Cannot parse server data, return
-            }
-            var hasServerType = serverJson.TryGetValue("type", out var serverType);
-            var hasServerData = serverJson.TryGetValue("data", out var serverData);
-            if (!hasServerData || !hasServerType)
-            {
-                return null; // Invalid server object
-            }
-
-            Server server = CreateFromString(serverType?.ToString());
-
-            var data = serverData.ToObject<JObject>();
-            await server.DeserializeData(data);
-
-            return server;
+            return JsonSerializer.Deserialize<Server>(input);
         }
     }
 }

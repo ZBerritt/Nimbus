@@ -12,10 +12,20 @@ namespace NimbusApp.Servers
 {
     internal class WebDAVServer : Server
     {
-        private static HttpClient client;
+        
+
+        // Properties
         public Uri Uri { get; private set; }
         public string Username { get; private set; }
-        string Password { get; set; }
+        public string Password { get; private set; }
+
+        // Utilities
+        private HttpClientHandler Handler => new()
+        {
+            Credentials = new NetworkCredential(Username, Password),
+        };
+        private HttpClient Client => new(Handler);
+
 
         public override string Type => "WebDAV";
 
@@ -27,20 +37,7 @@ namespace NimbusApp.Servers
             Uri = new Uri(args[0]); // TODO: Auto format URL
             Username = args[1];
             Password = args[2];
-            var handler = new HttpClientHandler
-            {
-                Credentials = new NetworkCredential(Username, Password),
-            };
-            client = new HttpClient(handler);
             await Setup();
-        }
-
-        public override async Task DeserializeData(JObject data)
-        {
-            var username = data.GetValue("username").ToObject<string>();
-            var password = data.GetValue("password").ToObject<string>();
-            var uri = data.GetValue("uri").ToObject<string>();
-            await Build(new string[] { uri, username, password });
         }
 
         public override async Task<string> GetLocalSaveHash(string archiveLocation)
@@ -58,7 +55,7 @@ namespace NimbusApp.Servers
                 Method = HttpMethod.Head,
                 RequestUri = GetSavePath()
             };
-            var res = await client.SendAsync(req);
+            var res = await Client.SendAsync(req);
             return res.IsSuccessStatusCode;
         }
 
@@ -68,7 +65,7 @@ namespace NimbusApp.Servers
             using var sha256 = SHA256.Create();
             try
             {
-                var response = await client.GetAsync(remotePath);
+                var response = await Client.GetAsync(remotePath);
                 response.EnsureSuccessStatusCode();
                 using var stream = await response.Content.ReadAsStreamAsync();
                 var hashBytes = await sha256.ComputeHashAsync(stream);
@@ -87,7 +84,7 @@ namespace NimbusApp.Servers
             var remotePath = GetSavePath(name);
             try
             {
-                var response = await client.GetAsync(remotePath);
+                var response = await Client.GetAsync(remotePath);
                 response.EnsureSuccessStatusCode();
                 using var remoteStream = await response.Content.ReadAsStreamAsync();
                 using var destinationStream = File.OpenWrite(destination);
@@ -110,7 +107,7 @@ namespace NimbusApp.Servers
                     Method = HttpMethod.Get,
                     RequestUri = remotePath
                 };
-                var response = await client.SendAsync(req);
+                var response = await Client.SendAsync(req);
                 response.EnsureSuccessStatusCode();
                 var content = await response.Content.ReadAsStringAsync();
                 var names = ParseNamesFromListing(content);
@@ -120,16 +117,6 @@ namespace NimbusApp.Servers
             {
                 return Array.Empty<string>();
             }
-        }
-
-        public override Task<JObject> SerializeData()
-        {
-            return Task.FromResult(new JObject
-            {
-                { "username", Username },
-                { "password", Password },
-                { "uri", Uri },
-            });
         }
 
         public override async Task UploadSaveData(string name, string source)
@@ -144,7 +131,7 @@ namespace NimbusApp.Servers
                 Content = new StreamContent(sourceStream)
             };
             req.Content.Headers.ContentLength = sourceStream.Length;
-            var res = await client.SendAsync(req);
+            var res = await Client.SendAsync(req);
             if (!res.IsSuccessStatusCode)
             {
                 throw new Exception("Failed to upload save data to the remote sever");
@@ -156,12 +143,12 @@ namespace NimbusApp.Servers
         {
             var savePath = GetSavePath();
             var headRequest = new HttpRequestMessage(HttpMethod.Head, savePath);
-            var headResponse = await client.SendAsync(headRequest);
+            var headResponse = await Client.SendAsync(headRequest);
 
             if (!headResponse.IsSuccessStatusCode)
             {
                 var mkcolRequest = new HttpRequestMessage(new HttpMethod("MKCOL"), savePath);
-                await client.SendAsync(mkcolRequest); // TODO: May need handling
+                await Client.SendAsync(mkcolRequest); // TODO: May need handling
             }
         }
 

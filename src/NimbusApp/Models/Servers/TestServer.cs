@@ -1,32 +1,23 @@
-﻿using Newtonsoft.Json.Linq;
-using NimbusApp.Models.Servers;
+﻿using System;
+using System.Threading.Tasks;
 
-namespace NimbusApp.Tests
+namespace NimbusApp.Models.Servers
 {
     /// <summary>
     /// Test implementation of the server class for testing purposes
+    /// Should not be used as an actual server
     /// </summary>
-    internal class TestServer : Server
+    public class TestServer : Server
     {
         public override string Type => "TestName";
 
         public override string Host => "TestHost";
 
-        public string? TestProperty { get; private set; }
+        public string TestProperty { get; private set; }
 
         protected override Task Build(params string[] args)
         {
             TestProperty = "Test";
-            return Task.CompletedTask;
-        }
-
-        public override Task DeserializeData(JObject json)
-        {
-            var value = json.GetValue("test_property");
-            if (value is not null)
-            {
-                TestProperty = value.ToString();
-            }
             return Task.CompletedTask;
         }
 
@@ -53,16 +44,6 @@ namespace NimbusApp.Tests
         public override Task<string[]> SaveNames()
         {
             return Task.FromResult(Array.Empty<string>());
-        }
-
-        public override Task<JObject> SerializeData()
-        {
-            var json = new JObject
-            {
-                { "test_property", TestProperty }
-            };
-
-            return Task.FromResult(json);
         }
 
         public override Task UploadSaveData(string name, string source)

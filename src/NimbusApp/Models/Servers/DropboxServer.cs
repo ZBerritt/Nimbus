@@ -14,17 +14,21 @@ namespace NimbusApp.Models.Servers
 {
     public class DropboxServer : Server
     {
+        // Constants
         private static readonly string APP_ID = "i136jjbqxg4aaci";
         private static readonly string LoopbackHost = "http://127.0.0.1:12356/";
         private static readonly Uri RedirectUri = new(LoopbackHost + "authorize");
         private static readonly Uri JSRedirectUri = new(LoopbackHost + "token");
-
-        private string AccessToken { get; set; }
-        private string RefreshToken { get; set; }
-        private DateTime Expires { get; set; }
+        
+        // Properties
+        public string AccessToken { get; set; }
+        public string RefreshToken { get; set; }
+        public DateTime Expires { get; set; }
         public string Uid { get; set; }
 
-        private DropboxClient DropboxClient { get; set; }
+        // Utilities
+        private DropboxClient DropboxClient => new DropboxClient(AccessToken, RefreshToken, Expires, APP_ID);
+
 
         public override string Type => "Dropbox";
 
@@ -65,23 +69,12 @@ namespace NimbusApp.Models.Servers
             }
         }
 
-        public override Task DeserializeData(JObject data)
-        {
-            var accessToken = data.GetValue("accessToken").ToObject<string>();
-            var refreshToken = data.GetValue("refreshToken").ToObject<string>();
-            var expires = data.GetValue("expires").ToObject<DateTime>();
-            var uid = data.GetValue("uid").ToObject<string>();
-            SetValues(accessToken, refreshToken, expires, uid);
-            return Task.CompletedTask;
-        }
-
         private void SetValues(string accessToken, string refreshToken, DateTime expires, string uid)
         {
             AccessToken = accessToken;
             RefreshToken = refreshToken;
             Expires = expires;
             Uid = uid;
-            DropboxClient = new DropboxClient(AccessToken, RefreshToken, Expires, APP_ID);
         }
 
         public override async Task<string[]> SaveNames()
@@ -166,17 +159,6 @@ namespace NimbusApp.Models.Servers
             hasher.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
             var hex = DropboxContentHasher.ToHex(hasher.Hash);
             return hex;
-        }
-
-        public override Task<JObject> SerializeData()
-        {
-            return Task.FromResult(new JObject
-            {
-                { "accessToken", AccessToken },
-                { "refreshToken", RefreshToken },
-                { "expires", Expires },
-                { "uid", Uid }
-            });
         }
     }
 }
