@@ -30,12 +30,7 @@ namespace SaveDataSync.Models.Servers
 
         public override string Host => "dropbox.com";
 
-        // All server instances need an empty constructor
-        public DropboxServer()
-        {
-        }
-
-        public override async Task Build()
+        public override async Task Build(params string[] _)
         {
             using var http = new HttpListener();
             try

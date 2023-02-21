@@ -30,26 +30,26 @@ namespace SaveDataSync.Servers
 
         public override string Host => Uri.Host;
 
-        public async void Build(string uri, string username, string password)
+        public override async Task Build(params string[] args)
         {
-            Uri = new Uri(uri); // TODO: Auto format URL
-            Username = username;
-            Password = password;
+            // TODO: Possible validate args in case something horrible goes wrong
+            Uri = new Uri(args[0]); // TODO: Auto format URL
+            Username = args[1];
+            Password = args[2];
             var handler = new HttpClientHandler
             {
-                Credentials = new NetworkCredential(username, password),
+                Credentials = new NetworkCredential(Username, Password),
             };
             client = new HttpClient(handler);
             await Setup();
         }
 
-        public override Task DeserializeData(JObject data)
+        public override async Task DeserializeData(JObject data)
         {
             var username = data.GetValue("username").ToObject<string>();
             var password = data.GetValue("password").ToObject<string>();
-            var uri = data.GetValue("expires").ToObject<string>();
-            Build(uri, username, password);
-            return Task.CompletedTask;
+            var uri = data.GetValue("uri").ToObject<string>();
+            await Build(new string[]{ uri, username, password });
         }
 
         public override async Task<string> GetLocalSaveHash(string archiveLocation)
