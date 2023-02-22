@@ -40,7 +40,7 @@ namespace NimbusApp.UI
         private async void saveBtn_Click(object sender, EventArgs e)
         {
             // Get the new settings from the UI here
-            await engine.SetSettings(settingsCopy);
+            engine.Settings = settingsCopy;
             await engine.Save();
             ShouldReload = true;
             Close();

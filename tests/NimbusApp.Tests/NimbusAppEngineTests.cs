@@ -26,30 +26,6 @@ namespace NimbusApp.Tests
         public void Dispose() => dataFile.Dispose();
 
         [Fact]
-        public async Task SetLocalSaveListShouldChangeSaveList()
-        {
-            var list = new LocalSaveList();
-            await _sut.SetLocalSaveList(list);
-            Assert.Equal(list, _sut.LocalSaveList);
-        }
-
-        [Fact]
-        public async Task SetSettingsShouldChangeSettings()
-        {
-            var settings = new Settings();
-            await _sut.SetSettings(settings);
-            Assert.Equal(settings, _sut.Settings);
-        }
-
-        [Fact]
-        public async Task SetServerShouldChangeServer()
-        {
-            var server = new TestServer();
-            await _sut.SetServer(server);
-            Assert.Equal(server, _sut.Server);
-        }
-
-        [Fact]
         public void DataFileShouldExistOnLoad()
         {
             Assert.True(File.Exists(dataFile.FilePath));
@@ -60,8 +36,9 @@ namespace NimbusApp.Tests
         {
             // Make changes
             var server = new TestServer();
-            await _sut.SetServer(server);
-            await _sut.AddSave("testing", "test/test");
+            _sut.Server = server;
+            _sut.AddSave("testing", "test/test");
+            await _sut.Save(dataFile.FilePath);
 
             // Save to file
             string oldData = File.ReadAllText(dataFile.FilePath);
@@ -76,8 +53,9 @@ namespace NimbusApp.Tests
             // Make changes
             var oldData = File.ReadAllBytes(dataFile.FilePath);
             var server = new TestServer();
-            await _sut.SetServer(server);
-            await _sut.AddSave("testing", "test/test");
+            _sut.Server = server;
+            _sut.AddSave("testing", "test/test");
+            await _sut.Save(dataFile.FilePath);
 
             // Load older version
             File.WriteAllBytes(dataFile.FilePath, oldData); // Write old data after it has been overritten

@@ -51,7 +51,7 @@ namespace NimbusApp.UI
                             PopupDialog.ErrorPopup("Server cannot be found or is not online!");
                             return;
                         }
-                        await engine.SetServer(_dropboxServer);
+                        engine.Server = _dropboxServer;
                         break;
 
                     case "webdav":
@@ -67,7 +67,7 @@ namespace NimbusApp.UI
                                 return;
                             }
 
-                            await engine.SetServer(_webDAVServer);
+                            engine.Server = _webDAVServer;
                         }
                         catch (Exception ee)
                         {
@@ -79,6 +79,7 @@ namespace NimbusApp.UI
                         break;
 
                 }
+                await engine.Save();
                 ShouldReload = true;
                 Close();
             }

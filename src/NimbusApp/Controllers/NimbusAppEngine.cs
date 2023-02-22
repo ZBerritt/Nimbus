@@ -23,25 +23,6 @@ namespace NimbusApp.Controllers
         public Server Server { get; set; }
         public Settings Settings { get; set; }
 
-        // Asynchronous setters
-        public async Task SetLocalSaveList(LocalSaveList saveList)
-        {
-            LocalSaveList = saveList;
-            await Save();
-        }
-
-        public async Task SetServer(Server server)
-        {
-            Server = server;
-            await Save();
-        }
-
-        public async Task SetSettings(Settings settings)
-        {
-            Settings = settings;
-            await Save();
-        }
-
         [JsonConstructor]
         public NimbusAppEngine()
         {
@@ -64,10 +45,9 @@ namespace NimbusApp.Controllers
         /// <param name="name">The name of the game save</param>
         /// <param name="location">The file/folder location</param>
         /// <returns>Task representing asynchronous operation</returns>
-        public async Task AddSave(string name, string location)
+        public void AddSave(string name, string location)
         {
             GetSaveManager().AddSave(name, location);
-            await Save();
         }
 
         public async Task<string[]> ExportSaves(string[] saves, ProgressBarControl progress) =>

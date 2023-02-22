@@ -78,7 +78,8 @@ namespace NimbusApp
 
             try
             {
-                await engine.AddSave(name, location);
+                engine.AddSave(name, location);
+                await engine.Save();
                 ShouldReload = true;
                 Close();
             }
