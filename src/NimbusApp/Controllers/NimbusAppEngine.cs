@@ -18,7 +18,6 @@ namespace NimbusApp.Controllers
     /// </summary>
     public class NimbusAppEngine
     {
-        public string DataFile { get; set; }
 
         public LocalSaveList LocalSaveList { get; set; }
 
@@ -46,11 +45,8 @@ namespace NimbusApp.Controllers
         }
 
         [JsonConstructor]
-        public NimbusAppEngine() { } // this really shouldn't be public
-
-        private NimbusAppEngine(string dataFile)
+        public NimbusAppEngine()
         {
-            DataFile = dataFile;
             LocalSaveList = new LocalSaveList();
             Settings = new Settings();
         }
@@ -97,11 +93,16 @@ namespace NimbusApp.Controllers
 
         public async Task<string> GetRemoteHash(string save) => await Server.GetRemoteSaveHash(save);
 
+        public async Task Save()
+        {
+            await Save(DefaultLocations.DataFile);
+        }
+
         /// <summary>
         /// Saves settings, local saves, and server data to storage
         /// </summary>
         /// <returns>Task representing asynchronous operation</returns>
-        public async Task Save()
+        public async Task Save(string DataFile)
         {
             CreateDataFile(DataFile);
 
@@ -115,6 +116,10 @@ namespace NimbusApp.Controllers
             await fsStream.WriteAsync(encData);
         }
 
+        /// <summary>
+        /// Loads the engine with the default data file
+        /// </summary>
+        /// <returns>The engine for the data</returns>
         public static async Task<NimbusAppEngine> Load()
         {
             return await Load(DefaultLocations.DataFile);
@@ -129,8 +134,8 @@ namespace NimbusApp.Controllers
             if (!File.Exists(DataFile))
             {
                 CreateDataFile(DataFile);
-                var engine = new NimbusAppEngine(DataFile);
-                await engine.Save();
+                var engine = new NimbusAppEngine();
+                await engine.Save(DataFile);
                 return engine;
             }
 
@@ -150,8 +155,8 @@ namespace NimbusApp.Controllers
                 var res = PopupDialog.ErrorPrompt($"Data is corrupted or out of date. Would you like to reset it?\nError: {ex.Message}");
                 if (res == DialogResult.Yes)
                 {
-                    var engine = new NimbusAppEngine(DataFile);
-                    await engine.Save();
+                    var engine = new NimbusAppEngine();
+                    await engine.Save(DataFile);
                     return engine;
                 }
 
