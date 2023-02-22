@@ -56,24 +56,18 @@ namespace NimbusApp.Models.Servers
                 var tokenResult = await OAuthFlow.ProcessCodeFlowAsync(redirectUri, APP_ID, RedirectUri.ToString(), state);
                 var accessToken = tokenResult.AccessToken;
                 var refreshToken = tokenResult.RefreshToken;
-                var expires = tokenResult.ExpiresAt;
-                if (expires is null) throw new Exception("No expire time found. This is probably my fault :(");
+                var expires = (DateTime)tokenResult.ExpiresAt;
                 var uid = tokenResult.Uid;
 
-                SetValues(accessToken, refreshToken, (DateTime)expires, uid);
+                AccessToken = accessToken;
+                RefreshToken = refreshToken;
+                Expires = expires;
+                Uid = uid;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
-        }
-
-        private void SetValues(string accessToken, string refreshToken, DateTime expires, string uid)
-        {
-            AccessToken = accessToken;
-            RefreshToken = refreshToken;
-            Expires = expires;
-            Uid = uid;
         }
 
         public override async Task<string[]> SaveNames()

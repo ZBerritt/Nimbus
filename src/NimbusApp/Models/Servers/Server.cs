@@ -10,9 +10,9 @@ namespace NimbusApp.Models.Servers
     /// Represents a remote data server used for importing and exporting saves
     /// </summary>
     [JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization)]
-    [JsonDerivedType(typeof(DropboxServer), "dropbox")]
-    [JsonDerivedType(typeof(WebDAVServer), "webdav")]
-    [JsonDerivedType(typeof(TestServer), "test")]
+    [JsonDerivedType(typeof(DropboxServer), nameof(DropboxServer))]
+    [JsonDerivedType(typeof(WebDAVServer), nameof(WebDAVServer))]
+    [JsonDerivedType(typeof(TestServer), nameof(TestServer))]
     public abstract class Server
 
     {
