@@ -71,7 +71,7 @@ namespace NimbusApp.Tests
             _sut.AddSave("test4", "test4/dir");
             _sut.AddSave("test5", "test5/dir");
             int count = 0;
-            foreach (Save save in _sut)
+            foreach (Save save in _sut.GetSaveList())
             {
                 count++;
             }
