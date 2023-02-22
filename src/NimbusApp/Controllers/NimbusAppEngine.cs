@@ -20,9 +20,7 @@ namespace NimbusApp.Controllers
     {
 
         public LocalSaveList LocalSaveList { get; set; }
-
         public Server Server { get; set; }
-
         public Settings Settings { get; set; }
 
         // Asynchronous setters
@@ -133,10 +131,7 @@ namespace NimbusApp.Controllers
         {
             if (!File.Exists(DataFile))
             {
-                CreateDataFile(DataFile);
-                var engine = new NimbusAppEngine();
-                await engine.Save(DataFile);
-                return engine;
+                return await CreateNew(DataFile);
             }
 
             try
@@ -144,22 +139,18 @@ namespace NimbusApp.Controllers
                 var encBytes = File.ReadAllBytes(DataFile);
                 if (encBytes.Length == 0)
                 {
-                    var eng = new NimbusAppEngine();
-                    await eng.Save(DataFile);
-                    return eng;
+                    return await CreateNew(DataFile);
                 }
                 var rawBytes = ProtectedData.Unprotect(encBytes, null, DataProtectionScope.CurrentUser);
                 var rawString = Encoding.ASCII.GetString(rawBytes);
                 var engine = JsonSerializer.Deserialize<NimbusAppEngine>(rawString);
                 return engine;
-            } catch (LoadException ex)
+            } catch (JsonException ex)
             {
                 var res = PopupDialog.ErrorPrompt($"Data is corrupted or out of date. Would you like to reset it?\nError: {ex.Message}");
                 if (res == DialogResult.Yes)
                 {
-                    var engine = new NimbusAppEngine();
-                    await engine.Save(DataFile);
-                    return engine;
+                    return await CreateNew(DataFile);
                 }
 
                 Application.Exit();
@@ -171,8 +162,20 @@ namespace NimbusApp.Controllers
 
         private static void CreateDataFile(string DataFile)
         {
+            if (File.Exists(DataFile))
+            {
+                return;
+            }
             Directory.CreateDirectory(Path.GetDirectoryName(DataFile));
             using var _ = File.Open(DataFile, FileMode.OpenOrCreate);
+        }
+
+        private static async Task<NimbusAppEngine> CreateNew(string DataFile)
+        {
+            CreateDataFile(DataFile);
+            var engine = new NimbusAppEngine();
+            await engine.Save(DataFile);
+            return engine;
         }
     }
 }

@@ -29,12 +29,4 @@ namespace NimbusApp
         {
         }
     }
-
-    public class LoadException : Exception
-    {
-        public LoadException(string message) : base($"Data Loading Error: {message}")
-        {
-
-        }
-    }
 }
