@@ -1,23 +1,28 @@
-﻿using Newtonsoft.Json;
-using NimbusApp.Models;
-using NimbusApp.Utils;
+﻿using NimbusApp.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Threading.Tasks;
 
 // TODO: Handle large files
-namespace NimbusApp.Controllers
+namespace NimbusApp.Models
 {
     /// <summary>
     /// Represents all stored and managed local saves
     /// </summary>
-    public class LocalSaveList : IEnumerable<Save>
+    public class LocalSaveList
     {
         private static readonly int MAX_FILE_SIZE = 1024 * 1024 * 128; // 128 mb
-        Dictionary<string, Save> Saves { get; } = new Dictionary<string, Save>();
+        public Dictionary<string, Save> Saves { get; set; }
+
+        public LocalSaveList() {
+             Saves = new Dictionary<string, Save>();
+        }
+
+        public List<Save> GetSaveList() => Saves.Values.ToList();
 
         /// <summary>
         /// Adds a save to the list if the save is valid
@@ -174,47 +179,6 @@ namespace NimbusApp.Controllers
         }
 
         /// <summary>
-        /// Converts the save list to JSON format
-        /// </summary>
-        /// <returns>The JSON represenation of the save list</returns>
-        public string Serialize()
-        {
-            return JsonConvert.SerializeObject(Saves.Values);
-        }
-
-        /// <summary>
-        /// Builds a local save list from a json string
-        /// </summary>
-        /// <param name="json">The serialized JSON string</param>
-        /// <returns>A deserialized local save list</returns>
-        public static LocalSaveList Deserialize(string json)
-        {
-            var deserializedJson = JsonConvert.DeserializeObject<List<Save>>(json);
-            var list = new LocalSaveList();
-            var failed = new List<string>();
-            foreach (var save in deserializedJson)
-            {
-                try
-                {
-                    list.AddSave(save.Name, save.Location);
-                }
-                catch (InvalidSaveException)
-                {
-                    failed.Add(save.Name);
-                }
-            }
-
-            if (failed.Count > 0)
-            {
-                var message = "The following saves were deemed invalid and were removed:";
-                failed.ForEach(x => message += "\n• " + x);
-                PopupDialog.ErrorPopup(message);
-            }
-
-            return list;
-        }
-
-        /// <summary>
         /// Extracts a zip entry to the desired folder
         /// </summary>
         /// <param name="destination">The base destination folder</param>
@@ -238,16 +202,6 @@ namespace NimbusApp.Controllers
             await using var entryStream = zipEntry.Open();
             await entryStream.CopyToAsync(destinationStream);
 
-        }
-
-        public IEnumerator<Save> GetEnumerator()
-        {
-            return Saves.Values.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
     }
 }

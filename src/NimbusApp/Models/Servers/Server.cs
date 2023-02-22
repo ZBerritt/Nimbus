@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using NimbusApp.Servers;
+﻿using NimbusApp.Servers;
 using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace NimbusApp.Models.Servers
@@ -9,6 +9,10 @@ namespace NimbusApp.Models.Servers
     /// <summary>
     /// Represents a remote data server used for importing and exporting saves
     /// </summary>
+    [JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization)]
+    [JsonDerivedType(typeof(DropboxServer), "dropbox")]
+    [JsonDerivedType(typeof(WebDAVServer), "webdav")]
+    [JsonDerivedType(typeof(TestServer), "test")]
     public abstract class Server
 
     {
@@ -66,19 +70,6 @@ namespace NimbusApp.Models.Servers
         public abstract Task<string> GetLocalSaveHash(string archiveLocation);
 
         /// <summary>
-        /// Serializes the server data to JSON
-        /// </summary>
-        /// <returns>A JSON object representing the server data</returns>
-        public abstract Task<JObject> SerializeData();
-
-        /// <summary>
-        /// Deserializes the server from a JSON object
-        /// </summary>
-        /// <param name="json">The JSON object to deserialize</param>
-        /// <returns>Task representing asynchronous operation</returns>
-        public abstract Task DeserializeData(JObject data);
-
-        /// <summary>
         /// Runs the main build function for an individual server
         /// </summary>
         /// <param name="args">The respective server type's arguments</param>
@@ -98,84 +89,6 @@ namespace NimbusApp.Models.Servers
             var instance = Activator.CreateInstance<T>();
             await instance.Build(args);
             return instance;
-        }
-
-        /// <summary>
-        /// Gets an empty server object given the server type
-        /// </summary>
-        /// <typeparam name="T">The server class needed</typeparam>
-        /// <returns>Task representing asynchronous operation which returns the server instance</returns>
-        public static Server Create<T>() where T : Server
-        {
-            var instance = Activator.CreateInstance<T>();
-            return instance;
-        }
-
-        public static async Task<Server> CreateFromString(string name, params string[] args)
-        {
-            return name switch
-            {
-                "Dropbox" => await Create<DropboxServer>(args),
-                "WebDAV" => await Create<WebDAVServer>(args),
-                _ => throw new ArgumentException("Invalid server class name"),
-            };
-        }
-
-        public static Server CreateFromString(string name)
-        {
-            return name switch
-            {
-                "Dropbox" => Create<DropboxServer>(),
-                "WebDAV" => Create<WebDAVServer>(),
-                _ => throw new ArgumentException("Invalid server class name"),
-            };
-        }
-
-        /// <summary>
-        /// Converts serialzed data into the form used to store
-        /// </summary>
-        /// <returns>A task that returns the string representation of the json object</returns>
-        public async Task<string> Serialize()
-        {
-            var data = await SerializeData();
-            var json = new JObject
-            {
-                { "type", Type },
-                { "data", data }
-            };
-
-            return json.ToString();
-        }
-
-        /// <summary>
-        /// Converts serialized data 
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        public static async Task<Server> Deserialize(string input)
-        {
-            JObject serverJson;
-            try
-            {
-                serverJson = JObject.Parse(input);
-            }
-            catch (JsonReaderException)
-            {
-                return null; // Cannot parse server data, return
-            }
-            var hasServerType = serverJson.TryGetValue("type", out var serverType);
-            var hasServerData = serverJson.TryGetValue("data", out var serverData);
-            if (!hasServerData || !hasServerType)
-            {
-                return null; // Invalid server object
-            }
-
-            Server server = CreateFromString(serverType?.ToString());
-
-            var data = serverData.ToObject<JObject>();
-            await server.DeserializeData(data);
-
-            return server;
         }
     }
 }

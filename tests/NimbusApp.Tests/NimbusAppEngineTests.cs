@@ -1,5 +1,6 @@
 ﻿using NimbusApp.Controllers;
 using NimbusApp.Models;
+using NimbusApp.Models.Servers;
 using Xunit;
 using static NimbusApp.Utils.FileUtils;
 
@@ -15,7 +16,7 @@ namespace NimbusApp.Tests
         public async Task InitializeAsync()
         {
             dataFile = new TemporaryFile();
-            _sut = await NimbusAppEngine.Start(dataFile.FilePath);
+            _sut = await NimbusAppEngine.Load(dataFile.FilePath);
         }
 
         public Task DisposeAsync()
@@ -51,7 +52,7 @@ namespace NimbusApp.Tests
         [Fact]
         public void DataFileShouldExistOnLoad()
         {
-            Assert.True(File.Exists(_sut.DataFile));
+            Assert.True(File.Exists(dataFile.FilePath));
         }
 
         [Fact]
@@ -63,9 +64,9 @@ namespace NimbusApp.Tests
             await _sut.AddSave("testing", "test/test");
 
             // Save to file
-            string oldData = File.ReadAllText(_sut.DataFile);
-            await _sut.Save();
-            string newData = File.ReadAllText(_sut.DataFile);
+            string oldData = File.ReadAllText(dataFile.FilePath);
+            await _sut.Save(dataFile.FilePath);
+            string newData = File.ReadAllText(dataFile.FilePath);
             Assert.NotEqual(oldData, newData);
         }
 
@@ -73,14 +74,14 @@ namespace NimbusApp.Tests
         public async void LoadShouldLoadFromFile()
         {
             // Make changes
-            var oldData = File.ReadAllBytes(_sut.DataFile);
+            var oldData = File.ReadAllBytes(dataFile.FilePath);
             var server = new TestServer();
             await _sut.SetServer(server);
             await _sut.AddSave("testing", "test/test");
 
             // Load older version
-            File.WriteAllBytes(_sut.DataFile, oldData); // Write old data after it has been overritten
-            await _sut.Load();
+            File.WriteAllBytes(dataFile.FilePath, oldData); // Write old data after it has been overritten
+            _sut = await NimbusAppEngine.Load(dataFile.FilePath);
             Assert.Null(_sut.Server);
             Assert.False(_sut.LocalSaveList.HasSave("testing"));
         }

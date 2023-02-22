@@ -7,8 +7,8 @@ namespace NimbusApp.Models
     /// </summary>
     public class Save
     {
-        public string Name { get; }
-        public string Location { get; }
+        public string Name { get; set; }
+        public string Location { get; set; }
 
         public Save(string name, string location)
         {
