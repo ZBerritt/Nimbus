@@ -1,5 +1,4 @@
 ﻿using NimbusApp.Controllers;
-using NimbusApp.Models;
 using NimbusApp.Models.Servers;
 using Xunit;
 using static NimbusApp.Utils.FileUtils;

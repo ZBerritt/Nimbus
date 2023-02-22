@@ -2,7 +2,6 @@
 using NimbusApp.Models.Servers;
 using NimbusApp.UI;
 using NimbusApp.Utils;
-using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -45,10 +44,7 @@ namespace NimbusApp.Controllers
         /// <param name="name">The name of the game save</param>
         /// <param name="location">The file/folder location</param>
         /// <returns>Task representing asynchronous operation</returns>
-        public void AddSave(string name, string location)
-        {
-            GetSaveManager().AddSave(name, location);
-        }
+        public void AddSave(string name, string location) => GetSaveManager().AddSave(name, location);
 
         public async Task<string[]> ExportSaves(string[] saves, ProgressBarControl progress) =>
             await GetSaveManager().ExportSaves(saves, progress);
@@ -65,8 +61,8 @@ namespace NimbusApp.Controllers
         {
             using var tmpFile = new FileUtils.TemporaryFile();
             await LocalSaveList.ArchiveSaveData(save, tmpFile.FilePath);
-            var saveHash = Server.GetLocalSaveHash(tmpFile.FilePath);
-            return await saveHash;
+            var saveHash = await Server.GetLocalSaveHash(tmpFile.FilePath);
+            return saveHash;
         }
 
         public async Task<string> GetRemoteHash(string save) => await Server.GetRemoteSaveHash(save);
@@ -125,7 +121,8 @@ namespace NimbusApp.Controllers
                 var rawString = Encoding.ASCII.GetString(rawBytes);
                 var engine = JsonSerializer.Deserialize<NimbusAppEngine>(rawString);
                 return engine;
-            } catch (JsonException ex)
+            }
+            catch (JsonException ex)
             {
                 var res = PopupDialog.ErrorPrompt($"Data is corrupted or out of date. Would you like to reset it?\nError: {ex.Message}");
                 if (res == DialogResult.Yes)

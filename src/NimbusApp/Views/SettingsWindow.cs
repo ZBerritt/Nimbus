@@ -26,8 +26,8 @@ namespace NimbusApp.UI
                 case THEME.LIGHT:
                     themeSelect.SelectedIndex = 0;
                     break;
-                case THEME.DARK: 
-                    themeSelect.SelectedIndex = 1; 
+                case THEME.DARK:
+                    themeSelect.SelectedIndex = 1;
                     break;
             }
         }

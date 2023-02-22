@@ -1,6 +1,5 @@
 ﻿using NimbusApp.Utils;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -18,8 +17,9 @@ namespace NimbusApp.Models
         private static readonly int MAX_FILE_SIZE = 1024 * 1024 * 128; // 128 mb
         public Dictionary<string, Save> Saves { get; set; }
 
-        public LocalSaveList() {
-             Saves = new Dictionary<string, Save>();
+        public LocalSaveList()
+        {
+            Saves = new Dictionary<string, Save>();
         }
 
         public List<Save> GetSaveList() => Saves.Values.ToList();
