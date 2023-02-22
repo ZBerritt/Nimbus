@@ -1,4 +1,5 @@
-﻿using NimbusApp.Models.Servers;
+﻿using NimbusApp.Models;
+using NimbusApp.Models.Servers;
 using NimbusApp.UI;
 using NimbusApp.Utils;
 using System;

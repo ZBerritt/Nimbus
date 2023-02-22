@@ -35,7 +35,7 @@ namespace NimbusApp
             Text = "Nimbus (DEBUG)";
 #endif
             // Grabs the engine which allows communication with the backend
-            engine = await NimbusAppEngine.Start();
+            engine = await NimbusAppEngine.Load();
 
             // Auto sizes the last column of the save list
             saveFileList.Columns[^1].Width = -2;

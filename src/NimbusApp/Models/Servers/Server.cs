@@ -90,55 +90,5 @@ namespace NimbusApp.Models.Servers
             await instance.Build(args);
             return instance;
         }
-
-        /// <summary>
-        /// Gets an empty server object given the server type
-        /// </summary>
-        /// <typeparam name="T">The server class needed</typeparam>
-        /// <returns>Task representing asynchronous operation which returns the server instance</returns>
-        public static Server Create<T>() where T : Server
-        {
-            var instance = Activator.CreateInstance<T>();
-            return instance;
-        }
-
-        public static async Task<Server> CreateFromString(string name, params string[] args)
-        {
-            return name switch
-            {
-                "Dropbox" => await Create<DropboxServer>(args),
-                "WebDAV" => await Create<WebDAVServer>(args),
-                _ => throw new ArgumentException("Invalid server class name"),
-            };
-        }
-
-        public static Server CreateFromString(string name)
-        {
-            return name switch
-            {
-                "Dropbox" => Create<DropboxServer>(),
-                "WebDAV" => Create<WebDAVServer>(),
-                _ => throw new ArgumentException("Invalid server class name"),
-            };
-        }
-
-        /// <summary>
-        /// Converts serialzed data into the form used to store
-        /// </summary>
-        /// <returns>A task that returns the string representation of the json object</returns>
-        public string Serialize()
-        {
-            return JsonSerializer.Serialize(this);
-        }
-
-        /// <summary>
-        /// Converts serialized data 
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        public static Server Deserialize(string input)
-        {
-            return JsonSerializer.Deserialize<Server>(input);
-        }
     }
 }

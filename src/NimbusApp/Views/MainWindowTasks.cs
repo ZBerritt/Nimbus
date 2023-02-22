@@ -70,7 +70,7 @@ namespace NimbusApp.UI
         public async Task SetLocalServerList()
         {
             /* Get a list of the data for the table */
-            foreach (var save in _engine.LocalSaveList)
+            foreach (var save in _engine.LocalSaveList.GetSaveList())
             {
                 _cancelToken.ThrowIfCancellationRequested();
                 var saveItem = new ListViewItem(save.Name)
@@ -107,7 +107,7 @@ namespace NimbusApp.UI
                 var saveName = item.SubItems[0].Text;
 
                 var save = _engine.LocalSaveList.GetSave(saveName);
-                if (save == null) return; // Ignore if its a remote save
+                if (save == null) continue; // Ignore if its a remote save
                 var location = save.Location;
 
                 var statusItem = item.SubItems[^1];
@@ -116,7 +116,7 @@ namespace NimbusApp.UI
                 {
                     statusItem.Text = "No Server";
                     statusItem.ForeColor = Color.Black;
-                    return;
+                    continue;
                 }
 
                 if (_serverOnline && FileUtils.PathExists(location))
@@ -128,18 +128,18 @@ namespace NimbusApp.UI
                     {
                         statusItem.Text = "Not Uploaded";
                         statusItem.ForeColor = Color.Gray;
-                        return;
+                        continue;
                     }
 
                     if (remoteHash == localHash)
                     {
                         statusItem.Text = "Synced";
                         statusItem.ForeColor = Color.Green;
-                        return;
+                        continue;
                     }
                     statusItem.Text = "Not Synced";
                     statusItem.ForeColor = Color.DarkRed;
-                    return;
+                    continue;
 
                 }
 
@@ -147,7 +147,7 @@ namespace NimbusApp.UI
                 {
                     statusItem.Text = "No Local Save";
                     statusItem.ForeColor = Color.Gray;
-                    return;
+                    continue;
                 }
 
                 statusItem.Text = "Offline";

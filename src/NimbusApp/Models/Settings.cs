@@ -1,6 +1,5 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
+using System.Text.Json;
 
 namespace NimbusApp.Models
 {
@@ -9,7 +8,6 @@ namespace NimbusApp.Models
     /// </summary>
     public class Settings
     {
-        [JsonConverter(typeof(StringEnumConverter))]
         public THEME Theme { get; set; }
 
         /// <summary>
@@ -27,27 +25,6 @@ namespace NimbusApp.Models
         public Settings Clone()
         {
             return MemberwiseClone() as Settings;
-        }
-
-        /// <summary>
-        /// Serializes the settings to JSON format
-        /// </summary>
-        /// <returns>A JSON object representation of the settings</returns>
-        public string Serialize()
-        {
-            var json = JsonConvert.SerializeObject(this);
-            return json.ToString();
-        }
-
-        /// <summary>
-        /// Deserializes the settins from JSON string
-        /// </summary>
-        /// <param name="json">JSON stirng to deserialize</param>
-        /// <returns>Settings object representing the json</returns>
-        public static Settings Deseriaize(string jsonString)
-        {
-            var settings = JsonConvert.DeserializeObject<Settings>(jsonString);
-            return settings;
         }
     }
 

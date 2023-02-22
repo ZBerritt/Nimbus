@@ -1,13 +1,15 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using NimbusApp.Models;
+﻿using NimbusApp.Models;
 using NimbusApp.Models.Servers;
 using NimbusApp.UI;
 using NimbusApp.Utils;
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace NimbusApp.Controllers
 {
@@ -16,13 +18,13 @@ namespace NimbusApp.Controllers
     /// </summary>
     public class NimbusAppEngine
     {
-        public string DataFile { get; init; }
+        public string DataFile { get; set; }
 
-        public LocalSaveList LocalSaveList { get; private set; }
+        public LocalSaveList LocalSaveList { get; set; }
 
-        public Server Server { get; private set; }
+        public Server Server { get; set; }
 
-        public Settings Settings { get; private set; }
+        public Settings Settings { get; set; }
 
         // Asynchronous setters
         public async Task SetLocalSaveList(LocalSaveList saveList)
@@ -43,46 +45,14 @@ namespace NimbusApp.Controllers
             await Save();
         }
 
+        [JsonConstructor]
+        public NimbusAppEngine() { } // this really shouldn't be public
+
         private NimbusAppEngine(string dataFile)
         {
             DataFile = dataFile;
-        }
-
-        /// <summary>
-        /// Starts an instance of the engine using the default data directory
-        /// </summary>
-        /// <returns>The instance of the NimbusAppEngine</returns>
-        public async static Task<NimbusAppEngine> Start()
-        {
-            return await Start(DefaultLocations.DataFile);
-        }
-
-        /// <summary>
-        /// Starts an instance of the engine
-        /// </summary>
-        /// <param name="dataLocation">The directory to store all app data</param>
-        /// <returns>The instance of the NimbusAppEngine</returns>
-        public async static Task<NimbusAppEngine> Start(string dataFile)
-        {
-            var engine = new NimbusAppEngine(dataFile);
-            try
-            {
-                await engine.Load();
-            }
-            catch (LoadException ex)
-            {
-#if DEBUG
-                var res = PopupDialog.ErrorPrompt("Data is corrupted or out of date. Would you like to reset it?\n" + ex.Message);
-#else
-                var res = PopupDialog.ErrorPrompt("Data is corrupted or out of date. Would you like to reset it?");
-#endif
-                if (res == System.Windows.Forms.DialogResult.Yes)
-                {
-                    engine.Reset();
-                }
-            }
-
-            return engine;
+            LocalSaveList = new LocalSaveList();
+            Settings = new Settings();
         }
 
         /// <summary>
@@ -133,22 +103,10 @@ namespace NimbusApp.Controllers
         /// <returns>Task representing asynchronous operation</returns>
         public async Task Save()
         {
-            CreateDataFile();
+            CreateDataFile(DataFile);
 
             // Serialize the data as JSON
-            var json = new JObject();
-            if (LocalSaveList != null)
-            {
-                json.Add("save_list", LocalSaveList.Serialize());
-            }
-            if (Settings != null)
-            {
-                json.Add("settings", Settings.Serialize());
-            }
-            if (Server != null)
-            {
-                json.Add("server", Server.Serialize());
-            }
+            var json = JsonSerializer.Serialize(this);
 
             // Encrypt and write data 
             var jsonAsBytes = Encoding.ASCII.GetBytes(json.ToString());
@@ -157,77 +115,54 @@ namespace NimbusApp.Controllers
             await fsStream.WriteAsync(encData);
         }
 
+        public static async Task<NimbusAppEngine> Load()
+        {
+            return await Load(DefaultLocations.DataFile);
+        }
+
         /// <summary>
-        /// Loads settings, local saves, and server data to engine
+        /// Attempts to load the engine given the data file
         /// </summary>
-        /// <returns>Task representing asynchronous operation</returns>
-        public async Task Load()
+        /// <returns>The engine instance loaded</returns>
+        public static async Task<NimbusAppEngine> Load(string DataFile)
         {
             if (!File.Exists(DataFile))
             {
-                CreateDataFile();
-                Reset();
-                return;
+                CreateDataFile(DataFile);
+                var engine = new NimbusAppEngine(DataFile);
+                await engine.Save();
+                return engine;
             }
 
-            var encBytes = await File.ReadAllBytesAsync(DataFile);
-            if (encBytes.Length == 0)
-            {
-                Reset();
-                return;
-            }
-            var rawBytes = ProtectedData.Unprotect(encBytes, null, DataProtectionScope.CurrentUser);
-            var rawString = Encoding.ASCII.GetString(rawBytes);
-            JObject json;
             try
             {
-                json = JObject.Parse(rawString);
-            }
-            catch (JsonReaderException)
+                var encBytes = File.ReadAllBytes(DataFile);
+                if (encBytes.Length == 0)
+                {
+                    throw new LoadException("Data file is empty");
+                }
+                var rawBytes = ProtectedData.Unprotect(encBytes, null, DataProtectionScope.CurrentUser);
+                var rawString = Encoding.ASCII.GetString(rawBytes);
+                var engine = JsonSerializer.Deserialize<NimbusAppEngine>(rawString);
+                return engine;
+            } catch (LoadException ex)
             {
-                throw new LoadException("Could not parse JSON from data file.");
+                var res = PopupDialog.ErrorPrompt($"Data is corrupted or out of date. Would you like to reset it?\nError: {ex.Message}");
+                if (res == DialogResult.Yes)
+                {
+                    var engine = new NimbusAppEngine(DataFile);
+                    await engine.Save();
+                    return engine;
+                }
+
+                Application.Exit();
+                return null; // Doesn't matter the app is closed
             }
 
-            // Reset everything before in case something is being removed
-            Reset();
 
-            // Save List
-            if (json.ContainsKey("save_list"))
-            {
-                var saveListData = json.GetValue("save_list").ToString();
-                var list = LocalSaveList.Deserialize(saveListData);
-                LocalSaveList = list;
-            }
-
-            // Settings
-            if (json.ContainsKey("settings"))
-            {
-                var settingsData = json.GetValue("settings").ToString();
-                var settings = Settings.Deseriaize(settingsData);
-                Settings = settings;
-            }
-
-            // Server
-            if (json.ContainsKey("server"))
-            {
-                var serverJsonString = json.GetValue("server").ToString();
-                var server = Server.Deserialize(serverJsonString);
-                Server = server;
-            }
         }
 
-        /// <summary>
-        /// Resets all data to default and saves to storage
-        /// </summary>
-        /// <returns>Task representing asynchronous operation</returns>
-        private void Reset()
-        {
-            LocalSaveList = new LocalSaveList();
-            Server = null;
-            Settings = new Settings();
-        }
-
-        private void CreateDataFile()
+        private static void CreateDataFile(string DataFile)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(DataFile));
             using var _ = File.Open(DataFile, FileMode.OpenOrCreate);

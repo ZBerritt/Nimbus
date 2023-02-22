@@ -16,7 +16,7 @@ namespace NimbusApp.Tests
         public async Task InitializeAsync()
         {
             dataFile = new TemporaryFile();
-            _sut = await NimbusAppEngine.Start(dataFile.FilePath);
+            _sut = NimbusAppEngine.Load(dataFile.FilePath);
         }
 
         public Task DisposeAsync()
@@ -81,7 +81,7 @@ namespace NimbusApp.Tests
 
             // Load older version
             File.WriteAllBytes(_sut.DataFile, oldData); // Write old data after it has been overritten
-            await _sut.Load();
+            _sut.Load();
             Assert.Null(_sut.Server);
             Assert.False(_sut.LocalSaveList.HasSave("testing"));
         }

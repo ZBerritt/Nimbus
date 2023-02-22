@@ -1,7 +1,6 @@
 ﻿using Dropbox.Api;
 using Dropbox.Api.Check;
 using Dropbox.Api.Files;
-using Newtonsoft.Json.Linq;
 using NimbusApp.Utils;
 using System;
 using System.Collections.Generic;
@@ -137,7 +136,7 @@ namespace NimbusApp.Models.Servers
             }
             catch (Exception)
             {
-                return string.Empty;
+                return string.Empty; // TODO: Fix error handling when save hash cannot be found
             }
         }
 
