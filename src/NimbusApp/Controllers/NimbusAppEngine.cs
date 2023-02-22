@@ -144,7 +144,9 @@ namespace NimbusApp.Controllers
                 var encBytes = File.ReadAllBytes(DataFile);
                 if (encBytes.Length == 0)
                 {
-                    throw new LoadException("Data file is empty");
+                    var eng = new NimbusAppEngine();
+                    await eng.Save(DataFile);
+                    return eng;
                 }
                 var rawBytes = ProtectedData.Unprotect(encBytes, null, DataProtectionScope.CurrentUser);
                 var rawString = Encoding.ASCII.GetString(rawBytes);
