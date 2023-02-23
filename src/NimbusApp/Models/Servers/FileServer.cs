@@ -1,10 +1,8 @@
 ﻿using NimbusApp.Utils;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace NimbusApp.Models.Servers
@@ -35,13 +33,16 @@ namespace NimbusApp.Models.Servers
         public override async Task<string> GetRemoteSaveHash(string name)
         {
             Setup();
-            try {
-            var path = GetSavePath(name);
-            using var stream = File.OpenRead(path);
-            using var sha256 = SHA256.Create();
-            var hashBytes = await sha256.ComputeHashAsync(stream);
-            return OtherUtils.BytesToHex(hashBytes);
-            } catch (FileNotFoundException) {
+            try
+            {
+                var path = GetSavePath(name);
+                using var stream = File.OpenRead(path);
+                using var sha256 = SHA256.Create();
+                var hashBytes = await sha256.ComputeHashAsync(stream);
+                return OtherUtils.BytesToHex(hashBytes);
+            }
+            catch (FileNotFoundException)
+            {
                 return null;
             }
         }
@@ -58,7 +59,7 @@ namespace NimbusApp.Models.Servers
                 await remoteStream.CopyToAsync(destinationStream);
             }
             catch (FileNotFoundException)
-            {}
+            { }
         }
 
         public override Task<string[]> SaveNames()
@@ -101,7 +102,8 @@ namespace NimbusApp.Models.Servers
                 {
                     Directory.CreateDirectory(Location);
                 }
-            } catch (Exception) { }
+            }
+            catch (Exception) { }
         }
     }
 }

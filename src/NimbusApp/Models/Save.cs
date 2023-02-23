@@ -11,9 +11,11 @@ namespace NimbusApp.Models
         private string _location;
 
         public string Name { get => _name; set => _name = value; }
-        public string Location { 
+        public string Location
+        {
             get => _location;
-            set => _location = FileUtils.Normalize(value); }
+            set => _location = FileUtils.Normalize(value);
+        }
 
         public Save(string name, string location)
         {

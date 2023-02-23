@@ -3,7 +3,6 @@ using Dropbox.Api.Check;
 using Dropbox.Api.Files;
 using NimbusApp.Utils;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -18,7 +17,7 @@ namespace NimbusApp.Models.Servers
         private static readonly string LoopbackHost = "http://127.0.0.1:12356/";
         private static readonly Uri RedirectUri = new(LoopbackHost + "authorize");
         private static readonly Uri JSRedirectUri = new(LoopbackHost + "token");
-        
+
         // Properties
         public string AccessToken { get; set; }
         public string RefreshToken { get; set; }
@@ -78,7 +77,6 @@ namespace NimbusApp.Models.Servers
                     recursive: false, includeMediaInfo: false, includeDeleted: false, includeMountedFolders: false));
 
                 var entries = result.Entries;
-                var nameList = new List<string>();
                 return entries.Where(c => c.Name.EndsWith(".zip")).Select(s => s.Name[..^4]).ToArray();
             }
             catch (Exception)
