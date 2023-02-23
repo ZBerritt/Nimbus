@@ -236,7 +236,7 @@ namespace NimbusApp
 
         private void Label2_Click(object sender, EventArgs e)
         {
-            var url = "http://" + host.Text;
+            var url = $"http://{host.Text}";
             OtherUtils.OpenUrl(url);
         }
 

@@ -7,8 +7,13 @@ namespace NimbusApp.Models
     /// </summary>
     public class Save
     {
-        public string Name { get; set; }
-        public string Location { get => Location; set => FileUtils.Normalize(value); }
+        private string _name;
+        private string _location;
+
+        public string Name { get => _name; set => _name = value; }
+        public string Location { 
+            get => _location;
+            set => _location = FileUtils.Normalize(value); }
 
         public Save(string name, string location)
         {
