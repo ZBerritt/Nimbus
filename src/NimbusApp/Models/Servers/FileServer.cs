@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NimbusApp.Utils;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace NimbusApp.Models.Servers
             using var stream = File.OpenRead(archiveLocation);
             using var sha256 = SHA256.Create();
             var hashBytes = await sha256.ComputeHashAsync(stream);
-            return Encoding.UTF8.GetString(hashBytes);
+            return OtherUtils.BytesToHex(hashBytes);
         }
 
         public override Task<bool> GetOnlineStatus()
@@ -39,8 +40,8 @@ namespace NimbusApp.Models.Servers
             using var stream = File.OpenRead(path);
             using var sha256 = SHA256.Create();
             var hashBytes = await sha256.ComputeHashAsync(stream);
-            return Encoding.UTF8.GetString(hashBytes);
-        } catch (FileNotFoundException) {
+            return OtherUtils.BytesToHex(hashBytes);
+            } catch (FileNotFoundException) {
                 return null;
             }
         }
