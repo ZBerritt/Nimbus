@@ -29,200 +29,248 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ServerSettings));
-            this.closeButton = new System.Windows.Forms.Button();
-            this.saveButton = new System.Windows.Forms.Button();
-            this.settingsTabs = new System.Windows.Forms.TabControl();
-            this.dropboxTab = new System.Windows.Forms.TabPage();
-            this.dropboxLoginNotice = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.loginWithDropboxButton = new System.Windows.Forms.Button();
-            this.webDavPage = new System.Windows.Forms.TabPage();
-            this.webDavPasswordInput = new System.Windows.Forms.TextBox();
-            this.webDavUsernameInput = new System.Windows.Forms.TextBox();
-            this.webDavUrlInput = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.settingsTabs.SuspendLayout();
-            this.dropboxTab.SuspendLayout();
-            this.webDavPage.SuspendLayout();
-            this.SuspendLayout();
+            closeButton = new System.Windows.Forms.Button();
+            saveButton = new System.Windows.Forms.Button();
+            settingsTabs = new System.Windows.Forms.TabControl();
+            dropboxTab = new System.Windows.Forms.TabPage();
+            dropboxLoginNotice = new System.Windows.Forms.Label();
+            label1 = new System.Windows.Forms.Label();
+            loginWithDropboxButton = new System.Windows.Forms.Button();
+            webDavPage = new System.Windows.Forms.TabPage();
+            webDavPasswordInput = new System.Windows.Forms.TextBox();
+            webDavUsernameInput = new System.Windows.Forms.TextBox();
+            webDavUrlInput = new System.Windows.Forms.TextBox();
+            label4 = new System.Windows.Forms.Label();
+            label3 = new System.Windows.Forms.Label();
+            label2 = new System.Windows.Forms.Label();
+            fileSystemPage = new System.Windows.Forms.TabPage();
+            localDirectoryTextBox = new System.Windows.Forms.TextBox();
+            localBrowseButton = new System.Windows.Forms.Button();
+            localDirectoryLabel = new System.Windows.Forms.Label();
+            localFolderBrowser = new System.Windows.Forms.FolderBrowserDialog();
+            settingsTabs.SuspendLayout();
+            dropboxTab.SuspendLayout();
+            webDavPage.SuspendLayout();
+            fileSystemPage.SuspendLayout();
+            SuspendLayout();
             // 
             // closeButton
             // 
-            this.closeButton.Location = new System.Drawing.Point(16, 304);
-            this.closeButton.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.closeButton.Name = "closeButton";
-            this.closeButton.Size = new System.Drawing.Size(159, 36);
-            this.closeButton.TabIndex = 0;
-            this.closeButton.Text = "Close";
-            this.closeButton.UseVisualStyleBackColor = true;
-            this.closeButton.Click += new System.EventHandler(this.closeButton_Click);
+            closeButton.Location = new System.Drawing.Point(16, 304);
+            closeButton.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            closeButton.Name = "closeButton";
+            closeButton.Size = new System.Drawing.Size(159, 36);
+            closeButton.TabIndex = 0;
+            closeButton.Text = "Close";
+            closeButton.UseVisualStyleBackColor = true;
+            closeButton.Click += closeButton_Click;
             // 
             // saveButton
             // 
-            this.saveButton.Location = new System.Drawing.Point(183, 304);
-            this.saveButton.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(246, 36);
-            this.saveButton.TabIndex = 1;
-            this.saveButton.Text = "Save && Exit";
-            this.saveButton.UseVisualStyleBackColor = true;
-            this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
+            saveButton.Location = new System.Drawing.Point(183, 304);
+            saveButton.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            saveButton.Name = "saveButton";
+            saveButton.Size = new System.Drawing.Size(246, 36);
+            saveButton.TabIndex = 1;
+            saveButton.Text = "Save && Exit";
+            saveButton.UseVisualStyleBackColor = true;
+            saveButton.Click += saveButton_Click;
             // 
             // settingsTabs
             // 
-            this.settingsTabs.Controls.Add(this.dropboxTab);
-            this.settingsTabs.Controls.Add(this.webDavPage);
-            this.settingsTabs.Location = new System.Drawing.Point(16, 8);
-            this.settingsTabs.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.settingsTabs.Name = "settingsTabs";
-            this.settingsTabs.SelectedIndex = 0;
-            this.settingsTabs.Size = new System.Drawing.Size(411, 261);
-            this.settingsTabs.TabIndex = 2;
+            settingsTabs.Controls.Add(dropboxTab);
+            settingsTabs.Controls.Add(webDavPage);
+            settingsTabs.Controls.Add(fileSystemPage);
+            settingsTabs.Location = new System.Drawing.Point(16, 8);
+            settingsTabs.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            settingsTabs.Name = "settingsTabs";
+            settingsTabs.SelectedIndex = 0;
+            settingsTabs.Size = new System.Drawing.Size(411, 261);
+            settingsTabs.TabIndex = 2;
             // 
             // dropboxTab
             // 
-            this.dropboxTab.AccessibleName = "dropbox";
-            this.dropboxTab.Controls.Add(this.dropboxLoginNotice);
-            this.dropboxTab.Controls.Add(this.label1);
-            this.dropboxTab.Controls.Add(this.loginWithDropboxButton);
-            this.dropboxTab.Location = new System.Drawing.Point(4, 29);
-            this.dropboxTab.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.dropboxTab.Name = "dropboxTab";
-            this.dropboxTab.Padding = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.dropboxTab.Size = new System.Drawing.Size(403, 228);
-            this.dropboxTab.TabIndex = 1;
-            this.dropboxTab.Text = "Dropbox";
-            this.dropboxTab.UseVisualStyleBackColor = true;
+            dropboxTab.AccessibleName = "dropbox";
+            dropboxTab.Controls.Add(dropboxLoginNotice);
+            dropboxTab.Controls.Add(label1);
+            dropboxTab.Controls.Add(loginWithDropboxButton);
+            dropboxTab.Location = new System.Drawing.Point(4, 29);
+            dropboxTab.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            dropboxTab.Name = "dropboxTab";
+            dropboxTab.Padding = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            dropboxTab.Size = new System.Drawing.Size(403, 228);
+            dropboxTab.TabIndex = 1;
+            dropboxTab.Text = "Dropbox";
+            dropboxTab.UseVisualStyleBackColor = true;
             // 
             // dropboxLoginNotice
             // 
-            this.dropboxLoginNotice.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dropboxLoginNotice.AutoSize = true;
-            this.dropboxLoginNotice.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.dropboxLoginNotice.Location = new System.Drawing.Point(0, 143);
-            this.dropboxLoginNotice.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.dropboxLoginNotice.Name = "dropboxLoginNotice";
-            this.dropboxLoginNotice.Size = new System.Drawing.Size(308, 29);
-            this.dropboxLoginNotice.TabIndex = 3;
-            this.dropboxLoginNotice.Text = "❌ Not logged into Dropbox";
-            this.dropboxLoginNotice.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            dropboxLoginNotice.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            dropboxLoginNotice.AutoSize = true;
+            dropboxLoginNotice.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dropboxLoginNotice.Location = new System.Drawing.Point(0, 143);
+            dropboxLoginNotice.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            dropboxLoginNotice.Name = "dropboxLoginNotice";
+            dropboxLoginNotice.Size = new System.Drawing.Size(308, 29);
+            dropboxLoginNotice.TabIndex = 3;
+            dropboxLoginNotice.Text = "❌ Not logged into Dropbox";
+            dropboxLoginNotice.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(43, 37);
-            this.label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(287, 25);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "Click here to login with dropbox:";
+            label1.AutoSize = true;
+            label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            label1.Location = new System.Drawing.Point(43, 37);
+            label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(287, 25);
+            label1.TabIndex = 2;
+            label1.Text = "Click here to login with dropbox:";
             // 
             // loginWithDropboxButton
             // 
-            this.loginWithDropboxButton.Location = new System.Drawing.Point(8, 72);
-            this.loginWithDropboxButton.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.loginWithDropboxButton.Name = "loginWithDropboxButton";
-            this.loginWithDropboxButton.Size = new System.Drawing.Size(385, 36);
-            this.loginWithDropboxButton.TabIndex = 0;
-            this.loginWithDropboxButton.Text = "Login With Dropbox";
-            this.loginWithDropboxButton.UseVisualStyleBackColor = true;
-            this.loginWithDropboxButton.Click += new System.EventHandler(this.loginWithDropboxButton_Click);
+            loginWithDropboxButton.Location = new System.Drawing.Point(8, 72);
+            loginWithDropboxButton.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            loginWithDropboxButton.Name = "loginWithDropboxButton";
+            loginWithDropboxButton.Size = new System.Drawing.Size(385, 36);
+            loginWithDropboxButton.TabIndex = 0;
+            loginWithDropboxButton.Text = "Login With Dropbox";
+            loginWithDropboxButton.UseVisualStyleBackColor = true;
+            loginWithDropboxButton.Click += loginWithDropboxButton_Click;
             // 
             // webDavPage
             // 
-            this.webDavPage.AccessibleName = "webdav";
-            this.webDavPage.Controls.Add(this.webDavPasswordInput);
-            this.webDavPage.Controls.Add(this.webDavUsernameInput);
-            this.webDavPage.Controls.Add(this.webDavUrlInput);
-            this.webDavPage.Controls.Add(this.label4);
-            this.webDavPage.Controls.Add(this.label3);
-            this.webDavPage.Controls.Add(this.label2);
-            this.webDavPage.Location = new System.Drawing.Point(4, 29);
-            this.webDavPage.Name = "webDavPage";
-            this.webDavPage.Size = new System.Drawing.Size(403, 228);
-            this.webDavPage.TabIndex = 2;
-            this.webDavPage.Text = "WebDAV";
-            this.webDavPage.UseVisualStyleBackColor = true;
+            webDavPage.AccessibleName = "webdav";
+            webDavPage.Controls.Add(webDavPasswordInput);
+            webDavPage.Controls.Add(webDavUsernameInput);
+            webDavPage.Controls.Add(webDavUrlInput);
+            webDavPage.Controls.Add(label4);
+            webDavPage.Controls.Add(label3);
+            webDavPage.Controls.Add(label2);
+            webDavPage.Location = new System.Drawing.Point(4, 29);
+            webDavPage.Name = "webDavPage";
+            webDavPage.Size = new System.Drawing.Size(403, 228);
+            webDavPage.TabIndex = 2;
+            webDavPage.Text = "WebDAV";
+            webDavPage.UseVisualStyleBackColor = true;
             // 
             // webDavPasswordInput
             // 
-            this.webDavPasswordInput.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.webDavPasswordInput.Location = new System.Drawing.Point(163, 142);
-            this.webDavPasswordInput.Name = "webDavPasswordInput";
-            this.webDavPasswordInput.Size = new System.Drawing.Size(213, 38);
-            this.webDavPasswordInput.TabIndex = 5;
-            this.webDavPasswordInput.UseSystemPasswordChar = true;
+            webDavPasswordInput.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            webDavPasswordInput.Location = new System.Drawing.Point(163, 142);
+            webDavPasswordInput.Name = "webDavPasswordInput";
+            webDavPasswordInput.Size = new System.Drawing.Size(213, 38);
+            webDavPasswordInput.TabIndex = 5;
+            webDavPasswordInput.UseSystemPasswordChar = true;
             // 
             // webDavUsernameInput
             // 
-            this.webDavUsernameInput.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.webDavUsernameInput.Location = new System.Drawing.Point(163, 88);
-            this.webDavUsernameInput.Name = "webDavUsernameInput";
-            this.webDavUsernameInput.Size = new System.Drawing.Size(213, 38);
-            this.webDavUsernameInput.TabIndex = 4;
+            webDavUsernameInput.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            webDavUsernameInput.Location = new System.Drawing.Point(163, 88);
+            webDavUsernameInput.Name = "webDavUsernameInput";
+            webDavUsernameInput.Size = new System.Drawing.Size(213, 38);
+            webDavUsernameInput.TabIndex = 4;
             // 
             // webDavUrlInput
             // 
-            this.webDavUrlInput.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.webDavUrlInput.Location = new System.Drawing.Point(163, 35);
-            this.webDavUrlInput.Name = "webDavUrlInput";
-            this.webDavUrlInput.Size = new System.Drawing.Size(213, 38);
-            this.webDavUrlInput.TabIndex = 3;
+            webDavUrlInput.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            webDavUrlInput.Location = new System.Drawing.Point(163, 35);
+            webDavUrlInput.Name = "webDavUrlInput";
+            webDavUrlInput.Size = new System.Drawing.Size(213, 38);
+            webDavUrlInput.TabIndex = 3;
             // 
             // label4
             // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label4.Location = new System.Drawing.Point(13, 142);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(115, 31);
-            this.label4.TabIndex = 2;
-            this.label4.Text = "Password:";
+            label4.AutoSize = true;
+            label4.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            label4.Location = new System.Drawing.Point(13, 142);
+            label4.Name = "label4";
+            label4.Size = new System.Drawing.Size(115, 31);
+            label4.TabIndex = 2;
+            label4.Text = "Password:";
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label3.Location = new System.Drawing.Point(13, 38);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(60, 31);
-            this.label3.TabIndex = 1;
-            this.label3.Text = "URL:";
+            label3.AutoSize = true;
+            label3.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            label3.Location = new System.Drawing.Point(13, 38);
+            label3.Name = "label3";
+            label3.Size = new System.Drawing.Size(60, 31);
+            label3.TabIndex = 1;
+            label3.Text = "URL:";
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label2.Location = new System.Drawing.Point(13, 91);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(122, 31);
-            this.label2.TabIndex = 0;
-            this.label2.Text = "Username:";
+            label2.AutoSize = true;
+            label2.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            label2.Location = new System.Drawing.Point(13, 91);
+            label2.Name = "label2";
+            label2.Size = new System.Drawing.Size(122, 31);
+            label2.TabIndex = 0;
+            label2.Text = "Username:";
+            // 
+            // fileSystemPage
+            // 
+            fileSystemPage.AccessibleName = "file";
+            fileSystemPage.Controls.Add(localDirectoryTextBox);
+            fileSystemPage.Controls.Add(localBrowseButton);
+            fileSystemPage.Controls.Add(localDirectoryLabel);
+            fileSystemPage.Location = new System.Drawing.Point(4, 29);
+            fileSystemPage.Name = "fileSystemPage";
+            fileSystemPage.Size = new System.Drawing.Size(403, 228);
+            fileSystemPage.TabIndex = 3;
+            fileSystemPage.Text = "Local";
+            fileSystemPage.UseVisualStyleBackColor = true;
+            // 
+            // localDirectoryTextBox
+            // 
+            localDirectoryTextBox.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            localDirectoryTextBox.Location = new System.Drawing.Point(121, 37);
+            localDirectoryTextBox.Name = "localDirectoryTextBox";
+            localDirectoryTextBox.Size = new System.Drawing.Size(279, 38);
+            localDirectoryTextBox.TabIndex = 9;
+            // 
+            // localBrowseButton
+            // 
+            localBrowseButton.Location = new System.Drawing.Point(121, 82);
+            localBrowseButton.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            localBrowseButton.Name = "localBrowseButton";
+            localBrowseButton.Size = new System.Drawing.Size(112, 41);
+            localBrowseButton.TabIndex = 8;
+            localBrowseButton.Text = "Browse...";
+            localBrowseButton.UseVisualStyleBackColor = true;
+            localBrowseButton.Click += localBrowseButton_Click;
+            // 
+            // localDirectoryLabel
+            // 
+            localDirectoryLabel.AutoSize = true;
+            localDirectoryLabel.Font = new System.Drawing.Font("Segoe UI", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            localDirectoryLabel.Location = new System.Drawing.Point(3, 37);
+            localDirectoryLabel.Name = "localDirectoryLabel";
+            localDirectoryLabel.Size = new System.Drawing.Size(112, 31);
+            localDirectoryLabel.TabIndex = 2;
+            localDirectoryLabel.Text = "Directory:";
             // 
             // ServerSettings
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(443, 359);
-            this.Controls.Add(this.settingsTabs);
-            this.Controls.Add(this.saveButton);
-            this.Controls.Add(this.closeButton);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.Name = "ServerSettings";
-            this.Text = "Nimbus - Remote Server";
-            this.settingsTabs.ResumeLayout(false);
-            this.dropboxTab.ResumeLayout(false);
-            this.dropboxTab.PerformLayout();
-            this.webDavPage.ResumeLayout(false);
-            this.webDavPage.PerformLayout();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(443, 359);
+            Controls.Add(settingsTabs);
+            Controls.Add(saveButton);
+            Controls.Add(closeButton);
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+            Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            Name = "ServerSettings";
+            Text = "Nimbus - Remote Server";
+            settingsTabs.ResumeLayout(false);
+            dropboxTab.ResumeLayout(false);
+            dropboxTab.PerformLayout();
+            webDavPage.ResumeLayout(false);
+            webDavPage.PerformLayout();
+            fileSystemPage.ResumeLayout(false);
+            fileSystemPage.PerformLayout();
+            ResumeLayout(false);
         }
 
         #endregion
@@ -241,5 +289,10 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TabPage fileSystemPage;
+        private System.Windows.Forms.Label localDirectoryLabel;
+        private System.Windows.Forms.TextBox localDirectoryTextBox;
+        private System.Windows.Forms.Button localBrowseButton;
+        private System.Windows.Forms.FolderBrowserDialog localFolderBrowser;
     }
 }
