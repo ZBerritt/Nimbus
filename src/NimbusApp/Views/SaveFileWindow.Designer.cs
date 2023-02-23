@@ -29,140 +29,139 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SaveFileWindow));
-            this.folderBrowser = new System.Windows.Forms.FolderBrowserDialog();
-            this.button1 = new System.Windows.Forms.Button();
-            this.cancelButton = new System.Windows.Forms.Button();
-            this.saveButton = new System.Windows.Forms.Button();
-            this.nameTextBox = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.locationTextBox = new System.Windows.Forms.TextBox();
-            this.browseButton = new System.Windows.Forms.Button();
-            this.singleFileCheckBox = new System.Windows.Forms.CheckBox();
-            this.openFile = new System.Windows.Forms.OpenFileDialog();
-            this.SuspendLayout();
+            folderBrowser = new System.Windows.Forms.FolderBrowserDialog();
+            button1 = new System.Windows.Forms.Button();
+            cancelButton = new System.Windows.Forms.Button();
+            saveButton = new System.Windows.Forms.Button();
+            nameTextBox = new System.Windows.Forms.TextBox();
+            label1 = new System.Windows.Forms.Label();
+            label2 = new System.Windows.Forms.Label();
+            locationTextBox = new System.Windows.Forms.TextBox();
+            browseButton = new System.Windows.Forms.Button();
+            singleFileCheckBox = new System.Windows.Forms.CheckBox();
+            openFile = new System.Windows.Forms.OpenFileDialog();
+            SuspendLayout();
             // 
             // folderBrowser
             // 
-            this.folderBrowser.HelpRequest += new System.EventHandler(this.folderBrowserDialog1_HelpRequest);
+            folderBrowser.HelpRequest += folderBrowserDialog1_HelpRequest;
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(504, 557);
-            this.button1.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(101, 36);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
+            button1.Location = new System.Drawing.Point(504, 557);
+            button1.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            button1.Name = "button1";
+            button1.Size = new System.Drawing.Size(101, 36);
+            button1.TabIndex = 0;
+            button1.Text = "button1";
+            button1.UseVisualStyleBackColor = true;
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(16, 131);
-            this.cancelButton.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(187, 52);
-            this.cancelButton.TabIndex = 1;
-            this.cancelButton.Text = "Cancel";
-            this.cancelButton.UseVisualStyleBackColor = true;
-            this.cancelButton.Click += new System.EventHandler(this.CancelButton_Click);
+            cancelButton.Location = new System.Drawing.Point(16, 131);
+            cancelButton.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            cancelButton.Name = "cancelButton";
+            cancelButton.Size = new System.Drawing.Size(187, 52);
+            cancelButton.TabIndex = 1;
+            cancelButton.Text = "Cancel";
+            cancelButton.UseVisualStyleBackColor = true;
+            cancelButton.Click += CancelButton_Click;
             // 
             // saveButton
             // 
-            this.saveButton.Location = new System.Drawing.Point(216, 131);
-            this.saveButton.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(187, 52);
-            this.saveButton.TabIndex = 2;
-            this.saveButton.Text = "Save";
-            this.saveButton.UseVisualStyleBackColor = true;
-            this.saveButton.Click += new System.EventHandler(this.SaveButton_Click);
+            saveButton.Location = new System.Drawing.Point(216, 131);
+            saveButton.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            saveButton.Name = "saveButton";
+            saveButton.Size = new System.Drawing.Size(187, 52);
+            saveButton.TabIndex = 2;
+            saveButton.Text = "Save";
+            saveButton.UseVisualStyleBackColor = true;
+            saveButton.Click += SaveButton_Click;
             // 
             // nameTextBox
             // 
-            this.nameTextBox.Location = new System.Drawing.Point(96, 16);
-            this.nameTextBox.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.nameTextBox.Name = "nameTextBox";
-            this.nameTextBox.Size = new System.Drawing.Size(132, 27);
-            this.nameTextBox.TabIndex = 3;
+            nameTextBox.Location = new System.Drawing.Point(96, 16);
+            nameTextBox.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            nameTextBox.Name = "nameTextBox";
+            nameTextBox.Size = new System.Drawing.Size(132, 27);
+            nameTextBox.TabIndex = 3;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(38, 20);
-            this.label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(52, 20);
-            this.label1.TabIndex = 4;
-            this.label1.Text = "Name:";
+            label1.AutoSize = true;
+            label1.Location = new System.Drawing.Point(38, 20);
+            label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(52, 20);
+            label1.TabIndex = 4;
+            label1.Text = "Name:";
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(21, 83);
-            this.label2.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(69, 20);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "Location:";
+            label2.AutoSize = true;
+            label2.Location = new System.Drawing.Point(21, 83);
+            label2.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            label2.Name = "label2";
+            label2.Size = new System.Drawing.Size(69, 20);
+            label2.TabIndex = 5;
+            label2.Text = "Location:";
             // 
             // locationTextBox
             // 
-            this.locationTextBox.Location = new System.Drawing.Point(96, 79);
-            this.locationTextBox.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.locationTextBox.Name = "locationTextBox";
-            this.locationTextBox.Size = new System.Drawing.Size(132, 27);
-            this.locationTextBox.TabIndex = 6;
+            locationTextBox.Location = new System.Drawing.Point(96, 79);
+            locationTextBox.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            locationTextBox.Name = "locationTextBox";
+            locationTextBox.Size = new System.Drawing.Size(132, 27);
+            locationTextBox.TabIndex = 6;
             // 
             // browseButton
             // 
-            this.browseButton.Location = new System.Drawing.Point(238, 79);
-            this.browseButton.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.browseButton.Name = "browseButton";
-            this.browseButton.Size = new System.Drawing.Size(103, 31);
-            this.browseButton.TabIndex = 7;
-            this.browseButton.Text = "Browse...";
-            this.browseButton.UseVisualStyleBackColor = true;
-            this.browseButton.Click += new System.EventHandler(this.BrowseButton_Click);
+            browseButton.Location = new System.Drawing.Point(238, 79);
+            browseButton.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            browseButton.Name = "browseButton";
+            browseButton.Size = new System.Drawing.Size(103, 31);
+            browseButton.TabIndex = 7;
+            browseButton.Text = "Browse...";
+            browseButton.UseVisualStyleBackColor = true;
+            browseButton.Click += BrowseButton_Click;
             // 
             // singleFileCheckBox
             // 
-            this.singleFileCheckBox.AutoSize = true;
-            this.singleFileCheckBox.Location = new System.Drawing.Point(239, 20);
-            this.singleFileCheckBox.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.singleFileCheckBox.Name = "singleFileCheckBox";
-            this.singleFileCheckBox.Size = new System.Drawing.Size(106, 24);
-            this.singleFileCheckBox.TabIndex = 8;
-            this.singleFileCheckBox.Text = "Single File?";
-            this.singleFileCheckBox.UseVisualStyleBackColor = true;
+            singleFileCheckBox.AutoSize = true;
+            singleFileCheckBox.Location = new System.Drawing.Point(239, 20);
+            singleFileCheckBox.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            singleFileCheckBox.Name = "singleFileCheckBox";
+            singleFileCheckBox.Size = new System.Drawing.Size(106, 24);
+            singleFileCheckBox.TabIndex = 8;
+            singleFileCheckBox.Text = "Single File?";
+            singleFileCheckBox.UseVisualStyleBackColor = true;
             // 
             // openFile
             // 
-            this.openFile.FileName = "openFile";
+            openFile.FileName = "openFile";
             // 
             // SaveFileWindow
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(421, 200);
-            this.Controls.Add(this.singleFileCheckBox);
-            this.Controls.Add(this.browseButton);
-            this.Controls.Add(this.locationTextBox);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.nameTextBox);
-            this.Controls.Add(this.saveButton);
-            this.Controls.Add(this.cancelButton);
-            this.Controls.Add(this.button1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.Name = "SaveFileWindow";
-            this.Text = "Nimbus - Save Manager";
-            this.Load += new System.EventHandler(this.SaveFileWindow_Load);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(421, 200);
+            Controls.Add(singleFileCheckBox);
+            Controls.Add(browseButton);
+            Controls.Add(locationTextBox);
+            Controls.Add(label2);
+            Controls.Add(label1);
+            Controls.Add(nameTextBox);
+            Controls.Add(saveButton);
+            Controls.Add(cancelButton);
+            Controls.Add(button1);
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+            Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            Name = "SaveFileWindow";
+            Text = "Nimbus - Save Manager";
+            Load += SaveFileWindow_Load;
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

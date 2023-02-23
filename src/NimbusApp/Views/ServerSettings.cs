@@ -15,6 +15,7 @@ namespace NimbusApp.UI
 
         private DropboxServer _dropboxServer;
         private WebDAVServer _webDAVServer;
+        private FileServer _fileServer;
 
         public ServerSettings(NimbusAppEngine engine)
         {
@@ -23,16 +24,19 @@ namespace NimbusApp.UI
             InitializeComponent();
             if (server is not null)
             {
-                var serverName = server.Type;
-                switch (serverName)
+                switch (server)
                 {
-                    case "Dropbox":
+                    case DropboxServer:
                         _dropboxServer = server as DropboxServer;
                         DropboxReloadUI();
                         break;
-                    case "WebDAV":
+                    case WebDAVServer:
                         _webDAVServer = server as WebDAVServer;
                         WebDAVReloadUI();
+                        break;
+                    case FileServer:
+                        _fileServer = server as FileServer;
+                        FileReloadUI();
                         break;
                 }
             }
@@ -77,6 +81,24 @@ namespace NimbusApp.UI
                             return;
                         }
                         break;
+                    case "file":
+                        if (localDirectoryTextBox.Text.Length < 0) {
+                            PopupDialog.ErrorPopup("Please specify a directory for the server!");
+                            return;
+                        }
+                        var fileArgs = new string[]
+                        {
+                            localDirectoryTextBox.Text
+                        };
+                        _fileServer = await Server.Create<FileServer>(fileArgs) as FileServer;
+                        var canAccess = await _fileServer.GetOnlineStatus();
+                        if (!canAccess)
+                        {
+                            PopupDialog.ErrorPopup("The file system directory cannot be accessed and a local file server cannot be created!");
+                            return;
+                        }
+                        engine.Server = _fileServer;
+                        break;
 
                 }
                 await engine.Save();
@@ -119,6 +141,22 @@ namespace NimbusApp.UI
             {
                 webDavUsernameInput.Text = _webDAVServer.Username.ToString();
                 webDavUrlInput.Text = _webDAVServer.Uri.ToString();
+            }
+        }
+
+        private void FileReloadUI()
+        {
+            if (_fileServer is not null)
+            {
+                localDirectoryTextBox.Text = _fileServer.Location;
+            }
+        }
+
+        private void localBrowseButton_Click(object sender, EventArgs e)
+        {
+            if (localFolderBrowser.ShowDialog() == DialogResult.OK)
+            {
+                localDirectoryTextBox.Text = localFolderBrowser.SelectedPath;
             }
         }
     }
