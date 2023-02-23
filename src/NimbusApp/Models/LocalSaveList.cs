@@ -14,6 +14,7 @@ namespace NimbusApp.Models
     /// </summary>
     public class LocalSaveList
     {
+        private static readonly int BUFFER_SIZE = 4096;
         private static readonly int MAX_FILE_SIZE = 1024 * 1024 * 128; // 128 mb
         public Dictionary<string, Save> Saves { get; set; }
 
@@ -42,11 +43,11 @@ namespace NimbusApp.Models
 
             // Name cannot be longer than 32 characters
             if (name.Length > 32)
-                throw new InvalidSaveException("Save file names must be shorter than 32 characters.");
+                throw new InvalidSaveException("Save names must be shorter than 32 characters.");
 
             // Duplicate names
             if (Saves.ContainsKey(name))
-                throw new InvalidSaveException("Save game with name " + name + " already exists.");
+                throw new InvalidSaveException($"Save with name {name} already exists.");
 
             foreach (var save in Saves.Values)
             {
@@ -55,10 +56,11 @@ namespace NimbusApp.Models
 
                 // Same path exists
                 if (locNormalizedPath.Equals(normalizedPath))
-                    throw new InvalidSaveException("Save game with location " + location + " already exists.");
+                    throw new InvalidSaveException($"Save game with name {location} already exists.");
 
                 // Path contains one another
-                if (FileUtils.NotAFile(normalizedPath) && locNormalizedPath.Contains(normalizedPath) || FileUtils.NotAFile(locNormalizedPath) && normalizedPath.Contains(locNormalizedPath))
+                if (FileUtils.NotAFile(normalizedPath) && locNormalizedPath.Contains(normalizedPath)
+                    || FileUtils.NotAFile(locNormalizedPath) && normalizedPath.Contains(locNormalizedPath))
                     throw new InvalidSaveException("Save locations cannot contain each other.");
             }
 
@@ -76,7 +78,13 @@ namespace NimbusApp.Models
         /// <returns>The save with the given name</returns>
         public Save GetSave(string name)
         {
-            return Saves.GetValueOrDefault(name);
+            var found = Saves.TryGetValue(name, out Save save);
+            if (!found)
+            {
+                return null;
+            }
+
+            return save;
         }
 
         /// <summary>
@@ -113,7 +121,7 @@ namespace NimbusApp.Models
             string location = GetSave(name).Location;
 
             await using var archiveStream = new FileStream(destinationFile, FileMode.Create,
-                FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
+                FileAccess.Write, FileShare.None, bufferSize: BUFFER_SIZE, useAsync: true);
             using var archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, true);
             var pathBase = FileUtils.IsDirectory(location) ? name : "";
             foreach (var file in FileUtils.GetFileList(location))
@@ -126,7 +134,7 @@ namespace NimbusApp.Models
 
                 using var entryStream = entry.Open();
                 await using var fileStream = new FileStream(file, FileMode.Open,
-                    FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
+                    FileAccess.Read, FileShare.Read, bufferSize: BUFFER_SIZE, useAsync: true);
                 await fileStream.CopyToAsync(entryStream);
             }
 
@@ -148,7 +156,7 @@ namespace NimbusApp.Models
             var destination = GetSave(name).Location;
 
             using var arciveStream = new FileStream(source, FileMode.Open,
-                FileAccess.Read, FileShare.None, bufferSize: 4096, useAsync: true);
+                FileAccess.Read, FileShare.None, bufferSize: BUFFER_SIZE, useAsync: true);
             using var archive = new ZipArchive(arciveStream, ZipArchiveMode.Read);
 
             // Determine file type

@@ -8,12 +8,12 @@ namespace NimbusApp.Models
     public class Save
     {
         public string Name { get; set; }
-        public string Location { get; set; }
+        public string Location { get => Location; set => FileUtils.Normalize(value); }
 
         public Save(string name, string location)
         {
             Name = name;
-            Location = FileUtils.Normalize(location);
+            Location = location;
         }
     }
 }

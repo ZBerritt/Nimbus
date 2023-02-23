@@ -17,7 +17,6 @@ namespace NimbusApp.Controllers
     /// </summary>
     public class NimbusAppEngine
     {
-
         public LocalSaveList LocalSaveList { get; set; }
         public Server Server { get; set; }
         public Settings Settings { get; set; }

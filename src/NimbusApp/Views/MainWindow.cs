@@ -47,8 +47,11 @@ namespace NimbusApp
             await ReloadUI();
         }
 
-        // Used to reload all UI data
-        // Most likely prone to errors regarding cancellation, keep watch
+        /// <summary>
+        /// Used to reload all UI data
+        /// Most likely prone to errors regarding cancellation, keep watch
+        /// </summary>
+        /// <returns>A Task representing the asynchronous action</returns>
         public async Task ReloadUI()
         {
             if (ReloadTask is not null && !ReloadTask.IsCompleted)
@@ -60,6 +63,11 @@ namespace NimbusApp
             await ReloadTask;
         }
 
+        /// <summary>
+        /// The async task used to reload the UI
+        /// </summary>
+        /// <param name="cancelToken">The cancel token to pass through async functions</param>
+        /// <returns>A Task representing the asynchronous action</returns>
         public async Task ReloadUITask(CancellationToken cancelToken)
         {
             // Remove all save list items to re-add later
