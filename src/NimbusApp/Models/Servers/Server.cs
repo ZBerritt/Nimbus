@@ -11,6 +11,7 @@ namespace NimbusApp.Models.Servers
     [JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization)]
     [JsonDerivedType(typeof(DropboxServer), nameof(DropboxServer))]
     [JsonDerivedType(typeof(WebDAVServer), nameof(WebDAVServer))]
+    [JsonDerivedType(typeof(FileServer), nameof(FileServer))]
     [JsonDerivedType(typeof(TestServer), nameof(TestServer))]
     public abstract class Server
 
