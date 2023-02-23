@@ -1,8 +1,12 @@
 # Nimbus [IN DEVELOPMENT]
-A windows application for uploading game save files to the cloud to be downloaded by other computers.
+A windows application for managing and uploading game save files to the cloud.
+
+## Current Features
+* Dropbox, File System & WebDAV servers
+
 
 ## Planned Features
-* Dropbox, OneDrive & WebDAV servers
+* OneDrive and GoogleDrive
 * Local and remote backups (?)
 * Multiple save slots per game (?)
 
