@@ -1,5 +1,5 @@
 ﻿using NimbusApp.Controllers;
-using NimbusApp.Models;
+using NimbusApp.Settings;
 using System;
 using System.Windows.Forms;
 
@@ -8,13 +8,13 @@ namespace NimbusApp.UI
     internal partial class SettingsWindow : Form
     {
         private readonly NimbusAppEngine engine;
-        private Settings settingsCopy;
+        private AppSettings settingsCopy;
         public bool ShouldReload { get; private set; } = false;
 
         public SettingsWindow(NimbusAppEngine engine)
         {
             this.engine = engine;
-            Settings currentSettings = engine.Settings;
+            AppSettings currentSettings = engine.Settings;
             settingsCopy = currentSettings.Clone(); // Clone all data to new instance
 
             // Initialize
@@ -41,7 +41,7 @@ namespace NimbusApp.UI
         {
             // Get the new settings from the UI here
             engine.Settings = settingsCopy;
-            await engine.Save();
+            await engine.Serialize();
             ShouldReload = true;
             Close();
         }

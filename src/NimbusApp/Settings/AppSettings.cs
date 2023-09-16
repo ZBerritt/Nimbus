@@ -1,18 +1,18 @@
 ﻿using System.Runtime.Serialization;
 
-namespace NimbusApp.Models
+namespace NimbusApp.Settings
 {
     /// <summary>
     /// Represents all application settings
     /// </summary>
-    public class Settings
+    public class AppSettings
     {
         public THEME Theme { get; set; }
 
         /// <summary>
         /// Default constructor. Sets all settings to their defaults
         /// </summary>
-        public Settings()
+        public AppSettings()
         {
             Theme = THEME.LIGHT;
         }
@@ -21,9 +21,9 @@ namespace NimbusApp.Models
         /// Clones the settings class, used for modification
         /// </summary>
         /// <returns>A new instance of identical settings</returns>
-        public Settings Clone()
+        public AppSettings Clone()
         {
-            return MemberwiseClone() as Settings;
+            return MemberwiseClone() as AppSettings;
         }
     }
 

@@ -8,9 +8,9 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace NimbusApp.Models.Servers
+namespace NimbusApp.Server
 {
-    public class DropboxServer : Server
+    public class DropboxServer : ServerBase
     {
         // Constants
         private static readonly string APP_ID = "i136jjbqxg4aaci";

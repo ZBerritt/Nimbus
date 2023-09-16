@@ -1,5 +1,6 @@
-﻿using NimbusApp.Models;
-using NimbusApp.Models.Servers;
+﻿using NimbusApp.Controllers;
+using NimbusApp.Models;
+using NimbusApp.Server;
 using NimbusApp.UI;
 using NimbusApp.Utils;
 using System;
@@ -8,7 +9,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace NimbusApp.Controllers
+namespace NimbusApp.Saves
 {
     /// <summary>
     /// Manages operations between the saves and the server
@@ -17,7 +18,7 @@ namespace NimbusApp.Controllers
     {
         private readonly NimbusAppEngine _engine;
         private LocalSaveList Saves => _engine.LocalSaveList;
-        private Server Server => _engine.Server;
+        private ServerBase Server => _engine.Server;
         public SaveManager(NimbusAppEngine engine)
         {
             _engine = engine;

@@ -1,9 +1,8 @@
-﻿using NimbusApp.Servers;
-using System;
+﻿using System;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace NimbusApp.Models.Servers
+namespace NimbusApp.Server
 {
     /// <summary>
     /// Represents a remote data server used for importing and exporting saves
@@ -13,7 +12,7 @@ namespace NimbusApp.Models.Servers
     [JsonDerivedType(typeof(WebDAVServer), nameof(WebDAVServer))]
     [JsonDerivedType(typeof(FileServer), nameof(FileServer))]
     [JsonDerivedType(typeof(TestServer), nameof(TestServer))]
-    public abstract class Server
+    public abstract class ServerBase
 
     {
         /// <summary>
@@ -84,7 +83,7 @@ namespace NimbusApp.Models.Servers
         /// <typeparam name="T">The server class needed</typeparam>
         /// <param name="args">The arguments for the build function</param>
         /// <returns>Task representing asynchronous operation which returns the server instance</returns>
-        public static async Task<Server> Create<T>(params string[] args) where T : Server
+        public static async Task<ServerBase> Create<T>(params string[] args) where T : ServerBase
         {
             var instance = Activator.CreateInstance<T>();
             await instance.Build(args);

@@ -79,7 +79,7 @@ namespace NimbusApp
             try
             {
                 engine.AddSave(name, location);
-                await engine.Save();
+                await engine.Serialize();
                 ShouldReload = true;
                 Close();
             }

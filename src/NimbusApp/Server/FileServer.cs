@@ -5,9 +5,9 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace NimbusApp.Models.Servers
+namespace NimbusApp.Server
 {
-    public class FileServer : Server
+    public class FileServer : ServerBase
     {
         public string Location { get; set; }
 

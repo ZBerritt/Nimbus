@@ -1,6 +1,5 @@
 ﻿using NimbusApp.Controllers;
-using NimbusApp.Models.Servers;
-using NimbusApp.Servers;
+using NimbusApp.Server;
 using NimbusApp.Utils;
 using System;
 using System.Windows.Forms;
@@ -10,7 +9,7 @@ namespace NimbusApp.UI
     internal partial class ServerSettings : Form
     {
         public NimbusAppEngine engine;
-        public Server server;
+        public ServerBase server;
         public bool ShouldReload { get; private set; } = false;
 
         private DropboxServer _dropboxServer;
@@ -63,7 +62,7 @@ namespace NimbusApp.UI
                         {
                             var args = new string[] {
                                 webDavUrlInput.Text, webDavUsernameInput.Text, webDavPasswordInput.Text };
-                            _webDAVServer = await Server.Create<WebDAVServer>(args) as WebDAVServer;
+                            _webDAVServer = await ServerBase.Create<WebDAVServer>(args) as WebDAVServer;
                             var canConnect = await _webDAVServer.GetOnlineStatus();
                             if (!canConnect)
                             {
@@ -90,7 +89,7 @@ namespace NimbusApp.UI
                         {
                             localDirectoryTextBox.Text
                         };
-                        _fileServer = await Server.Create<FileServer>(fileArgs) as FileServer;
+                        _fileServer = await ServerBase.Create<FileServer>(fileArgs) as FileServer;
                         var canAccess = await _fileServer.GetOnlineStatus();
                         if (!canAccess)
                         {
@@ -101,7 +100,7 @@ namespace NimbusApp.UI
                         break;
 
                 }
-                await engine.Save();
+                await engine.Serialize();
                 ShouldReload = true;
                 Close();
             }
@@ -118,7 +117,7 @@ namespace NimbusApp.UI
 
         private async void loginWithDropboxButton_Click(object sender, EventArgs e)
         {
-            var dropboxServer = await Server.Create<DropboxServer>(Array.Empty<string>()) as DropboxServer;
+            var dropboxServer = await ServerBase.Create<DropboxServer>(Array.Empty<string>()) as DropboxServer;
             _dropboxServer = dropboxServer;
             DropboxReloadUI();
         }

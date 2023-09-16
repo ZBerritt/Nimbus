@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace NimbusApp.Models.Servers
+namespace NimbusApp.Server
 {
     /// <summary>
     /// Test implementation of the server class for testing purposes
     /// Should not be used as an actual server
     /// </summary>
-    public class TestServer : Server
+    public class TestServer : ServerBase
     {
         public override string Type => "TestName";
 

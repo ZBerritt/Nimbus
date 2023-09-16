@@ -35,7 +35,7 @@ namespace NimbusApp
             Text = "Nimbus (DEBUG)";
 #endif
             // Grabs the engine which allows communication with the backend
-            engine = await NimbusAppEngine.Load();
+            engine = await NimbusAppEngine.Deserialize();
 
             // Auto sizes the last column of the save list
             saveFileList.Columns[^1].Width = -2;
@@ -226,7 +226,7 @@ namespace NimbusApp
                         engine.LocalSaveList.RemoveSave(save);
                     }
 
-                    await engine.Save();
+                    await engine.Serialize();
                     await ReloadUI();
                 }
             };

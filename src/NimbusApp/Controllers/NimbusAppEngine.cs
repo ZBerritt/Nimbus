@@ -1,7 +1,10 @@
 ﻿using NimbusApp.Models;
-using NimbusApp.Models.Servers;
+using NimbusApp.Saves;
+using NimbusApp.Server;
+using NimbusApp.Settings;
 using NimbusApp.UI;
 using NimbusApp.Utils;
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -18,14 +21,14 @@ namespace NimbusApp.Controllers
     public class NimbusAppEngine
     {
         public LocalSaveList LocalSaveList { get; set; }
-        public Server Server { get; set; }
-        public Settings Settings { get; set; }
+        public ServerBase Server { get; set; }
+        public AppSettings Settings { get; set; }
 
         [JsonConstructor]
         public NimbusAppEngine()
         {
             LocalSaveList = new LocalSaveList();
-            Settings = new Settings();
+            Settings = new AppSettings();
         }
 
         /// <summary>
@@ -66,16 +69,16 @@ namespace NimbusApp.Controllers
 
         public async Task<string> GetRemoteHash(string save) => await Server.GetRemoteSaveHash(save);
 
-        public async Task Save()
+        public async Task Serialize()
         {
-            await Save(DefaultLocations.DataFile);
+            await Serialize(DefaultLocations.DataFile);
         }
 
         /// <summary>
         /// Saves settings, local saves, and server data to storage
         /// </summary>
         /// <returns>Task representing asynchronous operation</returns>
-        public async Task Save(string DataFile)
+        public async Task Serialize(string DataFile)
         {
             CreateDataFile(DataFile);
 
@@ -93,40 +96,40 @@ namespace NimbusApp.Controllers
         /// Loads the engine with the default data file
         /// </summary>
         /// <returns>The engine for the data</returns>
-        public static async Task<NimbusAppEngine> Load()
+        public static async Task<NimbusAppEngine> Deserialize()
         {
-            return await Load(DefaultLocations.DataFile);
+            return await Deserialize(DefaultLocations.DataFile);
         }
 
         /// <summary>
         /// Attempts to load the engine given the data file
         /// </summary>
         /// <returns>The engine instance loaded</returns>
-        public static async Task<NimbusAppEngine> Load(string DataFile)
+        public static async Task<NimbusAppEngine> Deserialize(string dataFile)
         {
-            if (!File.Exists(DataFile))
+            if (!File.Exists(dataFile))
             {
-                return await CreateNew(DataFile);
+                return await CreateNew(dataFile);
             }
 
             try
             {
-                var encBytes = File.ReadAllBytes(DataFile);
+                var encBytes = File.ReadAllBytes(dataFile);
                 if (encBytes.Length == 0)
                 {
-                    return await CreateNew(DataFile);
+                    return await CreateNew(dataFile);
                 }
                 var rawBytes = ProtectedData.Unprotect(encBytes, null, DataProtectionScope.CurrentUser);
                 var rawString = Encoding.ASCII.GetString(rawBytes);
                 var engine = JsonSerializer.Deserialize<NimbusAppEngine>(rawString);
                 return engine;
             }
-            catch (JsonException ex)
+            catch (Exception ex)
             {
                 var res = PopupDialog.ErrorPrompt($"Data is corrupted or out of date. Would you like to reset it?\nError: {ex.Message}");
                 if (res == DialogResult.Yes)
                 {
-                    return await CreateNew(DataFile);
+                    return await CreateNew(dataFile);
                 }
 
                 Application.Exit();
@@ -150,7 +153,7 @@ namespace NimbusApp.Controllers
         {
             CreateDataFile(DataFile);
             var engine = new NimbusAppEngine();
-            await engine.Save(DataFile);
+            await engine.Serialize(DataFile);
             return engine;
         }
     }

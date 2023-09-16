@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NimbusApp
+namespace NimbusApp.Utils
 {
     public class InvalidSaveException : Exception
     {

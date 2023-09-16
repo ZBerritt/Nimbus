@@ -1,5 +1,5 @@
 ﻿using NimbusApp.Controllers;
-using NimbusApp.Models.Servers;
+using NimbusApp.Server;
 using Xunit;
 using static NimbusApp.Utils.FileUtils;
 
@@ -15,7 +15,7 @@ namespace NimbusApp.Tests
         public async Task InitializeAsync()
         {
             dataFile = new TemporaryFile();
-            _sut = await NimbusAppEngine.Load(dataFile.FilePath);
+            _sut = await NimbusAppEngine.Deserialize(dataFile.FilePath);
         }
 
         public Task DisposeAsync()
@@ -37,11 +37,11 @@ namespace NimbusApp.Tests
             var server = new TestServer();
             _sut.Server = server;
             _sut.AddSave("testing", "test/test");
-            await _sut.Save(dataFile.FilePath);
+            await _sut.Serialize(dataFile.FilePath);
 
             // Save to file
             string oldData = File.ReadAllText(dataFile.FilePath);
-            await _sut.Save(dataFile.FilePath);
+            await _sut.Serialize(dataFile.FilePath);
             string newData = File.ReadAllText(dataFile.FilePath);
             Assert.NotEqual(oldData, newData);
         }
@@ -54,11 +54,11 @@ namespace NimbusApp.Tests
             var server = new TestServer();
             _sut.Server = server;
             _sut.AddSave("testing", "test/test");
-            await _sut.Save(dataFile.FilePath);
+            await _sut.Serialize(dataFile.FilePath);
 
             // Load older version
             File.WriteAllBytes(dataFile.FilePath, oldData); // Write old data after it has been overritten
-            _sut = await NimbusAppEngine.Load(dataFile.FilePath);
+            _sut = await NimbusAppEngine.Deserialize(dataFile.FilePath);
             Assert.Null(_sut.Server);
             Assert.False(_sut.LocalSaveList.HasSave("testing"));
         }

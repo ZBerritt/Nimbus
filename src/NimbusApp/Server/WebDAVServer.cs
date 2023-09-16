@@ -1,5 +1,4 @@
-﻿using NimbusApp.Models.Servers;
-using NimbusApp.Utils;
+﻿using NimbusApp.Utils;
 using System;
 using System.IO;
 using System.Net;
@@ -7,9 +6,9 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace NimbusApp.Servers
+namespace NimbusApp.Server
 {
-    internal class WebDAVServer : Server
+    internal class WebDAVServer : ServerBase
     {
 
 

@@ -45,7 +45,7 @@
     <Authors>Zach Berritt</Authors>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="Assets\oauth.html">
+    <Content Include="Resources\oauth.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Nimbus.ico" />
